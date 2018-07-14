@@ -1,12 +1,13 @@
 #ifndef SEARCH_ENGINE_H
 #define SEARCH_ENGINE_H
 
-#include "global_operator.h"
+#include "task_representation/sas_operator.h"
 #include "operator_cost.h"
 #include "search_progress.h"
 #include "search_space.h"
 #include "search_statistics.h"
 #include "state_registry.h"
+#include "operator_id.h"
 
 #include <vector>
 
@@ -24,9 +25,11 @@ class OrderedSet;
 
 enum SearchStatus {IN_PROGRESS, TIMEOUT, FAILED, SOLVED};
 
+class SuccessorGenerator;
+
 class SearchEngine {
 public:
-    typedef std::vector<const GlobalOperator *> Plan;
+    typedef std::vector<int> Plan;
 private:
     SearchStatus status;
     bool solution_found;
@@ -40,12 +43,16 @@ protected:
     OperatorCost cost_type;
     double max_time;
 
+    std::shared_ptr<SearchTask> task;
+    
     virtual void initialize() {}
     virtual SearchStatus step() = 0;
 
     void set_plan(const Plan &plan);
     bool check_goal_and_set_plan(const GlobalState &state);
-    int get_adjusted_cost(const GlobalOperator &op) const;
+
+    int get_adjusted_cost(int cost) const;
+
 public:
     SearchEngine(const options::Options &opts);
     virtual ~SearchEngine();

@@ -350,7 +350,7 @@ def parse_args():
         if args.debug:
             args.build = "debug32"
         else:
-            args.build = "release32"
+            args.build = "fts"
 
     _split_planner_args(parser, args)
 

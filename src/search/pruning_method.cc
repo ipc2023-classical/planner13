@@ -1,6 +1,7 @@
 #include "pruning_method.h"
 
 #include "global_state.h"
+#include "task_representation/state.h"
 #include "plugin.h"
 
 #include <cassert>
@@ -11,7 +12,7 @@ PruningMethod::PruningMethod()
     : task(nullptr) {
 }
 
-void PruningMethod::initialize(const shared_ptr<AbstractTask> &task_) {
+void PruningMethod::initialize(const shared_ptr<FTSTask> &task_) {
     assert(!task);
     task = task_;
 }

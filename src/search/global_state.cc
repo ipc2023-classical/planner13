@@ -2,7 +2,8 @@
 
 #include "globals.h"
 #include "state_registry.h"
-#include "task_proxy.h"
+
+#include "task_representation/state.h"
 
 #include <algorithm>
 #include <iostream>
@@ -34,11 +35,11 @@ vector<int> GlobalState::get_values() const {
 }
 
 void GlobalState::dump_pddl() const {
-    State state(registry->get_task(), get_values());
+    State state(*g_main_task, get_values());
     state.dump_pddl();
 }
 
 void GlobalState::dump_fdr() const {
-    State state(registry->get_task(), get_values());
+    State state(*g_main_task, get_values());
     state.dump_fdr();
 }

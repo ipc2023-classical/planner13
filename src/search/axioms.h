@@ -2,7 +2,6 @@
 #define AXIOMS_H
 
 #include "global_state.h"
-#include "task_proxy.h"
 
 #include <memory>
 #include <vector>
@@ -10,6 +9,9 @@
 namespace int_packer {
 class IntPacker;
 }
+
+class FTSTask;
+
 
 class AxiomEvaluator {
     struct AxiomRule;
@@ -58,8 +60,12 @@ class AxiomEvaluator {
     */
     std::vector<AxiomLiteral *> queue;
 public:
-    explicit AxiomEvaluator(const TaskProxy &task_proxy);
+    explicit AxiomEvaluator(const FTSTask &task_proxy);
     void evaluate(PackedStateBin *buffer, const int_packer::IntPacker &state_packer);
+
+    bool has_axioms() const {
+	return task_has_axioms;
+    }
 };
 
 #endif

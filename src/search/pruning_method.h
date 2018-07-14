@@ -2,24 +2,23 @@
 #define PRUNING_METHOD_H
 
 #include "operator_id.h"
-#include "task_proxy.h"
 
 #include <memory>
 #include <vector>
 
-class AbstractTask;
+class FTSTask;
 class GlobalOperator;
 class GlobalState;
-
+class State;
 class PruningMethod {
 protected:
-    std::shared_ptr<AbstractTask> task;
+    std::shared_ptr<FTSTask> task;
 
 public:
     PruningMethod();
     virtual ~PruningMethod() = default;
 
-    virtual void initialize(const std::shared_ptr<AbstractTask> &task);
+    virtual void initialize(const std::shared_ptr<FTSTask> &task);
 
     /* This method must not be called for goal states. This can be checked
        with assertions in derived classes. */

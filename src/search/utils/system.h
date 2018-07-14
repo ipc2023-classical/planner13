@@ -50,6 +50,12 @@ bool is_exit_code_error_reentrant(ExitCode exitcode);
 void register_event_handlers();
 void report_exit_code_reentrant(ExitCode exitcode);
 int get_process_id();
+
+
+//TODO: Move this where it belongs
+void check_magic(std::istream &in, std::string magic);
+void read_and_verify_version(std::istream &in);
+
 }
 
 #endif

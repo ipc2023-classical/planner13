@@ -1,39 +1,39 @@
 #ifndef GLOBAL_OPERATOR_H
 #define GLOBAL_OPERATOR_H
 
-#include "global_state.h"
+#include "../global_state.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-struct GlobalCondition {
+struct SASCondition {
     int var;
     int val;
-    explicit GlobalCondition(std::istream &in);
-    GlobalCondition(int variable, int value);
+    explicit SASCondition(std::istream &in);
+    SASCondition(int variable, int value);
 
     bool is_applicable(const GlobalState &state) const {
         return state[var] == val;
     }
 
-    bool operator==(const GlobalCondition &other) const {
+    bool operator==(const SASCondition &other) const {
         return var == other.var && val == other.val;
     }
 
-    bool operator!=(const GlobalCondition &other) const {
+    bool operator!=(const SASCondition &other) const {
         return !(*this == other);
     }
 
     void dump() const;
 };
 
-struct GlobalEffect {
+struct SASEffect {
     int var;
     int val;
-    std::vector<GlobalCondition> conditions;
-    explicit GlobalEffect(std::istream &in);
-    GlobalEffect(int variable, int value, const std::vector<GlobalCondition> &conds);
+    std::vector<SASCondition> conditions;
+    explicit SASEffect(std::istream &in);
+    SASEffect(int variable, int value, const std::vector<SASCondition> &conds);
 
     bool does_fire(const GlobalState &state) const {
         for (size_t i = 0; i < conditions.size(); ++i)
@@ -45,23 +45,24 @@ struct GlobalEffect {
     void dump() const;
 };
 
-class GlobalOperator {
+class SASOperator {
     bool is_an_axiom;
-    std::vector<GlobalCondition> preconditions;
-    std::vector<GlobalEffect> effects;
+    std::vector<SASCondition> preconditions;
+    std::vector<SASEffect> effects;
     std::string name;
     int cost;
 
     void read_pre_post(std::istream &in);
 public:
-    explicit GlobalOperator(std::istream &in, bool is_axiom);
+    explicit SASOperator(std::istream &in, bool is_axiom,
+			 bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost);
     void dump() const;
     const std::string &get_name() const {return name; }
 
     bool is_axiom() const {return is_an_axiom; }
 
-    const std::vector<GlobalCondition> &get_preconditions() const {return preconditions; }
-    const std::vector<GlobalEffect> &get_effects() const {return effects; }
+    const std::vector<SASCondition> &get_preconditions() const {return preconditions; }
+    const std::vector<SASEffect> &get_effects() const {return effects; }
 
     bool is_applicable(const GlobalState &state) const {
         for (size_t i = 0; i < preconditions.size(); ++i)
@@ -73,6 +74,6 @@ public:
     int get_cost() const {return cost; }
 };
 
-extern int get_op_index_hacked(const GlobalOperator *op);
+//extern int get_op_index_hacked(const SASOperator *op);
 
 #endif

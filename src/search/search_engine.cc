@@ -24,8 +24,7 @@ class PruningMethod;
 SearchEngine::SearchEngine(const Options &opts)
     : status(IN_PROGRESS),
       solution_found(false),
-      state_registry(
-          *g_root_task(), *g_state_packer, *g_axiom_evaluator, g_initial_state_data),
+      state_registry(g_main_task->get_search_task()),
       search_space(state_registry,
                    static_cast<OperatorCost>(opts.get_enum("cost_type"))),
       cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
@@ -64,6 +63,7 @@ void SearchEngine::set_plan(const Plan &p) {
 }
 
 void SearchEngine::search() {
+    task = g_main_task->get_search_task();
     initialize();
     utils::CountdownTimer timer(max_time);
     while (status == IN_PROGRESS) {
@@ -80,7 +80,7 @@ void SearchEngine::search() {
 }
 
 bool SearchEngine::check_goal_and_set_plan(const GlobalState &state) {
-    if (test_goal(state)) {
+    if (g_main_task->is_goal_state(state)) {
         cout << "Solution found!" << endl;
         Plan plan;
         search_space.trace_path(state, plan);
@@ -95,8 +95,8 @@ void SearchEngine::save_plan_if_necessary() const {
         save_plan(get_plan());
 }
 
-int SearchEngine::get_adjusted_cost(const GlobalOperator &op) const {
-    return get_adjusted_action_cost(op, cost_type);
+int SearchEngine::get_adjusted_cost(int cost) const {
+    return get_adjusted_action_cost(cost, cost_type);
 }
 
 /* TODO: merge this into add_options_to_parser when all search

@@ -1,6 +1,5 @@
 #include "operator_cost.h"
 
-#include "global_operator.h"
 #include "globals.h"
 #include "option_parser.h"
 
@@ -17,7 +16,7 @@ int get_adjusted_action_cost(int cost, OperatorCost cost_type) {
     case ONE:
         return 1;
     case PLUSONE:
-        if (is_unit_cost())
+        if (g_sas_task->is_unit_cost())
             return 1;
         else
             return cost + 1;
@@ -26,12 +25,12 @@ int get_adjusted_action_cost(int cost, OperatorCost cost_type) {
     }
 }
 
-int get_adjusted_action_cost(const GlobalOperator &op, OperatorCost cost_type) {
-    if (op.is_axiom())
-        return 0;
-    else
-        return get_adjusted_action_cost(op.get_cost(), cost_type);
-}
+// int get_adjusted_action_cost(OperatorID op, OperatorCost cost_type) {
+//     if (op.is_axiom())
+//         return 0;
+//     else
+//         return get_adjusted_action_cost(op.get_cost(), cost_type);
+// }
 
 void add_cost_type_option_to_parser(OptionParser &parser) {
     vector<string> cost_types;

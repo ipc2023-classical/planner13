@@ -8,7 +8,6 @@
 
 #include <vector>
 
-class GlobalOperator;
 class GlobalState;
 
 
@@ -37,12 +36,9 @@ public:
     int get_real_g() const;
 
     void open_initial();
-    void open(const SearchNode &parent_node,
-              const GlobalOperator *parent_op);
-    void reopen(const SearchNode &parent_node,
-                const GlobalOperator *parent_op);
-    void update_parent(const SearchNode &parent_node,
-                       const GlobalOperator *parent_op);
+    void open(const SearchNode &parent_node, OperatorID creating_operator, int cost);
+    void reopen(const SearchNode &parent_node, OperatorID creating_operator, int cost);
+    void update_parent(const SearchNode &parent_node, OperatorID creating_operator, int cost);
     void close();
     void mark_as_dead_end();
 
@@ -59,8 +55,7 @@ public:
     SearchSpace(StateRegistry &state_registry, OperatorCost cost_type);
 
     SearchNode get_node(const GlobalState &state);
-    void trace_path(const GlobalState &goal_state,
-                    std::vector<const GlobalOperator *> &path) const;
+    void trace_path(const GlobalState &goal_state, std::vector<int> &path) const;
 
     void dump() const;
     void print_statistics() const;

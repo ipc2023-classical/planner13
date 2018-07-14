@@ -7,3 +7,4 @@
 ^misc/autodoc/downward-xmlrpc\.secret$
 ^builds/
 ^src/CMakeLists.txt.user$
+~$

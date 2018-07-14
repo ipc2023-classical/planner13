@@ -1,6 +1,6 @@
 #include "search_space.h"
 
-#include "global_operator.h"
+#include "task_representation/sas_operator.h"
 #include "global_state.h"
 #include "globals.h"
 
@@ -58,41 +58,38 @@ void SearchNode::open_initial() {
     info.creating_operator = -1;
 }
 
-void SearchNode::open(const SearchNode &parent_node,
-                      const GlobalOperator *parent_op) {
+void SearchNode::open(const SearchNode &parent_node, OperatorID creating_operator, int cost) {
     assert(info.status == SearchNodeInfo::NEW);
     info.status = SearchNodeInfo::OPEN;
-    info.g = parent_node.info.g + get_adjusted_action_cost(*parent_op, cost_type);
-    info.real_g = parent_node.info.real_g + parent_op->get_cost();
+    info.g = parent_node.info.g + get_adjusted_action_cost(cost, cost_type);
+    info.real_g = parent_node.info.real_g + cost;
     info.parent_state_id = parent_node.get_state_id();
-    info.creating_operator = get_op_index_hacked(parent_op);
+    info.creating_operator = creating_operator.get_index();
 }
 
-void SearchNode::reopen(const SearchNode &parent_node,
-                        const GlobalOperator *parent_op) {
+void SearchNode::reopen(const SearchNode &parent_node, OperatorID creating_operator, int cost) {
     assert(info.status == SearchNodeInfo::OPEN ||
            info.status == SearchNodeInfo::CLOSED);
 
     // The latter possibility is for inconsistent heuristics, which
     // may require reopening closed nodes.
     info.status = SearchNodeInfo::OPEN;
-    info.g = parent_node.info.g + get_adjusted_action_cost(*parent_op, cost_type);
-    info.real_g = parent_node.info.real_g + parent_op->get_cost();
+    info.g = parent_node.info.g + get_adjusted_action_cost(cost, cost_type);
+    info.real_g = parent_node.info.real_g + cost;
     info.parent_state_id = parent_node.get_state_id();
-    info.creating_operator = get_op_index_hacked(parent_op);
+    info.creating_operator = creating_operator.get_index();
 }
 
 // like reopen, except doesn't change status
-void SearchNode::update_parent(const SearchNode &parent_node,
-                               const GlobalOperator *parent_op) {
+void SearchNode::update_parent(const SearchNode &parent_node, OperatorID creating_operator, int cost) {
     assert(info.status == SearchNodeInfo::OPEN ||
            info.status == SearchNodeInfo::CLOSED);
     // The latter possibility is for inconsistent heuristics, which
     // may require reopening closed nodes.
-    info.g = parent_node.info.g + get_adjusted_action_cost(*parent_op, cost_type);
-    info.real_g = parent_node.info.real_g + parent_op->get_cost();
+    info.g = parent_node.info.g + get_adjusted_action_cost(cost, cost_type);
+    info.real_g = parent_node.info.real_g + cost;
     info.parent_state_id = parent_node.get_state_id();
-    info.creating_operator = get_op_index_hacked(parent_op);
+    info.creating_operator = creating_operator.get_index();
 }
 
 void SearchNode::close() {
@@ -108,7 +105,7 @@ void SearchNode::dump() const {
     cout << state_id << ": ";
     get_state().dump_fdr();
     if (info.creating_operator != -1) {
-        cout << " created by " << g_operators[info.creating_operator].get_name()
+        cout << " created by " << info.creating_operator//.get_name()
              << " from " << info.parent_state_id << endl;
     } else {
         cout << " no parent" << endl;
@@ -126,7 +123,7 @@ SearchNode SearchSpace::get_node(const GlobalState &state) {
 }
 
 void SearchSpace::trace_path(const GlobalState &goal_state,
-                             vector<const GlobalOperator *> &path) const {
+                             vector<int> &path) const {
     GlobalState current_state = goal_state;
     assert(path.empty());
     for (;;) {
@@ -135,9 +132,10 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
             assert(info.parent_state_id == StateID::no_state);
             break;
         }
-        assert(utils::in_bounds(info.creating_operator, g_operators));
-        const GlobalOperator *op = &g_operators[info.creating_operator];
-        path.push_back(op);
+        // assert(utils::in_bounds(info.creating_operator, g_operators));
+        // const GlobalOperator *op = &g_operators[info.creating_operator];
+        //path.push_back(op);
+	path.push_back(info.creating_operator);
         current_state = state_registry.lookup_state(info.parent_state_id);
     }
     reverse(path.begin(), path.end());
@@ -151,7 +149,7 @@ void SearchSpace::dump() const {
         state.dump_fdr();
         if (node_info.creating_operator != -1 &&
             node_info.parent_state_id != StateID::no_state) {
-            cout << " created by " << g_operators[node_info.creating_operator].get_name()
+            cout << " created by " << node_info.creating_operator//.get_name()
                  << " from " << node_info.parent_state_id << endl;
         } else {
             cout << "has no parent" << endl;

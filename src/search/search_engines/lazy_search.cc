@@ -5,9 +5,9 @@
 #include "../option_parser.h"
 
 #include "../algorithms/ordered_set.h"
-#include "../task_utils/successor_generator.h"
 #include "../utils/rng.h"
 #include "../utils/rng_options.h"
+#include "../task_representation/search_task.h"
 
 #include <algorithm>
 #include <limits>
@@ -26,7 +26,7 @@ LazySearch::LazySearch(const Options &opts)
       rng(utils::parse_rng_from_options(opts)),
       current_state(state_registry.get_initial_state()),
       current_predecessor_id(StateID::no_state),
-      current_operator(nullptr),
+      current_operator(-1),
       current_g(0),
       current_real_g(0),
       current_eval_context(current_state, 0, true, &statistics) {
@@ -64,8 +64,7 @@ void LazySearch::initialize() {
 vector<OperatorID> LazySearch::get_successor_operators(
     const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
     vector<OperatorID> applicable_operators;
-    g_successor_generator->generate_applicable_ops(
-        current_state, applicable_operators);
+    task->generate_applicable_ops(current_state, applicable_operators);
 
     if (randomize_successors) {
         rng->shuffle(applicable_operators);
@@ -99,14 +98,14 @@ void LazySearch::generate_successors() {
     statistics.inc_generated(successor_operators.size());
 
     for (OperatorID op_id : successor_operators) {
-        const GlobalOperator *op = &g_operators[op_id.get_index()];
-        int new_g = current_g + get_adjusted_cost(*op);
-        int new_real_g = current_real_g + op->get_cost();
+	int operator_cost = task->get_operator_cost(op_id);
+        int new_g = current_g + get_adjusted_cost(operator_cost);
+        int new_real_g = current_real_g + operator_cost;
         bool is_preferred = preferred_operators.contains(op_id);
         if (new_real_g < bound) {
             EvaluationContext new_eval_context(
                 current_eval_context.get_cache(), new_g, is_preferred, nullptr);
-            open_list->insert(new_eval_context, make_pair(current_state.get_id(), get_op_index_hacked(op)));
+            open_list->insert(new_eval_context, make_pair(current_state.get_id(), op_id.get_index()));
         }
     }
 }
@@ -120,14 +119,15 @@ SearchStatus LazySearch::fetch_next_state() {
     EdgeOpenListEntry next = open_list->remove_min();
 
     current_predecessor_id = next.first;
-    current_operator = &g_operators[next.second];
+    current_operator = OperatorID(next.second);
+    current_operator_cost = task->get_operator_cost(current_operator); 
     GlobalState current_predecessor = state_registry.lookup_state(current_predecessor_id);
-    assert(current_operator->is_applicable(current_predecessor));
-    current_state = state_registry.get_successor_state(current_predecessor, *current_operator);
+    assert(task->is_applicable(current_predecessor, current_operator));
+    current_state = state_registry.get_successor_state(current_predecessor, current_operator);
 
     SearchNode pred_node = search_space.get_node(current_predecessor);
-    current_g = pred_node.get_g() + get_adjusted_cost(*current_operator);
-    current_real_g = pred_node.get_real_g() + current_operator->get_cost();
+    current_g = pred_node.get_g() + get_adjusted_cost(current_operator_cost);
+    current_real_g = pred_node.get_real_g() + current_operator_cost;
 
     /*
       Note: We mark the node in current_eval_context as "preferred"
@@ -165,23 +165,24 @@ SearchStatus LazySearch::step() {
         GlobalState parent_state = state_registry.lookup_state(dummy_id);
         SearchNode parent_node = search_space.get_node(parent_state);
 
-        if (current_operator) {
-            for (Heuristic *heuristic : heuristics)
+        if (current_operator.is_valid()) {
+            for (Heuristic *heuristic : heuristics) {
                 heuristic->notify_state_transition(
-                    parent_state, *current_operator, current_state);
+                    parent_state, current_operator, current_state);
+	    }
         }
         statistics.inc_evaluated_states();
         if (!open_list->is_dead_end(current_eval_context)) {
             // TODO: Generalize code for using multiple heuristics.
             if (reopen) {
-                node.reopen(parent_node, current_operator);
+                node.reopen(parent_node, current_operator, current_operator_cost);
                 statistics.inc_reopened();
             } else if (current_predecessor_id == StateID::no_state) {
                 node.open_initial();
                 if (search_progress.check_progress(current_eval_context))
                     print_checkpoint_line(current_g);
             } else {
-                node.open(parent_node, current_operator);
+                node.open(parent_node, current_operator, current_operator_cost);
             }
             node.close();
             if (check_goal_and_set_plan(current_state))

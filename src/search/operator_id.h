@@ -29,6 +29,10 @@ public:
         : index(index) {
     }
 
+    OperatorID()
+        : index(-1) {
+    }
+
     int get_index() const {
         return index;
     }
@@ -44,6 +48,11 @@ public:
     size_t hash() const {
         return index;
     }
+
+    size_t is_valid() const {
+        return index >= 0;
+    }
+
 };
 
 std::ostream &operator<<(std::ostream &os, OperatorID id);

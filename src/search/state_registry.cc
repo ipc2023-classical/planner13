@@ -1,18 +1,15 @@
 #include "state_registry.h"
 
-#include "global_operator.h"
+#include "task_representation/search_task.h"
 #include "per_state_information.h"
 
 using namespace std;
 
 StateRegistry::StateRegistry(
-    const AbstractTask &task, const int_packer::IntPacker &state_packer,
-    AxiomEvaluator &axiom_evaluator, const vector<int> &initial_state_data)
+    shared_ptr<SearchTask> task)
     : task(task),
-      state_packer(state_packer),
-      axiom_evaluator(axiom_evaluator),
-      initial_state_data(initial_state_data),
-      num_variables(initial_state_data.size()),
+      state_packer(task->get_state_packer()),
+      num_variables(task->num_variables()),
       state_data_pool(get_bins_per_state()),
       registered_states(
           0,
@@ -56,10 +53,11 @@ const GlobalState &StateRegistry::get_initial_state() {
         PackedStateBin *buffer = new PackedStateBin[get_bins_per_state()];
         // Avoid garbage values in half-full bins.
         fill_n(buffer, get_bins_per_state(), 0);
-        for (size_t i = 0; i < initial_state_data.size(); ++i) {
-            state_packer.set(buffer, i, initial_state_data[i]);
+	vector<int> initial_state_data = task->get_initial_state_data();
+	for (size_t i = 0; i < initial_state_data.size(); ++i) {
+            state_packer->set(buffer, i, initial_state_data[i]);
         }
-        axiom_evaluator.evaluate(buffer, state_packer);
+        task->get_axiom_evaluator().evaluate(buffer, *state_packer);
         state_data_pool.push_back(buffer);
         // buffer is copied by push_back
         delete[] buffer;
@@ -69,25 +67,35 @@ const GlobalState &StateRegistry::get_initial_state() {
     return *cached_initial_state;
 }
 
-//TODO it would be nice to move the actual state creation (and operator application)
-//     out of the StateRegistry. This could for example be done by global functions
-//     operating on state buffers (PackedStateBin *).
-GlobalState StateRegistry::get_successor_state(const GlobalState &predecessor, const GlobalOperator &op) {
-    assert(!op.is_axiom());
+// //TODO it would be nice to move the actual state creation (and operator application)
+// //     out of the StateRegistry. This could for example be done by global functions
+// //     operating on state buffers (PackedStateBin *).
+// GlobalState StateRegistry::get_successor_state(const GlobalState &predecessor, const SASOperator &op) {
+//     assert(!op.is_axiom());
+//     state_data_pool.push_back(predecessor.get_packed_buffer());
+//     PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
+//     for (size_t i = 0; i < op.get_effects().size(); ++i) {
+//         const SASEffect &effect = op.get_effects()[i];
+//         if (effect.does_fire(predecessor))
+//             state_packer->set(buffer, effect.var, effect.val);
+//     }
+//     axiom_evaluator.evaluate(buffer, state_packer);
+//     StateID id = insert_id_or_pop_state();
+//     return lookup_state(id);
+// }
+
+GlobalState StateRegistry::get_successor_state(const GlobalState &predecessor,
+					       OperatorID op) {
+    //assert(!op.is_axiom());
     state_data_pool.push_back(predecessor.get_packed_buffer());
     PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
-    for (size_t i = 0; i < op.get_effects().size(); ++i) {
-        const GlobalEffect &effect = op.get_effects()[i];
-        if (effect.does_fire(predecessor))
-            state_packer.set(buffer, effect.var, effect.val);
-    }
-    axiom_evaluator.evaluate(buffer, state_packer);
+    task->apply_operator(op, buffer);
     StateID id = insert_id_or_pop_state();
     return lookup_state(id);
 }
 
 int StateRegistry::get_bins_per_state() const {
-    return state_packer.get_num_bins();
+    return state_packer->get_num_bins();
 }
 
 int StateRegistry::get_state_size_in_bytes() const {

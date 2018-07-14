@@ -36,7 +36,8 @@ protected:
 
     GlobalState current_state;
     StateID current_predecessor_id;
-    const GlobalOperator *current_operator;
+    OperatorID current_operator;
+    int current_operator_cost;
     int current_g;
     int current_real_g;
     EvaluationContext current_eval_context;

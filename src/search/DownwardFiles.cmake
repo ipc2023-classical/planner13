@@ -48,12 +48,10 @@ fast_downward_plugin(
     SOURCES
         planner
 
-        abstract_task
         axioms
         evaluation_context
         evaluation_result
         evaluator
-        global_operator
         globals
         global_state
         heuristic_cache
@@ -74,9 +72,27 @@ fast_downward_plugin(
         search_statistics
         state_id
         state_registry
-        task_proxy
 
-    DEPENDS CAUSAL_GRAPH INT_PACKER ORDERED_SET SEGMENTED_VECTOR SUCCESSOR_GENERATOR TASK_PROPERTIES
+    DEPENDS INT_PACKER ORDERED_SET SEGMENTED_VECTOR SAS_REPRESENTATION FTS_REPRESENTATION
+    CORE_PLUGIN
+)
+
+
+fast_downward_plugin(
+    NAME FTS_REPRESENTATION
+    HELP "FTS REPRESENTATION"
+    SOURCES
+    	task_representation/search_task
+        task_representation/sas_operator
+	task_representation/sas_task
+	task_representation/fts_operators
+	task_representation/state
+	task_representation/distances
+	task_representation/fts_task
+	task_representation/labels
+	task_representation/label_equivalence_relation
+	task_representation/transition_system
+	task_representation/types
     CORE_PLUGIN
 )
 
@@ -498,7 +514,6 @@ fast_downward_plugin(
         tasks/cost_adapted_task
         tasks/delegating_task
         tasks/root_task
-    CORE_PLUGIN
 )
 
 fast_downward_plugin(

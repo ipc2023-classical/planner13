@@ -4,7 +4,6 @@
 #include "evaluator.h"
 #include "operator_id.h"
 #include "per_state_information.h"
-#include "task_proxy.h"
 
 #include "algorithms/ordered_set.h"
 
@@ -13,12 +12,15 @@
 
 class GlobalOperator;
 class GlobalState;
-class TaskProxy;
+class FTSOperator;
 
 namespace options {
 class OptionParser;
 class Options;
 }
+
+class State;
+
 
 class Heuristic : public Evaluator {
     struct HEntry {
@@ -59,9 +61,7 @@ protected:
     bool cache_h_values;
 
     // Hold a reference to the task implementation and pass it to objects that need it.
-    const std::shared_ptr<AbstractTask> task;
-    // Use task_proxy to access task information.
-    TaskProxy task_proxy;
+    const std::shared_ptr<SearchTask> task;
 
     enum {DEAD_END = -1, NO_VALUE = -2};
 
@@ -73,10 +73,8 @@ protected:
       is OK -- it will only appear once in the list of preferred
       operators for this heuristic.
     */
-    void set_preferred(const OperatorProxy &op);
+    void set_preferred(const FTSOperator &op);
 
-    /* TODO: Make private and use State instead of GlobalState once all
-       heuristics use the TaskProxy class. */
     State convert_global_state(const GlobalState &global_state) const;
 
 public:
@@ -87,7 +85,7 @@ public:
     }
 
     virtual bool notify_state_transition(
-        const GlobalState &parent_state, const GlobalOperator &op,
+        const GlobalState &parent_state, const OperatorID op,
         const GlobalState &state);
 
     virtual void get_involved_heuristics(std::set<Heuristic *> &hset) override {
