@@ -53,10 +53,10 @@ int FTSTask::get_min_operator_cost() const {
     return labels->get_min_operator_cost();
 }
 
-FTSTask::FTSTask(const SASTask & sas_task) {
+FTSTask::FTSTask(const SASTask & sas_task) : labels (utils::make_unique_ptr<Labels>(sas_task)) {
     cout << "Building atomic transition systems... " << endl;
 
-    unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(sas_task);
+
 
     const int num_variables = sas_task.get_num_variables(); 
     const int num_labels = labels->get_size();
