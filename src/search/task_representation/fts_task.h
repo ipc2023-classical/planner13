@@ -88,10 +88,13 @@ public:
 
     State get_initial_state() const;
 
+    bool is_goal_state (const GlobalState & state) const;
+
     bool has_axioms() const {
 	return false;
     }
     std::shared_ptr<SearchTask> get_search_task() const;
+    
     std::unique_ptr<int_packer::IntPacker> get_state_packer() const;
 };
 

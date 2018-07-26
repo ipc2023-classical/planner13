@@ -281,6 +281,12 @@ State FTSTask::get_initial_state() const {
     return State(*this, vector<int>());
 }
 
+bool FTSTask::is_goal_state (const GlobalState & /*state*/) const {
+    cerr <<  "FTSTask::is_goal_state not implemented" << endl;
+    utils::exit_with(utils::ExitCode::UNSUPPORTED);
+    return false;
+}
+
 
 std::shared_ptr<SearchTask> FTSTask::get_search_task() const {
     if (!search_task) {

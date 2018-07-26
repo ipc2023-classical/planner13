@@ -61,7 +61,7 @@ protected:
     bool cache_h_values;
 
     // Hold a reference to the task implementation and pass it to objects that need it.
-    const std::shared_ptr<SearchTask> task;
+    const std::shared_ptr<FTSTask> task;
 
     enum {DEAD_END = -1, NO_VALUE = -2};
 
