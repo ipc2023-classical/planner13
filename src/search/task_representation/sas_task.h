@@ -44,6 +44,7 @@ class SASTask {
     std::vector<int> g_default_axiom_values;
 
 
+    void read_and_verify_version(std::istream &in);
     void read_metric(std::istream &in);
     void read_variables(std::istream &in);
     void read_mutexes(std::istream &in);

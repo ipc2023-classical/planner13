@@ -18,17 +18,32 @@ ostream &operator<<(ostream &os, const FactPair &fact_pair) {
     return os;
 }
 
+static const int PRE_FILE_VERSION = 3;
+
+void SASTask::read_and_verify_version(istream &in) {
+    int version;
+    check_magic(in, "begin_version");
+    in >> version;
+    check_magic(in, "end_version");
+    if (version != PRE_FILE_VERSION) {
+        cerr << "Expected preprocessor file version " << PRE_FILE_VERSION
+             << ", got " << version << "." << endl;
+        cerr << "Exiting." << endl;
+        utils::exit_with(utils::ExitCode::INPUT_ERROR);
+    }
+}
+
 void SASTask::read_metric(istream &in) {
-    utils::check_magic(in, "begin_metric");
+    check_magic(in, "begin_metric");
     in >> g_use_metric;
-    utils::check_magic(in, "end_metric");
+    check_magic(in, "end_metric");
 }
 
 void SASTask::read_variables(istream &in) {
     int count;
     in >> count;
     for (int i = 0; i < count; ++i) {
-        utils::check_magic(in, "begin_variable");
+        check_magic(in, "begin_variable");
         string name;
         in >> name;
         g_variable_name.push_back(name);
@@ -43,7 +58,7 @@ void SASTask::read_variables(istream &in) {
         for (size_t j = 0; j < fact_names.size(); ++j)
             getline(in, fact_names[j]);
         g_fact_names.push_back(fact_names);
-        utils::check_magic(in, "end_variable");
+        check_magic(in, "end_variable");
     }
 }
 
@@ -62,7 +77,7 @@ void SASTask::read_mutexes(istream &in) {
        aware of. */
 
     for (int i = 0; i < num_mutex_groups; ++i) {
-        utils::check_magic(in, "begin_mutex_group");
+        check_magic(in, "begin_mutex_group");
         int num_facts;
         in >> num_facts;
         vector<FactPair> invariant_group;
@@ -73,7 +88,7 @@ void SASTask::read_mutexes(istream &in) {
             in >> var >> value;
             invariant_group.emplace_back(var, value);
         }
-        utils::check_magic(in, "end_mutex_group");
+        check_magic(in, "end_mutex_group");
         for (const FactPair &fact1 : invariant_group) {
             for (const FactPair &fact2 : invariant_group) {
                 if (fact1.var != fact2.var) {
@@ -95,7 +110,7 @@ void SASTask::read_mutexes(istream &in) {
 }
 
 void SASTask::read_goal(istream &in) {
-    utils::check_magic(in, "begin_goal");
+    check_magic(in, "begin_goal");
     int count;
     in >> count;
     if (count < 1) {
@@ -107,7 +122,7 @@ void SASTask::read_goal(istream &in) {
         in >> var >> val;
         g_goal.push_back(make_pair(var, val));
     }
-    utils::check_magic(in, "end_goal");
+    check_magic(in, "end_goal");
 }
 
 void SASTask::read_operators(istream &in) {
@@ -134,17 +149,17 @@ SASTask::SASTask() : g_min_action_cost (numeric_limits<int>::max()),
 }
 void SASTask::read_from_file(istream &in)  {
     cout << "reading input... [t=" << utils::g_timer << "]" << endl;
-    utils::read_and_verify_version(in);
+    read_and_verify_version(in);
 
     read_metric(in);
     read_variables(in);
     read_mutexes(in);
     g_initial_state_data.resize(g_variable_domain.size());
-    utils::check_magic(in, "begin_state");
+    check_magic(in, "begin_state");
     for (size_t i = 0; i < g_variable_domain.size(); ++i) {
         in >> g_initial_state_data[i];
     }
-    utils::check_magic(in, "end_state");
+    check_magic(in, "end_state");
     g_default_axiom_values = g_initial_state_data;
 
     read_goal(in);

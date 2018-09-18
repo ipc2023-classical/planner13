@@ -13,6 +13,21 @@ using namespace std;
 using utils::ExitCode;
 
 namespace task_representation {
+void check_magic(istream &in, string magic) {
+    string word;
+    in >> word;
+    if (word != magic) {
+        cout << "Failed to match magic word '" << magic << "'." << endl;
+        cout << "Got '" << word << "'." << endl;
+        if (magic == "begin_version") {
+            cerr << "Possible cause: you are running the planner "
+                 << "on a preprocessor file from " << endl
+                 << "an older version." << endl;
+        }
+        utils::exit_with(utils::ExitCode::INPUT_ERROR);
+    }
+}
+
 SASCondition::SASCondition(istream &in) {
     in >> var >> val;
     g_sas_task->check_fact(var, val);
@@ -61,7 +76,7 @@ SASOperator::SASOperator(istream &in, bool axiom,
                          bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost ) {
     is_an_axiom = axiom;
     if (!is_an_axiom) {
-        utils::check_magic(in, "begin_operator");
+        check_magic(in, "begin_operator");
         in >> ws;
         getline(in, name);
         int count;
@@ -79,13 +94,13 @@ SASOperator::SASOperator(istream &in, bool axiom,
         g_min_action_cost = min(g_min_action_cost, cost);
         g_max_action_cost = max(g_max_action_cost, cost);
 
-        utils::check_magic(in, "end_operator");
+        check_magic(in, "end_operator");
     } else {
         name = "<axiom>";
         cost = 0;
-        utils::check_magic(in, "begin_rule");
+        check_magic(in, "begin_rule");
         read_pre_post(in);
-        utils::check_magic(in, "end_rule");
+        check_magic(in, "end_rule");
     }
 }
 

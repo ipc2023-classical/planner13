@@ -8,6 +8,8 @@
 #include <vector>
 
 namespace task_representation {
+void check_magic(std::istream &in, std::string magic);
+
 struct SASCondition {
     int var;
     int val;
