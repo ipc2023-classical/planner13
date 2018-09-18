@@ -10,24 +10,24 @@ using namespace std;
 
 namespace task_representation {
 class FTSOperator {
-    OperatorID id; // Unique identifier of the operator in the planning task 
+    OperatorID id; // Unique identifier of the operator in the planning task
     int label; // Label that corresponds to this operator
     int cost;
-    
+
     std::vector<FactPair> effects;
 public:
     OperatorID get_id () const {
-	return id;
+        return id;
     }
-    
+
     /* std::vector<Fact> targets; */
 
     const std::vector<FactPair> & get_effects() const {
-	return effects;
+        return effects;
     }
 
     int get_cost() const {
-	return cost;
+        return cost;
     }
 };
 
@@ -38,7 +38,7 @@ class FTSOperators {
 
 public:
     const FTSOperator & get_operator (OperatorID id_op) const {
-	return operators_by_id[id_op.get_index()];
+        return operators_by_id[id_op.get_index()];
     }
 
 };

@@ -77,9 +77,9 @@ public:
     }
 
     std::string get_name() const;
-    
+
     bool operator==(const Fact &other) const {
-	assert(task == other.task);
+        assert(task == other.task);
         return fact == other.fact;
     }
 

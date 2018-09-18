@@ -56,7 +56,7 @@ class SASOperator {
     void read_pre_post(std::istream &in);
 public:
     explicit SASOperator(std::istream &in, bool is_axiom,
-			 bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost);
+                         bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost);
     void dump() const;
     const std::string &get_name() const {return name; }
 

@@ -29,7 +29,7 @@ class TransitionSystem;
 class FTSTask {
     std::shared_ptr<Labels> labels;
     std::vector<std::shared_ptr<TransitionSystem>> transition_systems;
-    
+
     /*
       Assert that the factor at the given index is in a consistent state, i.e.
       that there is a transition system, a distances object, and an MSR.
@@ -46,9 +46,9 @@ class FTSTask {
     void assert_all_components_valid() const;
 
     mutable std::shared_ptr<SearchTask> search_task;
-    
+
 public:
-    FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation 
+    FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
     FTSTask(FTSTask &&other) = default;
     ~FTSTask() = default;
     FTSTask(const FTSTask &) = default;
@@ -78,7 +78,7 @@ public:
     int get_label_cost(int label) const;
 
     int get_min_operator_cost() const;
-    
+
     int get_num_labels() const;
 
     std::string get_fact_name(const FactPair & fact) const;
@@ -94,10 +94,10 @@ public:
     bool is_goal_state (const GlobalState & state) const;
 
     bool has_axioms() const {
-	return false;
+        return false;
     }
     std::shared_ptr<SearchTask> get_search_task() const;
-    
+
     std::unique_ptr<int_packer::IntPacker> get_state_packer() const;
 };
 }

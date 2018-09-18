@@ -20,17 +20,17 @@ Distances::Distances(const TransitionSystem &transition_system, bool init_distan
     }
 
     if(init_distances) {
-	if (transition_system.is_unit_cost()) {
-	    compute_init_distances_unit_cost(transition_system);
-	} else {
-	    compute_init_distances_general_cost(transition_system);
-	}
+        if (transition_system.is_unit_cost()) {
+            compute_init_distances_unit_cost(transition_system);
+        } else {
+            compute_init_distances_general_cost(transition_system);
+        }
     } else {
-	if (transition_system.is_unit_cost()) {
-	    compute_goal_distances_unit_cost(transition_system);
-	} else {
-	    compute_goal_distances_general_cost(transition_system);
-	}
+        if (transition_system.is_unit_cost()) {
+            compute_goal_distances_unit_cost(transition_system);
+        } else {
+            compute_goal_distances_general_cost(transition_system);
+        }
     }
 }
 

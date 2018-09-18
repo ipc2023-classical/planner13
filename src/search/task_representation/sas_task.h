@@ -28,15 +28,15 @@ class SASTask {
     int g_min_action_cost;
     int g_max_action_cost;
 
-    std::vector<SASOperator> g_operators; 
-    std::vector<SASOperator> g_axioms; 
+    std::vector<SASOperator> g_operators;
+    std::vector<SASOperator> g_axioms;
 
     // This vector holds the initial values *before* the axioms have been evaluated.
     // Use a state registry to obtain the real initial state.
     std::vector<int> g_initial_state_data;
     std::vector<std::pair<int, int>> g_goal;
     std::vector<int> initial_state_values; //Values in the initial state (after evaluating axioms)
-    
+
     std::vector<std::string> g_variable_name;
     std::vector<int> g_variable_domain;
     std::vector<std::vector<std::string>> g_fact_names;
@@ -51,7 +51,7 @@ class SASTask {
     void read_operators(std::istream &in);
     void read_axioms(std::istream &in);
 
-    
+
 // TODO: This needs a proper type and should be moved to a separate
 //       mutexes.cc file or similar, accessed via something called
 //       g_mutexes. (Right now, the interface is via global function
@@ -79,14 +79,14 @@ public:
      std::string get_operator_name(int index, bool is_axiom = false) const ;
 
      const std::vector<SASOperator> & get_operators() const {
-	 return g_operators;
+         return g_operators;
      }
 
      const SASOperator & get_operator(int index) const {
-	 return g_operators[index];
+         return g_operators[index];
      }
 
-     
+
      int get_num_operators() const ;
      int get_num_operator_preconditions(int index, bool is_axiom) const ;
      FactPair get_operator_precondition(
@@ -104,23 +104,23 @@ public:
 
      int get_num_goals() const ;
      FactPair get_goal_fact(int index) const ;
-     
+
      bool test_goal(const GlobalState &state) const;
 
      std::vector<int> get_initial_state_data() const {
-	 return g_initial_state_data;
+         return g_initial_state_data;
      }
-     
+
 
      int get_goal_value(int var) const {
-	 for (const auto & goal : g_goal) {
-	     if (goal.first == var) {
-		 return goal.second;
-	     }
-	 }
-	 return -1;
-     } 
-     
+         for (const auto & goal : g_goal) {
+             if (goal.first == var) {
+                 return goal.second;
+             }
+         }
+         return -1;
+     }
+
      /*
       Convert state values from an ancestor task A (ancestor) into
       state values from this task, C (child). Task A has to be an
@@ -132,7 +132,7 @@ public:
       the parameter.
     */
      void convert_state_values(std::vector<int> &values,
-			       const SASTask *ancestor_task) const ;
+                               const SASTask *ancestor_task) const ;
 
      void dump_goal() const;
      void dump_everything() const;

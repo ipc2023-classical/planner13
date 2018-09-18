@@ -30,9 +30,9 @@ public:
     }
 
     void erase(LabelID label) {
-	auto pos = std::find(labels.begin(), labels.end(), label);
-	assert (pos != labels.end());
-	labels.erase(pos);
+        auto pos = std::find(labels.begin(), labels.end(), label);
+        assert (pos != labels.end());
+        labels.erase(pos);
     }
 
     void clear() {
@@ -88,8 +88,8 @@ public:
       groups are recomputed.
     */
     void apply_label_mapping(const std::vector<std::pair<LabelID, std::vector<LabelID>>> &label_mapping,
-			     const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
-    
+                             const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
+
     // Moves all labels from one goup into the other
     void move_group_into_group(LabelGroupID from_group_id, LabelGroupID to_group_id);
     int add_label_group(const std::vector<LabelID> &new_labels);

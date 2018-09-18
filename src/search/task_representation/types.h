@@ -35,12 +35,12 @@ struct LabelID {
     id(id_) {
     }
     operator int() const {
-	return id;
+        return id;
     }
 
     LabelID & operator++ () {
-	++id;
-	return *this;
+        ++id;
+        return *this;
     }
 };
 
@@ -53,12 +53,12 @@ struct LabelGroupID {
     id(id_) {
     }
     operator int() const {
-	return id;
+        return id;
     }
-    
+
     LabelGroupID & operator++ () {
-	++id;
-	return *this;
+        ++id;
+        return *this;
     }
 };
 }
@@ -67,17 +67,17 @@ namespace std {
     template<> struct hash<task_representation::LabelGroupID> {
     public:
     size_t operator()(const task_representation::LabelGroupID & g) const
-	{
-	    return g.id;
-	}
+        {
+            return g.id;
+        }
     };
 
     template<> struct hash<task_representation::LabelID> {
     public:
     size_t operator()(const task_representation::LabelID & g) const
-	{
-	    return g.id;
-	}
+        {
+            return g.id;
+        }
     };
 }
 

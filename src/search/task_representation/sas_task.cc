@@ -115,7 +115,7 @@ void SASTask::read_operators(istream &in) {
     in >> count;
     for (int i = 0; i < count; ++i)
         g_operators.push_back(SASOperator(in, false,
-					     g_use_metric, g_min_action_cost, g_max_action_cost));
+                                             g_use_metric, g_min_action_cost, g_max_action_cost));
 }
 
 void SASTask::read_axioms(istream &in) {
@@ -123,19 +123,19 @@ void SASTask::read_axioms(istream &in) {
     in >> count;
     for (int i = 0; i < count; ++i)
         g_axioms.push_back(SASOperator(in, true,
-					  g_use_metric, g_min_action_cost, g_max_action_cost));
+                                          g_use_metric, g_min_action_cost, g_max_action_cost));
 
     // g_axiom_evaluator = new AxiomEvaluator(TaskProxy(*g_root_task()));
 }
 
 SASTask::SASTask() : g_min_action_cost (numeric_limits<int>::max()),
-				     g_max_action_cost (0) {
+                                     g_max_action_cost (0) {
 
 }
 void SASTask::read_from_file(istream &in)  {
     cout << "reading input... [t=" << utils::g_timer << "]" << endl;
     utils::read_and_verify_version(in);
-    
+
     read_metric(in);
     read_variables(in);
     read_mutexes(in);

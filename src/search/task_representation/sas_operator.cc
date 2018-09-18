@@ -58,7 +58,7 @@ void SASOperator::read_pre_post(istream &in) {
 }
 
 SASOperator::SASOperator(istream &in, bool axiom,
-			 bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost ) {
+                         bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost ) {
     is_an_axiom = axiom;
     if (!is_an_axiom) {
         utils::check_magic(in, "begin_operator");

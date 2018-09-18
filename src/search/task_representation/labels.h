@@ -38,14 +38,14 @@ public:
     bool is_current_label(LabelID label_no) const;
     int get_label_cost(LabelID label_no) const;
     int get_min_operator_cost() const {
-	if(labels.empty()) {
-	    return 0;
-	}
-	int minimum_cost = labels[0]->get_cost();
-	for (const auto & label : labels) {
-	    minimum_cost = std::min(minimum_cost, label->get_cost());
-	}
-	return minimum_cost;
+        if(labels.empty()) {
+            return 0;
+        }
+        int minimum_cost = labels[0]->get_cost();
+        for (const auto & label : labels) {
+            minimum_cost = std::min(minimum_cost, label->get_cost());
+        }
+        return minimum_cost;
     }
 
     void dump_labels() const;

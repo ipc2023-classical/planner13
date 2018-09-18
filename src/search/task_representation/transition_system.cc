@@ -226,9 +226,9 @@ void TransitionSystem::statistics() const {
 
 bool TransitionSystem::is_goal_relevant() const {
     for(bool is_goal : goal_states) {
-	if (!is_goal) {
-	    return true;
-	}
+        if (!is_goal) {
+            return true;
+        }
     }
     return false;
 }
