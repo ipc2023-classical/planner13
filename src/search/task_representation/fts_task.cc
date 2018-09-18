@@ -225,7 +225,7 @@ FTSTask::FTSTask(const SASTask & sas_task) : labels (utils::make_unique_ptr<Labe
     constexpr bool compute_label_equivalence_relation = true;
     for (int var_no = 0; var_no < num_variables; ++var_no) {
         TransitionSystemData &ts_data = transition_system_data_by_var[var_no];
-        transition_systems.push_back(make_shared<TransitionSystem>(
+        transition_systems.push_back(utils::make_unique_ptr<TransitionSystem>(
                                          ts_data.num_variables,
                                          move(ts_data.incorporated_variables),
                                          move(ts_data.label_equivalence_relation),
@@ -237,6 +237,13 @@ FTSTask::FTSTask(const SASTask & sas_task) : labels (utils::make_unique_ptr<Labe
                                          ));
     }
 
+}
+
+FTSTask::~FTSTask() {
+    labels = nullptr;
+    for (auto &transition_system : transition_systems) {
+        transition_system = nullptr;
+    }
 }
 
 bool FTSTask::is_component_valid(int index) const {

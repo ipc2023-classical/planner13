@@ -34,6 +34,7 @@ class Labels {
     std::vector<std::unique_ptr<Label>> labels;
 public:
     explicit Labels(const SASTask & sas_task);
+    ~Labels() = default;
     void reduce_labels(const std::vector<LabelID> &old_label_nos);
     bool is_current_label(LabelID label_no) const;
     int get_label_cost(LabelID label_no) const;

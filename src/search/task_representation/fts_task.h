@@ -27,8 +27,8 @@ class TransitionSystem;
 
 
 class FTSTask {
-    std::shared_ptr<Labels> labels;
-    std::vector<std::shared_ptr<TransitionSystem>> transition_systems;
+    std::unique_ptr<Labels> labels;
+    std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
 
     /*
       Assert that the factor at the given index is in a consistent state, i.e.
@@ -50,7 +50,7 @@ class FTSTask {
 public:
     FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
     FTSTask(FTSTask &&other) = default;
-    ~FTSTask() = default;
+    ~FTSTask();
     FTSTask(const FTSTask &) = default;
     FTSTask &operator=(const FTSTask &) = default;
 

@@ -92,9 +92,6 @@ TransitionSystem::TransitionSystem(
     assert(are_transitions_sorted_unique());
 }
 
-TransitionSystem::~TransitionSystem() {
-}
-
 void TransitionSystem::compute_locally_equivalent_labels() {
     /*
       Compare every group of labels and their transitions to all others and
