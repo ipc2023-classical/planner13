@@ -12,7 +12,7 @@
 using namespace std;
 using utils::ExitCode;
 
-
+namespace task_representation {
 SASCondition::SASCondition(istream &in) {
     in >> var >> val;
     g_sas_task->check_fact(var, val);
@@ -124,3 +124,4 @@ void SASOperator::dump() const {
 //     assert(op_index >= 0 && op_index < static_cast<int>(g_operators.size()));
 //     return op_index;
 // }
+}

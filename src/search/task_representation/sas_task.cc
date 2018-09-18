@@ -10,6 +10,7 @@
 
 using namespace std;
 
+namespace task_representation {
 const FactPair FactPair::no_fact = FactPair(-1, -1);
 
 ostream &operator<<(ostream &os, const FactPair &fact_pair) {
@@ -381,4 +382,4 @@ void SASTask::check_fact(int var, int val) const {
         utils::exit_with(utils::ExitCode::INPUT_ERROR);
     }
 }
-
+}

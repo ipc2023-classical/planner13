@@ -8,6 +8,7 @@
 
 using namespace std;
 
+namespace task_representation {
 class FTSOperator {
     OperatorID id; // Unique identifier of the operator in the planning task 
     int label; // Label that corresponds to this operator
@@ -41,7 +42,7 @@ public:
     }
 
 };
-
+}
 
 
 #endif

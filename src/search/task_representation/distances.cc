@@ -10,8 +10,9 @@
 
 using namespace std;
 
-const int Distances::DISTANCE_UNKNOWN;
+//const int Distances::DISTANCE_UNKNOWN;
 
+namespace task_representation {
 Distances::Distances(const TransitionSystem &transition_system, bool init_distances) {
     distances.resize(transition_system.get_size(), INF);
     if (distances.empty()) {
@@ -266,4 +267,4 @@ void Distances::statistics() const {
     // }
     // cout << endl;
 }
-
+}

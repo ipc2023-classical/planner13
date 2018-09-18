@@ -9,6 +9,7 @@
 #include <vector>
 #include <cassert>
 
+namespace task_representation {
 class LabelGroup {
     /*
       A label group contains a set of locally equivalent labels, possibly of
@@ -109,6 +110,6 @@ public:
         return label_groups.at(group_id);
     }
 };
-
+}
 
 #endif

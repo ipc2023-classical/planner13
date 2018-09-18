@@ -12,14 +12,16 @@
 
 class GlobalOperator;
 class GlobalState;
-class FTSOperator;
 
 namespace options {
 class OptionParser;
 class Options;
 }
 
+namespace task_representation {
+class FTSOperator;
 class State;
+}
 
 
 class Heuristic : public Evaluator {
@@ -61,7 +63,7 @@ protected:
     bool cache_h_values;
 
     // Hold a reference to the task implementation and pass it to objects that need it.
-    const std::shared_ptr<FTSTask> task;
+    const std::shared_ptr<task_representation::FTSTask> task;
 
     enum {DEAD_END = -1, NO_VALUE = -2};
 
@@ -73,9 +75,9 @@ protected:
       is OK -- it will only appear once in the list of preferred
       operators for this heuristic.
     */
-    void set_preferred(const FTSOperator &op);
+    void set_preferred(const task_representation::FTSOperator &op);
 
-    State convert_global_state(const GlobalState &global_state) const;
+    task_representation::State convert_global_state(const GlobalState &global_state) const;
 
 public:
     explicit Heuristic(const options::Options &options);

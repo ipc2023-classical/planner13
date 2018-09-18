@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+namespace task_representation {
 class State {
     const FTSTask *task;
     std::vector<int> values;
@@ -85,6 +86,6 @@ public:
     void dump_fdr() const;
 
 };
-
+}
 
 #endif

@@ -1,6 +1,6 @@
 #include "state.h"
 
-
+namespace task_representation {
 
 
 // State State::get_successor(const FTSOperator & op) const {
@@ -28,4 +28,5 @@ void State::dump_pddl() const {
 void State::dump_fdr() const {
     cerr <<  "State::dump_fdr not implemented" << endl;
     utils::exit_with(utils::ExitCode::UNSUPPORTED);
+}
 }

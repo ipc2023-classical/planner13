@@ -1,5 +1,5 @@
-#ifndef FTS_REPRESENTATIION_DISTANCES_H
-#define FTS_REPRESENTATIION_DISTANCES_H
+#ifndef FTS_REPRESENTATION_DISTANCES_H
+#define FTS_REPRESENTATION_DISTANCES_H
 
 #include "types.h"
 
@@ -13,6 +13,7 @@
   can be one of the bottlenecks in our code.)
 */
 
+namespace task_representation {
 class TransitionSystem;
 
 class Distances {
@@ -35,6 +36,6 @@ public:
     void dump() const;
     void statistics() const;
 };
-
+}
 
 #endif

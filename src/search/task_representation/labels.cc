@@ -10,7 +10,7 @@
 
 using namespace std;
 
-
+namespace task_representation {
 Labels::Labels(const SASTask & sas_task) {
     for (int index = 0; index < sas_task.get_num_operators(); ++index) {
         labels.push_back(utils::make_unique_ptr<Label>(sas_task.get_operator_cost(index, false)));
@@ -46,4 +46,4 @@ void Labels::dump_labels() const {
         }
     }
 }
-
+}

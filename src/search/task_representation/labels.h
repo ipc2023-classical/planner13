@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+namespace task_representation {
 class SASTask;
 
 class Label {
@@ -52,6 +53,6 @@ public:
         return labels.size();
     }
 };
-
+}
 
 #endif

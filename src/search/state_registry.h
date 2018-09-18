@@ -100,6 +100,11 @@
 
 class PerStateInformationBase;
 
+namespace task_representation {
+class FTSOperator;
+class SearchTask;
+}
+
 class StateRegistry {
     struct StateIDSemanticHash {
         const segmented_vector::SegmentedArrayVector<PackedStateBin> &state_data_pool;
@@ -147,7 +152,7 @@ class StateRegistry {
 
     /* TODO: The state registry still doesn't use the task interface completely.
              Fixing this is part of issue509. */
-    const std::shared_ptr<SearchTask> task;
+    const std::shared_ptr<task_representation::SearchTask> task;
     const int_packer::IntPacker * state_packer;
     const int num_variables;
     
@@ -160,7 +165,7 @@ class StateRegistry {
     StateID insert_id_or_pop_state();
     int get_bins_per_state() const;
 public:
-    StateRegistry(std::shared_ptr<SearchTask> task);
+    StateRegistry(std::shared_ptr<task_representation::SearchTask> task);
     ~StateRegistry();
 
     int get_num_variables() const {
@@ -188,7 +193,7 @@ public:
       registers it if this was not done before. This is an expensive operation
       as it includes duplicate checking.
     */
-    //GlobalState get_successor_state(const GlobalState &predecessor, const SASOperator &op);
+    //GlobalState get_successor_state(const GlobalState &predecessor, const task_representation::SASOperator &op);
     GlobalState get_successor_state(const GlobalState &predecessor, OperatorID op);
 
     /*

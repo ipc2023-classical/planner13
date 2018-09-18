@@ -71,7 +71,7 @@ int g_num_previously_generated_plans = 0;
 bool g_is_part_of_anytime_portfolio = false;
 
 
-const std::shared_ptr<SASTask> g_sas_task = make_shared<SASTask>();
-std::shared_ptr<FTSTask> g_main_task;
+const std::shared_ptr<task_representation::SASTask> g_sas_task = make_shared<task_representation::SASTask>();
+std::shared_ptr<task_representation::FTSTask> g_main_task;
 
 utils::Log g_log;

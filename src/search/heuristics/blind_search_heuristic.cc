@@ -3,7 +3,7 @@
 #include "../global_state.h"
 #include "../option_parser.h"
 #include "../plugin.h"
-#include "../task_representation/state.h"
+
 #include "../task_representation/search_task.h"
 
 #include <cstddef>

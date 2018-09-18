@@ -20,6 +20,7 @@
 using namespace std;
 using utils::ExitCode;
 
+namespace task_representation {
 ostream &operator<<(ostream &os, const Transition &trans) {
     os << trans.src << "->" << trans.target;
     return os;
@@ -242,4 +243,4 @@ bool TransitionSystem::is_unit_cost() const {
     }
     return true;
 }
-
+}

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+namespace task_representation {
 struct SASCondition {
     int var;
     int val;
@@ -73,6 +74,7 @@ public:
 
     int get_cost() const {return cost; }
 };
+}
 
 //extern int get_op_index_hacked(const SASOperator *op);
 

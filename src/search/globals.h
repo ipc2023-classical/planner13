@@ -10,7 +10,6 @@
 
 class Axiom;
 class AxiomEvaluator;
-struct FactPair;
 class GlobalOperator;
 class GlobalState;
 class StateRegistry;
@@ -23,8 +22,10 @@ namespace successor_generator {
 class SuccessorGenerator;
 }
 
+namespace task_representation {
+struct FactPair;
 class FTSTask;
-
+}
 
 namespace utils {
 struct Log;
@@ -67,8 +68,8 @@ extern int g_num_previously_generated_plans;
 extern bool g_is_part_of_anytime_portfolio;
 
 //extern std::shared_ptr<TaskTransformation> g_task_transformation;
-extern const std::shared_ptr<SASTask> g_sas_task;
-extern std::shared_ptr<FTSTask> g_main_task;
+extern const std::shared_ptr<task_representation::SASTask> g_sas_task;
+extern std::shared_ptr<task_representation::FTSTask> g_main_task;
 //extern const std::shared_ptr<FTSTask> g_root_task();
 
 

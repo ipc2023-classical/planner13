@@ -6,7 +6,7 @@
 using namespace std;
 
 StateRegistry::StateRegistry(
-    shared_ptr<SearchTask> task)
+    shared_ptr<task_representation::SearchTask> task)
     : task(task),
       state_packer(task->get_state_packer()),
       num_variables(task->num_variables()),

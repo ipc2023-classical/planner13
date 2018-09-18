@@ -13,7 +13,7 @@ namespace int_packer {
     class IntPacker;
 }
 
-
+namespace task_representation {
 struct Precondition {
     int variable;
     std::set<int> values;
@@ -181,5 +181,6 @@ public:
     }
 
 };
+}
 
 #endif

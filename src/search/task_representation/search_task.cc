@@ -10,7 +10,7 @@
 
 using namespace std;
 
-
+namespace task_representation {
 // OperatorTree::OperatorTree (const FTSTask & fts_task, 
 // 			    std::vector<AbstractOperator> & operators) {
 //     map<OperatorTreeNode, int> cache;
@@ -150,4 +150,5 @@ bool SearchTask::is_applicable(const GlobalState & state, OperatorID op) const {
 	}
     }
     return true;
+}
 }

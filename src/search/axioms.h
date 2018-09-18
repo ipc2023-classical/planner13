@@ -10,8 +10,9 @@ namespace int_packer {
 class IntPacker;
 }
 
+namespace task_representation {
 class FTSTask;
-
+}
 
 class AxiomEvaluator {
     struct AxiomRule;
@@ -60,7 +61,7 @@ class AxiomEvaluator {
     */
     std::vector<AxiomLiteral *> queue;
 public:
-    explicit AxiomEvaluator(const FTSTask &task_proxy);
+    explicit AxiomEvaluator(const task_representation::FTSTask &task_proxy);
     void evaluate(PackedStateBin *buffer, const int_packer::IntPacker &state_packer);
 
     bool has_axioms() const {

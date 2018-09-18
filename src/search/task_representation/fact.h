@@ -12,6 +12,7 @@
 #include <set>
 #include <cassert>
 
+namespace task_representation {
 class FTSTask;
 
 struct FactPair {
@@ -41,14 +42,14 @@ struct FactPair {
     */
     static const FactPair no_fact;
 };
+}
 
-
-std::ostream &operator<<(std::ostream &os, const FactPair &fact_pair);
+std::ostream &operator<<(std::ostream &os, const task_representation::FactPair &fact_pair);
 
 namespace std {
 template<>
-struct hash<FactPair> {
-    size_t operator()(const FactPair &fact) const {
+struct hash<task_representation::FactPair> {
+    size_t operator()(const task_representation::FactPair &fact) const {
         std::pair<int, int> raw_fact(fact.var, fact.value);
         std::hash<std::pair<int, int>> hasher;
         return hasher(raw_fact);
@@ -56,6 +57,7 @@ struct hash<FactPair> {
 };
 }
 
+namespace task_representation {
 class Fact {
     const FTSTask *task;
     FactPair fact;
@@ -87,5 +89,6 @@ public:
 
     bool is_mutex(const Fact &other) const;
 };
+}
 
 #endif

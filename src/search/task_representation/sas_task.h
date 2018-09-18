@@ -19,8 +19,9 @@ class Options;
 }
 
 class GlobalState;
-class FactPair;
 
+namespace task_representation {
+struct FactPair;
 class SASTask {
     bool g_use_metric;
 
@@ -146,5 +147,6 @@ public:
      bool has_axioms() const;
      bool is_unit_cost()  const;
 };
+}
 
 #endif

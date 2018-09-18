@@ -25,7 +25,10 @@ class OrderedSet;
 
 enum SearchStatus {IN_PROGRESS, TIMEOUT, FAILED, SOLVED};
 
+namespace task_representation {
+class SearchTask;
 class SuccessorGenerator;
+}
 
 class SearchEngine {
 public:
@@ -43,7 +46,7 @@ protected:
     OperatorCost cost_type;
     double max_time;
 
-    std::shared_ptr<SearchTask> task;
+    std::shared_ptr<task_representation::SearchTask> task;
     
     virtual void initialize() {}
     virtual SearchStatus step() = 0;

@@ -6,6 +6,7 @@
 
 using namespace std;
 
+namespace task_representation {
 LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels)
     : labels(labels) {
     label_to_groups.resize(labels.get_size());
@@ -80,4 +81,4 @@ int LabelEquivalenceRelation::add_label_group(const vector<LabelID> &new_labels)
     }
     return new_group_id;
 }
-
+}

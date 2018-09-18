@@ -35,11 +35,11 @@ vector<int> GlobalState::get_values() const {
 }
 
 void GlobalState::dump_pddl() const {
-    State state(*g_main_task, get_values());
+    task_representation::State state(*g_main_task, get_values());
     state.dump_pddl();
 }
 
 void GlobalState::dump_fdr() const {
-    State state(*g_main_task, get_values());
+    task_representation::State state(*g_main_task, get_values());
     state.dump_fdr();
 }

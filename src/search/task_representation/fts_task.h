@@ -8,20 +8,23 @@
 #include <memory>
 #include <vector>
 
-class Distances;
-class FactoredTransitionSystem;
-class Labels;
-class TransitionSystem;
-class FTSOperators;
-class FactPair;
-class State;
-class SASTask;
 class GlobalState;
-class SearchTask;
 
 namespace int_packer {
     class IntPacker;
 }
+
+namespace task_representation {
+class Distances;
+class FactoredTransitionSystem;
+struct FactPair;
+class FTSOperators;
+class Labels;
+class SASTask;
+class SearchTask;
+class State;
+class TransitionSystem;
+
 
 class FTSTask {
     std::shared_ptr<Labels> labels;
@@ -97,7 +100,7 @@ public:
     
     std::unique_ptr<int_packer::IntPacker> get_state_packer() const;
 };
-
+}
 
 
 #endif

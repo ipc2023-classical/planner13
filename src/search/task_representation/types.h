@@ -4,6 +4,7 @@
 #include <forward_list>
 #include <vector>
 
+namespace task_representation {
 // Positive infinity. The name "INFINITY" is taken by an ISO C99 macro.
 extern const int INF;
 extern const int MINUSINF;
@@ -60,19 +61,20 @@ struct LabelGroupID {
 	return *this;
     }
 };
+}
 
 namespace std {
-    template<> struct hash<LabelGroupID> {
+    template<> struct hash<task_representation::LabelGroupID> {
     public:
-	size_t operator()(const LabelGroupID & g) const 
+    size_t operator()(const task_representation::LabelGroupID & g) const
 	{
 	    return g.id;
 	}
     };
 
-    template<> struct hash<LabelID> {
+    template<> struct hash<task_representation::LabelID> {
     public:
-	size_t operator()(const LabelID & g) const 
+    size_t operator()(const task_representation::LabelID & g) const
 	{
 	    return g.id;
 	}

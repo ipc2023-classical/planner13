@@ -14,6 +14,7 @@
 #include <limits>
 
 using namespace std;
+using namespace task_representation;
 
 Heuristic::Heuristic(const Options &opts)
     : description(opts.get_unparsed_config()),

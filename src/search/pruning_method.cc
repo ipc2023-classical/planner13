@@ -12,7 +12,7 @@ PruningMethod::PruningMethod()
     : task(nullptr) {
 }
 
-void PruningMethod::initialize(const shared_ptr<FTSTask> &task_) {
+void PruningMethod::initialize(const shared_ptr<task_representation::FTSTask> &task_) {
     assert(!task);
     task = task_;
 }
@@ -23,7 +23,7 @@ void PruningMethod::prune_operators(const GlobalState &global_state,
     assert(task);
     /* Note that if the pruning method would use a different task than
        the search, we would have to convert the state before using it. */
-    State state(*task, global_state.get_values());
+    task_representation::State state(*task, global_state.get_values());
 
     prune_operators(state, op_ids);
 }

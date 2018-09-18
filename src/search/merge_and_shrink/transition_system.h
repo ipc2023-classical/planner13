@@ -57,7 +57,7 @@ class TSConstIterator {
     const LabelEquivalenceRelation &label_equivalence_relation;
     const std::vector<std::vector<Transition>> &transitions_by_group_id;
     // current_group_id is the actual iterator
-    LabelGroupID current_group_id;
+    int current_group_id;
 
     void next_valid_index();
 public:
@@ -122,7 +122,7 @@ private:
     */
     void compute_locally_equivalent_labels();
 
-    const std::vector<Transition> &get_transitions_for_group_id(LabelGroupID group_id) const {
+    const std::vector<Transition> &get_transitions_for_group_id(int group_id) const {
         return transitions_by_group_id[group_id];
     }
 

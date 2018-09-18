@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+namespace task_representation {
 class Distances;
 class LabelEquivalenceRelation;
 class LabelGroup;
@@ -203,6 +204,6 @@ public:
         return incorporated_variables;
     }
 };
-
+}
 
 #endif

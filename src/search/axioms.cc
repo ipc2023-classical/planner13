@@ -11,7 +11,7 @@
 
 using namespace std;
 
-AxiomEvaluator::AxiomEvaluator(const FTSTask &task_proxy) {
+AxiomEvaluator::AxiomEvaluator(const task_representation::FTSTask &task_proxy) {
     if (task_proxy.has_axioms()) {
         // VariablesProxy variables = task_proxy.get_variables();
         // AxiomsProxy axioms = task_proxy.get_axioms();

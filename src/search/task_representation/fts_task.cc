@@ -22,7 +22,7 @@ using namespace std;
 
 
 
-
+namespace task_representation {
 //Auxiliary classes for construction of the initial FTS
 class TransitionSystemData {
 public:
@@ -302,4 +302,5 @@ std::unique_ptr<int_packer::IntPacker> FTSTask::get_state_packer() const {
 	sizes.push_back(tr->get_size());
     }
     return utils::make_unique_ptr<int_packer::IntPacker>(sizes);
+}
 }

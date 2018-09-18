@@ -6,10 +6,10 @@
 
 class GlobalState;
 class OperatorID;
-class State;
-class FTSTask;
 
-class GeneratorBase;
+namespace task_representation {
+class FTSTask;
+class State;
 
 class FTSSuccessorGenerator {
     
@@ -28,6 +28,6 @@ public:
     void generate_applicable_ops(
         const GlobalState &state, std::vector<OperatorID> &applicable_ops) const;
 };
-
+}
 
 #endif
