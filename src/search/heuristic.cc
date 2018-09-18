@@ -27,8 +27,8 @@ Heuristic::Heuristic(const Options &opts)
 Heuristic::~Heuristic() {
 }
 
-void Heuristic::set_preferred(const FTSOperator &op) {
-    preferred_operators.insert(op.get_id());
+void Heuristic::set_preferred(const OperatorID op) {
+    preferred_operators.insert(op);
 }
 
 bool Heuristic::notify_state_transition(

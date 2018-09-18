@@ -19,7 +19,6 @@ class Options;
 }
 
 namespace task_representation {
-class FTSOperator;
 class State;
 }
 
@@ -75,7 +74,7 @@ protected:
       is OK -- it will only appear once in the list of preferred
       operators for this heuristic.
     */
-    void set_preferred(const task_representation::FTSOperator &op);
+    void set_preferred(const OperatorID op);
 
     task_representation::State convert_global_state(const GlobalState &global_state) const;
 
