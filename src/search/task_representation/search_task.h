@@ -6,7 +6,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "../axioms.h"
+//#include "../axioms.h"
+#include "../global_state.h"
 #include "../operator_id.h"
 
 namespace int_packer {
@@ -14,6 +15,9 @@ namespace int_packer {
 }
 
 namespace task_representation {
+class FTSTask;
+class State;
+
 struct Precondition {
     int variable;
     std::set<int> values;
@@ -40,8 +44,6 @@ struct AbstractOperator {
                      std::vector<Effect> effects_) : label(label_), cost(cost_), effects(effects_) {
                      }
 };
-
-class State;
 
 struct OperatorTreeNode {
     int variable;
@@ -126,7 +128,7 @@ class OperatorTree {
 class SearchTask {
 private:
     std::unique_ptr<int_packer::IntPacker> state_packer;
-    AxiomEvaluator axiom_evaluator;
+//    AxiomEvaluator axiom_evaluator;
     /* std::unique_ptr<SuccessorGenerator> successor_generator; */
 
     std::vector<int> initial_state;
@@ -167,9 +169,9 @@ public:
         return state_packer.get();
     }
 
-    AxiomEvaluator & get_axiom_evaluator() {
-        return axiom_evaluator;
-    }
+//    AxiomEvaluator & get_axiom_evaluator() {
+//        return axiom_evaluator;
+//    }
 
     int get_operator_cost(OperatorID op) const {
         return operators[op.get_index()].cost;

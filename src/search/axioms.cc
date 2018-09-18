@@ -1,8 +1,7 @@
 #include "axioms.h"
 
 #include "algorithms/int_packer.h"
-#include "utils/system.h"
-#include "task_representation/fts_task.h"
+#include "task_utils/task_properties.h"
 
 #include <algorithm>
 #include <cassert>
@@ -11,67 +10,66 @@
 
 using namespace std;
 
-AxiomEvaluator::AxiomEvaluator(const task_representation::FTSTask &task_proxy) {
-    if (task_proxy.has_axioms()) {
-        // VariablesProxy variables = task_proxy.get_variables();
-        // AxiomsProxy axioms = task_proxy.get_axioms();
+AxiomEvaluator::AxiomEvaluator(const TaskProxy &task_proxy) {
+    task_has_axioms = task_properties::has_axioms(task_proxy);
+    if (task_has_axioms) {
+        VariablesProxy variables = task_proxy.get_variables();
+        AxiomsProxy axioms = task_proxy.get_axioms();
 
-        // // Initialize literals
-        // for (VariableProxy var : variables)
-        //     axiom_literals.emplace_back(var.get_domain_size());
+        // Initialize literals
+        for (VariableProxy var : variables)
+            axiom_literals.emplace_back(var.get_domain_size());
 
-        // // Initialize rules
-        // for (OperatorProxy axiom : axioms) {
-        //     assert(axiom.get_effects().size() == 1);
-        //     EffectProxy cond_effect = axiom.get_effects()[0];
-        //     FactPair effect = cond_effect.get_fact().get_pair();
-        //     int num_conditions = cond_effect.get_conditions().size();
-        //     AxiomLiteral *eff_literal = &axiom_literals[effect.var][effect.value];
-        //     rules.emplace_back(
-        //         num_conditions, effect.var, effect.value, eff_literal);
-        // }
+        // Initialize rules
+        for (OperatorProxy axiom : axioms) {
+            assert(axiom.get_effects().size() == 1);
+            EffectProxy cond_effect = axiom.get_effects()[0];
+            FactPair effect = cond_effect.get_fact().get_pair();
+            int num_conditions = cond_effect.get_conditions().size();
+            AxiomLiteral *eff_literal = &axiom_literals[effect.var][effect.value];
+            rules.emplace_back(
+                num_conditions, effect.var, effect.value, eff_literal);
+        }
 
-        // // Cross-reference rules and literals
-        // for (OperatorProxy axiom : axioms) {
-        //     EffectProxy effect = axiom.get_effects()[0];
-        //     for (FactProxy condition : effect.get_conditions()) {
-        //         int var_id = condition.get_variable().get_id();
-        //         int val = condition.get_value();
-        //         AxiomRule *rule = &rules[axiom.get_id()];
-        //         axiom_literals[var_id][val].condition_of.push_back(rule);
-        //     }
-        // }
+        // Cross-reference rules and literals
+        for (OperatorProxy axiom : axioms) {
+            EffectProxy effect = axiom.get_effects()[0];
+            for (FactProxy condition : effect.get_conditions()) {
+                int var_id = condition.get_variable().get_id();
+                int val = condition.get_value();
+                AxiomRule *rule = &rules[axiom.get_id()];
+                axiom_literals[var_id][val].condition_of.push_back(rule);
+            }
+        }
 
-        // // Initialize negation-by-failure information
-        // int last_layer = -1;
-        // for (VariableProxy var : variables) {
-        //     if (var.is_derived()) {
-        //         last_layer = max(last_layer, var.get_axiom_layer());
-        //     }
-        // }
-        // nbf_info_by_layer.resize(last_layer + 1);
+        // Initialize negation-by-failure information
+        int last_layer = -1;
+        for (VariableProxy var : variables) {
+            if (var.is_derived()) {
+                last_layer = max(last_layer, var.get_axiom_layer());
+            }
+        }
+        nbf_info_by_layer.resize(last_layer + 1);
 
-        // for (VariableProxy var : variables) {
-        //     if (var.is_derived()) {
-        //         int layer = var.get_axiom_layer();
-        //         if (layer != last_layer) {
-        //             int var_id = var.get_id();
-        //             int nbf_value = var.get_default_axiom_value();
-        //             AxiomLiteral *nbf_literal = &axiom_literals[var_id][nbf_value];
-        //             nbf_info_by_layer[layer].emplace_back(var_id, nbf_literal);
-        //         }
-        //     }
-        // }
+        for (VariableProxy var : variables) {
+            if (var.is_derived()) {
+                int layer = var.get_axiom_layer();
+                if (layer != last_layer) {
+                    int var_id = var.get_id();
+                    int nbf_value = var.get_default_axiom_value();
+                    AxiomLiteral *nbf_literal = &axiom_literals[var_id][nbf_value];
+                    nbf_info_by_layer[layer].emplace_back(var_id, nbf_literal);
+                }
+            }
+        }
 
-        // default_values.reserve(variables.size());
-        // for (VariableProxy var : variables) {
-        //     if (var.is_derived())
-        //         default_values.emplace_back(var.get_default_axiom_value());
-        //     else
-        //         default_values.emplace_back(-1);
-        // }
-	std::cout << "We currently do not support axioms" << std::endl;
-	utils::exit_with(utils::ExitCode::UNSUPPORTED);
+        default_values.reserve(variables.size());
+        for (VariableProxy var : variables) {
+            if (var.is_derived())
+                default_values.emplace_back(var.get_default_axiom_value());
+            else
+                default_values.emplace_back(-1);
+        }
     }
 }
 

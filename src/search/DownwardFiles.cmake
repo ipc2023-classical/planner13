@@ -48,7 +48,6 @@ fast_downward_plugin(
     SOURCES
         planner
 
-        axioms
         evaluation_context
         evaluation_result
         evaluator
@@ -72,7 +71,6 @@ fast_downward_plugin(
         search_statistics
         state_id
         state_registry
-
     DEPENDS INT_PACKER ORDERED_SET SEGMENTED_VECTOR FTS_REPRESENTATION
     CORE_PLUGIN
 )
@@ -82,17 +80,17 @@ fast_downward_plugin(
     NAME FTS_REPRESENTATION
     HELP "FTS REPRESENTATION"
     SOURCES
-    	task_representation/search_task
-        task_representation/sas_operator
-	task_representation/sas_task
-	task_representation/fts_operators
-	task_representation/state
-	task_representation/distances
-	task_representation/fts_task
-	task_representation/labels
-	task_representation/label_equivalence_relation
-	task_representation/transition_system
-	task_representation/types
+    task_representation/search_task
+    task_representation/sas_operator
+    task_representation/sas_task
+    task_representation/fts_operators
+    task_representation/state
+    task_representation/distances
+    task_representation/fts_task
+    task_representation/labels
+    task_representation/label_equivalence_relation
+    task_representation/transition_system
+    task_representation/types
     CORE_PLUGIN
 )
 

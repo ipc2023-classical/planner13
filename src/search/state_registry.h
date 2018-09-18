@@ -2,7 +2,6 @@
 #define STATE_REGISTRY_H
 
 #include "task_representation/fts_task.h"
-#include "axioms.h"
 #include "global_state.h"
 #include "state_id.h"
 

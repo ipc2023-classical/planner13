@@ -34,7 +34,7 @@ namespace task_representation {
 
 SearchTask::SearchTask(const FTSTask & fts_task) :
     state_packer(std::move(fts_task.get_state_packer())),
-    axiom_evaluator (fts_task),
+//    axiom_evaluator (fts_task),
     min_operator_cost (fts_task.get_min_operator_cost()) {
 
     std::vector<AbstractOperator> operators;
@@ -113,7 +113,7 @@ void SearchTask::apply_operator(OperatorID op_id, PackedStateBin *buffer) {
     for (const auto & effect : operators[op_id.get_index()].effects) {
         state_packer->set(buffer, effect.variable, effect.value);
     }
-    axiom_evaluator.evaluate(buffer, *state_packer);
+//    axiom_evaluator.evaluate(buffer, *state_packer);
 }
 
 

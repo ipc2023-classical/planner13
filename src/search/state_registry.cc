@@ -57,7 +57,7 @@ const GlobalState &StateRegistry::get_initial_state() {
 	for (size_t i = 0; i < initial_state_data.size(); ++i) {
             state_packer->set(buffer, i, initial_state_data[i]);
         }
-        task->get_axiom_evaluator().evaluate(buffer, *state_packer);
+//        task->get_axiom_evaluator().evaluate(buffer, *state_packer);
         state_data_pool.push_back(buffer);
         // buffer is copied by push_back
         delete[] buffer;
