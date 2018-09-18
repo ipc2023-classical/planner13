@@ -53,8 +53,8 @@ const GlobalState &StateRegistry::get_initial_state() {
         PackedStateBin *buffer = new PackedStateBin[get_bins_per_state()];
         // Avoid garbage values in half-full bins.
         fill_n(buffer, get_bins_per_state(), 0);
-	vector<int> initial_state_data = task->get_initial_state_data();
-	for (size_t i = 0; i < initial_state_data.size(); ++i) {
+    const vector<int> &initial_state_data = task->get_initial_state_data();
+    for (size_t i = 0; i < initial_state_data.size(); ++i) {
             state_packer->set(buffer, i, initial_state_data[i]);
         }
 //        task->get_axiom_evaluator().evaluate(buffer, *state_packer);
