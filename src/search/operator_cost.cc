@@ -16,7 +16,7 @@ int get_adjusted_action_cost(int cost, OperatorCost cost_type) {
     case ONE:
         return 1;
     case PLUSONE:
-        if (g_sas_task->is_unit_cost())
+        if (g_sas_task()->is_unit_cost())
             return 1;
         else
             return cost + 1;

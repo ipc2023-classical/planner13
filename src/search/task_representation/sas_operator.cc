@@ -30,13 +30,13 @@ void check_magic(istream &in, string magic) {
 
 SASCondition::SASCondition(istream &in) {
     in >> var >> val;
-    g_sas_task->check_fact(var, val);
+    g_sas_task()->check_fact(var, val);
 }
 
 SASCondition::SASCondition(int variable, int value)
     : var(variable),
       val(value) {
-    g_sas_task->check_fact(var, val);
+    g_sas_task()->check_fact(var, val);
 }
 
 // TODO if the input file format has been changed, we would need something like this
@@ -52,7 +52,7 @@ SASEffect::SASEffect(int variable, int value, const vector<SASCondition> &conds)
     : var(variable),
       val(value),
       conditions(conds) {
-    g_sas_task->check_fact(var, val);
+    g_sas_task()->check_fact(var, val);
 }
 
 void SASOperator::read_pre_post(istream &in) {
@@ -64,8 +64,8 @@ void SASOperator::read_pre_post(istream &in) {
         conditions.push_back(SASCondition(in));
     in >> var >> pre >> post;
     if (pre != -1) {
-        g_sas_task->check_fact(var, pre);}
-    g_sas_task->check_fact(var, post);
+        g_sas_task()->check_fact(var, pre);}
+    g_sas_task()->check_fact(var, post);
     if (pre != -1) {
         preconditions.push_back(SASCondition(var, pre));
     }

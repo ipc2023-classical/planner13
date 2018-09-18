@@ -19,9 +19,9 @@ int main(int argc, const char **argv) {
     }
 
     if (static_cast<string>(argv[1]) != "--help") {
-	g_sas_task->read_from_file(cin);
+        g_sas_task()->read_from_file(cin);
 	
-    g_main_task = make_shared<task_representation::FTSTask>(*g_sas_task);
+    g_main_task = make_shared<task_representation::FTSTask>(*g_sas_task());
 	g_log << "Main task constructed" << endl;
     }
     
@@ -62,8 +62,8 @@ int main(int argc, const char **argv) {
     // The command line is parsed twice: once in dry-run mode, to
     // check for simple input errors, and then in normal mode.
     try {
-        OptionParser::parse_cmd_line(argc, argv, true, g_sas_task->is_unit_cost());
-        engine = OptionParser::parse_cmd_line(argc, argv, false, g_sas_task->is_unit_cost());
+        OptionParser::parse_cmd_line(argc, argv, true, g_sas_task()->is_unit_cost());
+        engine = OptionParser::parse_cmd_line(argc, argv, false, g_sas_task()->is_unit_cost());
     } catch (ArgError &error) {
         cerr << error << endl;
         OptionParser::usage(argv[0]);

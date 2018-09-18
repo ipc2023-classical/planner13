@@ -32,7 +32,7 @@ int calculate_plan_cost(const vector<int> &plan) {
     //       save_plan).
     int plan_cost = 0;
     for (int op : plan) {
-        plan_cost += g_sas_task->get_operator_cost(op);
+        plan_cost += g_sas_task()->get_operator_cost(op);
     }
     return plan_cost;
 }
@@ -51,12 +51,12 @@ void save_plan(const vector<int> &plan,
     }
     ofstream outfile(filename.str());
     for (size_t i = 0; i < plan.size(); ++i) {
-        cout << g_sas_task->get_operator_name(plan[i]) << " (" << g_sas_task->get_operator_cost(plan[i]) << ")" << endl;
-        outfile << "(" << g_sas_task->get_operator_name(plan[i]) << ")" << endl;
+        cout << g_sas_task()->get_operator_name(plan[i]) << " (" << g_sas_task()->get_operator_cost(plan[i]) << ")" << endl;
+        outfile << "(" << g_sas_task()->get_operator_name(plan[i]) << ")" << endl;
     }
     int plan_cost = calculate_plan_cost(plan);
     outfile << "; cost = " << plan_cost << " ("
-            << (g_sas_task->is_unit_cost() ? "unit cost" : "general cost") << ")" << endl;
+            << (g_sas_task()->is_unit_cost() ? "unit cost" : "general cost") << ")" << endl;
     outfile.close();
     cout << "Plan length: " << plan.size() << " step(s)." << endl;
     cout << "Plan cost: " << plan_cost << endl;
@@ -70,8 +70,11 @@ string g_plan_filename = "sas_plan";
 int g_num_previously_generated_plans = 0;
 bool g_is_part_of_anytime_portfolio = false;
 
+const shared_ptr<task_representation::SASTask> g_sas_task() {
+    static shared_ptr<task_representation::SASTask> sas_task = make_shared<task_representation::SASTask>();
+    return sas_task;
+}
 
-const std::shared_ptr<task_representation::SASTask> g_sas_task = make_shared<task_representation::SASTask>();
 std::shared_ptr<task_representation::FTSTask> g_main_task;
 
 utils::Log g_log;
