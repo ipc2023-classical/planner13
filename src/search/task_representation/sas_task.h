@@ -67,62 +67,62 @@ class SASTask {
 public:
     SASTask();
     void read_from_file(std::istream &in);
-     ~SASTask() = default;
-     int get_num_variables() const ;
-     std::string get_variable_name(int var) const ;
-     int get_variable_domain_size(int var) const ;
-     int get_variable_axiom_layer(int var) const ;
-     int get_variable_default_axiom_value(int var) const ;
-     std::string get_fact_name(const FactPair &fact) const ;
-     bool are_facts_mutex(const FactPair &fact1, const FactPair &fact2) const ;
+    ~SASTask() = default;
+    int get_num_variables() const ;
+    std::string get_variable_name(int var) const ;
+    int get_variable_domain_size(int var) const ;
+    int get_variable_axiom_layer(int var) const ;
+    int get_variable_default_axiom_value(int var) const ;
+    std::string get_fact_name(const FactPair &fact) const ;
+    bool are_facts_mutex(const FactPair &fact1, const FactPair &fact2) const ;
 
-     int get_operator_cost(int index, bool is_axiom = false) const ;
-     std::string get_operator_name(int index, bool is_axiom = false) const ;
+    int get_operator_cost(int index, bool is_axiom = false) const ;
+    std::string get_operator_name(int index, bool is_axiom = false) const ;
 
-     const std::vector<SASOperator> & get_operators() const {
-         return g_operators;
-     }
+    const std::vector<SASOperator> & get_operators() const {
+        return g_operators;
+    }
 
-     const SASOperator & get_operator(int index) const {
-         return g_operators[index];
-     }
+    const SASOperator & get_operator(int index) const {
+        return g_operators[index];
+    }
 
 
-     int get_num_operators() const ;
-     int get_num_operator_preconditions(int index, bool is_axiom) const ;
-     FactPair get_operator_precondition(
+    int get_num_operators() const ;
+    int get_num_operator_preconditions(int index, bool is_axiom) const ;
+    FactPair get_operator_precondition(
         int op_index, int fact_index, bool is_axiom) const ;
-     int get_num_operator_effects(int op_index, bool is_axiom) const ;
-     int get_num_operator_effect_conditions(
+    int get_num_operator_effects(int op_index, bool is_axiom) const ;
+    int get_num_operator_effect_conditions(
         int op_index, int eff_index, bool is_axiom) const ;
-     FactPair get_operator_effect_condition(
+    FactPair get_operator_effect_condition(
         int op_index, int eff_index, int cond_index, bool is_axiom) const ;
-     FactPair get_operator_effect(
+    FactPair get_operator_effect(
         int op_index, int eff_index, bool is_axiom) const ;
-     OperatorID get_global_operator_id(OperatorID id) const ;
+    OperatorID get_global_operator_id(OperatorID id) const ;
 
-     int get_num_axioms() const ;
+    int get_num_axioms() const ;
 
-     int get_num_goals() const ;
-     FactPair get_goal_fact(int index) const ;
+    int get_num_goals() const ;
+    FactPair get_goal_fact(int index) const ;
 
-     bool test_goal(const GlobalState &state) const;
+    bool test_goal(const GlobalState &state) const;
 
-     std::vector<int> get_initial_state_data() const {
-         return g_initial_state_data;
-     }
+    std::vector<int> get_initial_state_data() const {
+        return g_initial_state_data;
+    }
 
 
-     int get_goal_value(int var) const {
-         for (const auto & goal : g_goal) {
-             if (goal.first == var) {
-                 return goal.second;
-             }
-         }
-         return -1;
-     }
+    int get_goal_value(int var) const {
+        for (const auto & goal : g_goal) {
+            if (goal.first == var) {
+                return goal.second;
+            }
+        }
+        return -1;
+    }
 
-     /*
+    /*
       Convert state values from an ancestor task A (ancestor) into
       state values from this task, C (child). Task A has to be an
       ancestor of C in the sense that C is the result of a sequence of
@@ -132,21 +132,22 @@ public:
       it should create the new vector in a local variable and then swap it with
       the parameter.
     */
-     void convert_state_values(std::vector<int> &values,
-                               const SASTask *ancestor_task) const ;
+    void convert_state_values(std::vector<int> &values,
+                              const SASTask *ancestor_task) const ;
 
-     void dump_goal() const;
-     void dump_everything() const;
+    void dump_goal() const;
+    void dump_everything() const;
 
-     void check_fact(int var, int val) const;
+    void check_fact(int var, int val) const;
 
-     void verify_no_axioms_no_conditional_effects() const;
-     void verify_no_conditional_effects() const ;
-     bool has_conditional_effects() const;
-     int get_first_conditional_effects_op_id() const;
-     void verify_no_axioms() const;
-     bool has_axioms() const;
-     bool is_unit_cost()  const;
+
+    void verify_no_axioms_no_conditional_effects() const;
+    void verify_no_conditional_effects() const ;
+    bool has_conditional_effects() const;
+    int get_first_conditional_effects_op_id() const;
+    void verify_no_axioms() const;
+    bool has_axioms() const;
+    bool is_unit_cost()  const;
 };
 }
 
