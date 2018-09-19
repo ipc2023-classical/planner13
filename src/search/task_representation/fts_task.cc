@@ -270,12 +270,6 @@ bool FTSTask::are_facts_mutex(const FactPair & , const FactPair & ) const {
     return false;
 }
 
-State FTSTask::convert_ancestor_state (const State & state) const {
-    cerr <<  "FTSTask::convert_ancestor_state not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
-    return state;
-}
-
 std::vector<int> FTSTask::get_initial_state_data() const {
     cerr <<  "FTSTask::get_initial_state_data not implemented" << endl;
     utils::exit_with(utils::ExitCode::UNSUPPORTED);

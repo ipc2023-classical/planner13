@@ -85,8 +85,6 @@ public:
 
     bool are_facts_mutex(const FactPair & f1, const FactPair & f2) const;
 
-    State convert_ancestor_state (const State & state) const;
-
     std::vector<int> get_initial_state_data() const;
 
     State get_initial_state() const;
