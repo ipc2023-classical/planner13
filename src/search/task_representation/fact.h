@@ -13,8 +13,6 @@
 #include <cassert>
 
 namespace task_representation {
-class FTSTask;
-
 struct FactPair {
     int var;
     int value;
@@ -57,38 +55,40 @@ struct hash<task_representation::FactPair> {
 };
 }
 
-namespace task_representation {
-class Fact {
-    const FTSTask *task;
-    FactPair fact;
-public:
-    Fact(const FTSTask &task, int var_id, int value);
-    Fact(const FTSTask &task, const FactPair &fact);
-    ~Fact() = default;
+//namespace task_representation {
+//class FTSTask;
 
-    /* VariableProxy get_variable() const; */
+//class Fact {
+//    const FTSTask *task;
+//    FactPair fact;
+//public:
+//    Fact(const FTSTask &task, int var_id, int value);
+//    Fact(const FTSTask &task, const FactPair &fact);
+//    ~Fact() = default;
 
-    int get_value() const {
-        return fact.value;
-    }
+//    /* VariableProxy get_variable() const; */
 
-    FactPair get_pair() const {
-        return fact;
-    }
+//    int get_value() const {
+//        return fact.value;
+//    }
 
-    std::string get_name() const;
+//    FactPair get_pair() const {
+//        return fact;
+//    }
 
-    bool operator==(const Fact &other) const {
-        assert(task == other.task);
-        return fact == other.fact;
-    }
+//    std::string get_name() const;
 
-    bool operator!=(const Fact &other) const {
-        return !(*this == other);
-    }
+//    bool operator==(const Fact &other) const {
+//        assert(task == other.task);
+//        return fact == other.fact;
+//    }
 
-    bool is_mutex(const Fact &other) const;
-};
-}
+//    bool operator!=(const Fact &other) const {
+//        return !(*this == other);
+//    }
+
+//    bool is_mutex(const Fact &other) const;
+//};
+//}
 
 #endif
