@@ -20,9 +20,8 @@ int main(int argc, const char **argv) {
 
     if (static_cast<string>(argv[1]) != "--help") {
         g_sas_task()->read_from_file(cin);
-	
-    g_main_task = make_shared<task_representation::FTSTask>(*g_sas_task());
-	g_log << "Main task constructed" << endl;
+        g_main_task = make_shared<task_representation::FTSTask>(*g_sas_task());
+        g_log << "Main task constructed" << endl;
     }
     
     // shared_ptr<TaskTransformationMethod> transformer;
