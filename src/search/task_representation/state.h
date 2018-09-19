@@ -17,6 +17,11 @@
 
 namespace task_representation {
 class State {
+    /*
+      TODO: Having a const raw pointer is not very nice. I see that we need
+      it for some assertions, but do we really need these, do we want to
+      support having different tasks as long as we don't have them?
+    */
     const FTSTask *task;
     std::vector<int> values;
 public:
