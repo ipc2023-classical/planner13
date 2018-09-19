@@ -122,32 +122,20 @@ public:
         return -1;
     }
 
-    /*
-      Convert state values from an ancestor task A (ancestor) into
-      state values from this task, C (child). Task A has to be an
-      ancestor of C in the sense that C is the result of a sequence of
-      task transformations on A.
-      The values are converted in-place to avoid unnecessary copies. If a
-      subclass needs to create a new vector, e.g., because the size changes,
-      it should create the new vector in a local variable and then swap it with
-      the parameter.
-    */
-    void convert_state_values(std::vector<int> &values,
-                              const SASTask *ancestor_task) const ;
-
     void dump_goal() const;
     void dump_everything() const;
 
     void check_fact(int var, int val) const;
 
-
-    void verify_no_axioms_no_conditional_effects() const;
-    void verify_no_conditional_effects() const ;
     bool has_conditional_effects() const;
     int get_first_conditional_effects_op_id() const;
-    void verify_no_axioms() const;
     bool has_axioms() const;
     bool is_unit_cost()  const;
+
+    // TODO: these methods should live somewhere else
+    void verify_no_axioms_no_conditional_effects() const;
+    void verify_no_conditional_effects() const ;
+    void verify_no_axioms() const;
 };
 }
 

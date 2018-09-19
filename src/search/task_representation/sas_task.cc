@@ -297,14 +297,6 @@ FactPair SASTask::get_goal_fact(int index) const {
     return FactPair(goal.first, goal.second);
 }
 
-void SASTask::convert_state_values(
-    vector<int> &, const SASTask *ancestor_task) const {
-    if (this != ancestor_task) {
-        ABORT("Invalid state conversion");
-    }
-}
-
-
 void SASTask::dump_goal() const {
     cout << "Goal Conditions:" << endl;
     for (size_t i = 0; i < g_goal.size(); ++i)
