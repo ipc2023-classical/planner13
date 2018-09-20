@@ -39,8 +39,7 @@ bool Heuristic::notify_state_transition(
 }
 
 State Heuristic::convert_global_state(const GlobalState &global_state) const {
-    State state(*g_main_task, global_state.get_values());
-    return task->convert_ancestor_state(state);
+    return State(*g_main_task, global_state.get_values());
 }
 
 void Heuristic::add_options_to_parser(OptionParser &parser) {
