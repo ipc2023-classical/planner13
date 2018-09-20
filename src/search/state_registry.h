@@ -164,7 +164,7 @@ class StateRegistry {
     StateID insert_id_or_pop_state();
     int get_bins_per_state() const;
 public:
-    StateRegistry(std::shared_ptr<task_representation::SearchTask> task);
+    explicit StateRegistry(std::shared_ptr<task_representation::SearchTask> task);
     ~StateRegistry();
 
     int get_num_variables() const {

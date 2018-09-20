@@ -28,7 +28,8 @@ SearchEngine::SearchEngine(const Options &opts)
       search_space(state_registry,
                    static_cast<OperatorCost>(opts.get_enum("cost_type"))),
       cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
-      max_time(opts.get<double>("max_time")) {
+      max_time(opts.get<double>("max_time")),
+      task(g_main_task->get_search_task()) {
     if (opts.get<int>("bound") < 0) {
         cerr << "error: negative cost bound " << opts.get<int>("bound") << endl;
         utils::exit_with(ExitCode::INPUT_ERROR);
@@ -63,7 +64,6 @@ void SearchEngine::set_plan(const Plan &p) {
 }
 
 void SearchEngine::search() {
-    task = g_main_task->get_search_task();
     initialize();
     utils::CountdownTimer timer(max_time);
     while (status == IN_PROGRESS) {
