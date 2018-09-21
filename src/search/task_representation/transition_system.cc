@@ -230,6 +230,16 @@ bool TransitionSystem::is_goal_relevant() const {
     return false;
 }
 
+vector<int> TransitionSystem::get_goal_states() const {
+    vector<int> res;
+    for(size_t i = 0; i < goal_states.size(); ++i) {
+        if (goal_states[i]) {
+            res.push_back(i);
+        }
+    }
+    return res;
+}
+
 
 
 bool TransitionSystem::is_unit_cost() const {

@@ -21,17 +21,30 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
     : Heuristic(opts) {
     // Build propositions.
     int prop_id = 0;
-    VariablesProxy variables = task_proxy.get_variables();
     propositions.resize(variables.size());
-    for (FactProxy fact : variables.get_facts()) {
-        propositions[fact.get_variable().get_id()].push_back(Proposition(prop_id++));
+    for (size_t i = 0; i < task->get_size(); ++i){
+        const auto & ts = task->get_ts(i);
+        for (int s = 0; s < ts.get_size(); ++s) {
+            propositions[i].push_back(Proposition(prop_id++));
+        }
+
+        // Build goal propositions.
+        if (ts.is_goal_relevant()) {
+            vector<int> goal_states = ts.get_goal_states(); 
+            if (goal_states.size() == 1) {             
+                goal_propositions.push_back(&(propositions[i][goal_states][0]));
+            } else {
+                propositions[i].push_back(Proposition(prop_id++));
+                goal_propositions.push_back(propositions[i].back());
+            }
+        }
     }
 
-    // Build goal propositions.
+
     for (FactProxy goal : task_proxy.get_goals()) {
         Proposition *prop = get_proposition(goal);
         prop->is_goal = true;
-        goal_propositions.push_back(prop);
+        
     }
 
     // Build unary operators for operators and axioms.
@@ -57,14 +70,6 @@ RelaxationHeuristic::~RelaxationHeuristic() {
 
 bool RelaxationHeuristic::dead_ends_are_reliable() const {
     return !has_axioms();
-}
-
-Proposition *RelaxationHeuristic::get_proposition(const FactProxy &fact) {
-    int var = fact.get_variable().get_id();
-    int value = fact.get_value();
-    assert(utils::in_bounds(var, propositions));
-    assert(utils::in_bounds(value, propositions[var]));
-    return &propositions[var][value];
 }
 
 void RelaxationHeuristic::build_unary_operators(const OperatorProxy &op, int op_no) {

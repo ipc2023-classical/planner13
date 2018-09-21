@@ -37,9 +37,9 @@ struct Proposition {
     UnaryOperator *reached_by;
     bool marked; // used when computing preferred operators for h^add and h^FF
 
-    Proposition(int id_) {
+    Proposition(int id_, bool _is_goal = false) {
         id = id_;
-        is_goal = false;
+        is_goal = _is_goal;
         cost = -1;
         reached_by = 0;
         marked = false;
@@ -54,7 +54,6 @@ protected:
     std::vector<std::vector<Proposition>> propositions;
     std::vector<Proposition *> goal_propositions;
 
-    Proposition *get_proposition(const FactProxy &fact);
     virtual int compute_heuristic(const GlobalState &state) = 0;
 public:
     RelaxationHeuristic(const options::Options &options);

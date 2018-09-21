@@ -200,6 +200,8 @@ public:
         return goal_states[state];
     }
 
+    std::vector<int> get_goal_states() const;
+    
     const std::vector<int> &get_incorporated_variables() const {
         return incorporated_variables;
     }
