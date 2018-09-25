@@ -304,4 +304,23 @@ std::unique_ptr<int_packer::IntPacker> FTSTask::get_state_packer() const {
     }
     return utils::make_unique_ptr<int_packer::IntPacker>(sizes);
 }
+
+const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
+    if (label_preconditions.empty()) {
+        int num_labels = get_num_labels();
+        label_preconditions.resize(num_labels);
+        for (int label_no = 0; label_no < num_labels; ++label_no) {
+            for (size_t index = 0; index < transition_systems.size(); ++index) {
+                if (transition_systems[index]->has_precondition_on(LabelID(label_no))) {
+                    label_preconditions[label_no].push_back(index);
+                }
+            }
+        }
+    }
+    
+    assert(label >= 0 && label < label_preconditions.size()); 
+    return label_preconditions[label];
+}
+
+    
 }

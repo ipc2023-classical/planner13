@@ -47,6 +47,9 @@ class FTSTask {
 
     mutable std::shared_ptr<SearchTask> search_task;
 
+    //for each label, the set of transition systems where the label has a precondition (it is not applicable in all sources)
+    mutable std::vector<std::vector<int>> label_preconditions;
+
 public:
     FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
     FTSTask(FTSTask &&other) = default;
@@ -97,6 +100,8 @@ public:
     std::shared_ptr<SearchTask> get_search_task() const;
 
     std::unique_ptr<int_packer::IntPacker> get_state_packer() const;
+
+    const std::vector<int> & get_label_preconditions(int label) const;
 };
 }
 

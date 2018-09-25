@@ -38,12 +38,13 @@ struct Transition {
 };
 
 struct GroupAndTransitions {
+    LabelGroupID group_id;
     const LabelGroup &label_group;
     const std::vector<Transition> &transitions;
-    GroupAndTransitions(const LabelGroup &label_group,
-                        const std::vector<Transition> &transitions)
-        : label_group(label_group),
-          transitions(transitions) {
+   GroupAndTransitions(LabelGroupID id, const LabelGroup &label_group,
+                       const std::vector<Transition> &transitions)
+        : group_id (id), label_group(label_group),
+        transitions(transitions) {
     }
 };
 
@@ -117,6 +118,20 @@ private:
     int init_state;
 
     std::shared_ptr<Distances> init_distances, goal_distances;
+
+
+
+    //list of goal states
+    mutable std::vector<int> goal_state_list;
+
+    //for each label group, stores the set of states in which the label can be applied.
+    mutable std::vector<std::vector<int>> label_group_precondition;
+
+    //List of label groups that have a non-self-loop transition
+    mutable std::vector<LabelGroupID> relevant_label_groups;
+  
+    
+    
     /*
       Check if two or more labels are locally equivalent to each other, and
       if so, update the label equivalence relation.
@@ -186,8 +201,6 @@ public:
 
     bool is_unit_cost() const;
     
-    bool is_goal_relevant() const;
-
     int get_size() const {
         return num_states;
     }
@@ -199,12 +212,25 @@ public:
     bool is_goal_state(int state) const {
         return goal_states[state];
     }
-
-    std::vector<int> get_goal_states() const;
     
     const std::vector<int> &get_incorporated_variables() const {
         return incorporated_variables;
     }
+
+    const std::vector<int> & get_goal_states() const;
+
+    bool is_goal_relevant() const {
+        return get_goal_states().size() < (size_t)num_states;
+    }
+    
+    const std::vector<int> & get_label_precondition(LabelID label) const;
+
+    const std::vector<LabelGroupID> & get_relevant_label_groups() const;
+
+    bool has_precondition_on (LabelID label) const {
+        return get_label_precondition(label).size() < (size_t)num_states;
+    }
+        
 };
 }
 

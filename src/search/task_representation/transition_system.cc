@@ -49,7 +49,7 @@ void TSConstIterator::operator++() {
 }
 
 GroupAndTransitions TSConstIterator::operator*() const {
-    return GroupAndTransitions(
+    return GroupAndTransitions(current_group_id, 
         label_equivalence_relation.get_group(current_group_id),
         transitions_by_group_id[current_group_id]);
 }
@@ -221,24 +221,58 @@ void TransitionSystem::statistics() const {
 }
 
 
-bool TransitionSystem::is_goal_relevant() const {
-    for(bool is_goal : goal_states) {
-        if (!is_goal) {
-            return true;
-        }
+const vector<int> & TransitionSystem::get_goal_states() const {
+    if (goal_state_list.empty()) {
+        for(size_t i = 0; i < goal_states.size(); ++i) {
+            if (goal_states[i]) {
+                goal_state_list.push_back(i);
+            }
+        }        
     }
-    return false;
+    return goal_state_list;
 }
 
-vector<int> TransitionSystem::get_goal_states() const {
-    vector<int> res;
-    for(size_t i = 0; i < goal_states.size(); ++i) {
-        if (goal_states[i]) {
-            res.push_back(i);
+const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label) const {
+    if (label_group_precondition.empty()) {
+        label_group_precondition.resize(label_equivalence_relation->get_size());
+        for (LabelGroupID group_id (0);
+             group_id < label_equivalence_relation->get_size(); ++group_id) {
+            if (!label_equivalence_relation->is_empty_group(group_id)) {
+                set<int> sources;
+                for(const auto & tr : transitions_by_group_id[group_id]) {
+                    sources.insert(tr.src);
+                }
+                label_group_precondition[group_id].reserve(sources.size());
+                for (int source : sources) {
+                    label_group_precondition[group_id].push_back(source);
+                }
+            }
         }
     }
-    return res;
+
+        
+    return label_group_precondition[label_equivalence_relation->get_group_id(label)];
 }
+
+    const std::vector<LabelGroupID> & TransitionSystem::get_relevant_label_groups() const {
+
+        if (relevant_label_groups.empty()) {
+            for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
+                if (!label_equivalence_relation->is_empty_group(group_id)) {
+                    for(const auto & tr : transitions_by_group_id[group_id]) {
+                        if (tr.src != tr.target) {
+                            relevant_label_groups.push_back(group_id);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return relevant_label_groups;
+    
+    }
+
 
 
 
@@ -250,4 +284,5 @@ bool TransitionSystem::is_unit_cost() const {
     }
     return true;
 }
+
 }

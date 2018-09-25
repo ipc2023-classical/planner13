@@ -1,11 +1,12 @@
 #include "relaxation_heuristic.h"
 
-#include "../global_operator.h"
 #include "../global_state.h"
 #include "../globals.h"
 
 #include "../utils/collections.h"
 #include "../utils/hash.h"
+#include "../task_representation/transition_system.h"
+#include "../task_representation/label_equivalence_relation.h"
 
 #include <algorithm>
 #include <cassert>
@@ -21,8 +22,8 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
     : Heuristic(opts) {
     // Build propositions.
     int prop_id = 0;
-    propositions.resize(variables.size());
-    for (size_t i = 0; i < task->get_size(); ++i){
+    propositions.resize(task->get_size());
+    for (int i = 0; i < task->get_size(); ++i){
         const auto & ts = task->get_ts(i);
         for (int s = 0; s < ts.get_size(); ++s) {
             propositions[i].push_back(Proposition(prop_id++));
@@ -30,29 +31,38 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 
         // Build goal propositions.
         if (ts.is_goal_relevant()) {
-            vector<int> goal_states = ts.get_goal_states(); 
+            const auto & goal_states = ts.get_goal_states(); 
             if (goal_states.size() == 1) {             
-                goal_propositions.push_back(&(propositions[i][goal_states][0]));
+                goal_propositions.push_back(&(propositions[i][goal_states[0]]));
             } else {
-                propositions[i].push_back(Proposition(prop_id++));
-                goal_propositions.push_back(propositions[i].back());
+                propositions[i].push_back(Proposition(prop_id++, true));
+                goal_propositions.push_back(&(propositions[i].back()));
             }
         }
+
+        // Build propositions for each label group in each transition system if it has
+        // relevant transitions
+        // for (const task_representation::GroupAndTransitions & gat : ts) {
+        //     propositions[i].push_back(Proposition(prop_id++));
+        //     assert (ts_label_group[i].size() == gat.label_group);
+        //     ts_label_group[i].push_back(&(propositions[i].back()));
+            
+        // }
     }
 
+    // Build unary operators for operators.
+    // for (int label = 0; label < task->get_num_labels(); ++label) {
+    //     build_unary_operators_label(label);
+    // }
+    
 
-    for (FactProxy goal : task_proxy.get_goals()) {
-        Proposition *prop = get_proposition(goal);
-        prop->is_goal = true;
-        
-    }
 
-    // Build unary operators for operators and axioms.
-    int op_no = 0;
-    for (OperatorProxy op : task_proxy.get_operators())
-        build_unary_operators(op, op_no++);
-    for (OperatorProxy axiom : task_proxy.get_axioms())
-        build_unary_operators(axiom, -1);
+
+
+    
+
+
+    
 
     // Simplify unary operators.
     simplify();
@@ -69,25 +79,34 @@ RelaxationHeuristic::~RelaxationHeuristic() {
 }
 
 bool RelaxationHeuristic::dead_ends_are_reliable() const {
-    return !has_axioms();
+    //return !has_axioms();
+    return true;
 }
 
-void RelaxationHeuristic::build_unary_operators(const OperatorProxy &op, int op_no) {
-    int base_cost = op.get_cost();
-    vector<Proposition *> precondition_props;
-    for (FactProxy precondition : op.get_preconditions()) {
-        precondition_props.push_back(get_proposition(precondition));
-    }
-    for (EffectProxy effect : op.get_effects()) {
-        Proposition *effect_prop = get_proposition(effect.get_fact());
-        EffectConditionsProxy eff_conds = effect.get_conditions();
-        for (FactProxy eff_cond : eff_conds) {
-            precondition_props.push_back(get_proposition(eff_cond));
-        }
-        unary_operators.push_back(UnaryOperator(precondition_props, effect_prop, op_no, base_cost));
-        precondition_props.erase(precondition_props.end() - eff_conds.size(), precondition_props.end());
-    }
-}
+// void RelaxationHeuristic::build_unary_operators(int label) {
+//     int base_cost = op.get_cost();
+//     vector<Proposition *> precondition_props;
+    
+//     for (FactProxy precondition : op.get_preconditions()) {
+//         precondition_props.push_back(get_proposition(precondition));
+//     }
+
+//     for (size_t i = 0; i < task->get_size(); ++i){
+//         const auto & ts = task->get_ts(i);
+//         ts.get_transitions_label();
+
+//     }
+    
+//     for (EffectProxy effect : op.get_effects()) {
+//         Proposition *effect_prop = get_proposition(effect.get_fact());
+//         EffectConditionsProxy eff_conds = effect.get_conditions();
+//         for (FactProxy eff_cond : eff_conds) {
+//             precondition_props.push_back(get_proposition(eff_cond));
+//         }
+//         unary_operators.push_back(UnaryOperator(precondition_props, effect_prop, op_no, base_cost));
+//         precondition_props.erase(precondition_props.end() - eff_conds.size(), precondition_props.end());
+//     }
+// }
 
 void RelaxationHeuristic::simplify() {
     // Remove duplicate or dominated unary operators.
