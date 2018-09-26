@@ -3,10 +3,14 @@
 
 #include <memory>
 #include <set>
+#include <unordered_map>
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "types.h"
+
 //#include "../axioms.h"
+#include "fact.h"
 #include "../global_state.h"
 #include "../operator_id.h"
 
@@ -15,35 +19,10 @@ namespace int_packer {
 }
 
 namespace task_representation {
+class FTSOperator;
 class FTSTask;
 class State;
-
-struct Precondition {
-    int variable;
-    std::set<int> values;
-};
-
-struct Effect {
-    int variable;
-    int value;
-    Effect (int var, int val) : variable(var), value(val){
-    }
-};
-
-// Each operator is associated with a label plus a set of target effects in each TS
-// whenever there are non self-loop transitions
-
-struct AbstractOperator {
-    int label;
-    int cost;
-
-    std::vector<Precondition> preconditions;
-    std::vector<Effect> effects;
-    AbstractOperator(int label_,
-                     int cost_,
-                     std::vector<Effect> effects_) : label(label_), cost(cost_), effects(effects_) {
-                     }
-};
+class Transition;
 
 struct OperatorTreeNode {
     int variable;
@@ -59,7 +38,7 @@ class OperatorTree {
     std::vector<OperatorTreeNode> nodes;
     std::vector<int> root_per_label;
 
-    OperatorTree (const FTSTask & fts_task, std::vector<AbstractOperator> & operators);
+//    OperatorTree (const FTSTask & fts_task, std::vector<AbstractOperator> & operators);
 
     /* int construct_tree(int label_no, const FTSTask & fts_task,  */
     /*                        std::vector<AbstractOperator> & operators, */
@@ -127,34 +106,63 @@ class OperatorTree {
 // we only allow for virtual functions that may be called at most once per search.
 class SearchTask {
 private:
+    const FTSTask &fts_task;
     std::unique_ptr<int_packer::IntPacker> state_packer;
 //    AxiomEvaluator axiom_evaluator;
     /* std::unique_ptr<SuccessorGenerator> successor_generator; */
 
     std::vector<int> initial_state;
 
-    std::vector<AbstractOperator> operators;
-    std::vector<std::vector<OperatorID> > operators_by_label;
-    std::vector<std::vector<boost::dynamic_bitset<> > > activated_labels_by_state;
+    std::vector<FTSOperator> operators;
+    std::vector<std::vector<OperatorID>> operators_by_label;
+    std::vector<std::vector<boost::dynamic_bitset<>>> activated_labels_by_state;
     //std::vector<OperatorTree> operator_tree;
+
+    struct LabelInformation {
+        // The set of transition systems (ids) in which the label is relevant
+        // and deterministic.
+        std::vector<int> relevant_deterministic_transition_systems;
+        // Mapping of source to target states of each relevant deterministic
+        // TS. That is, this vector is indexed by indices of above vector and
+        // *not* the id of the TS itself.
+        std::vector<std::unordered_map<int, int>> src_to_target_by_ts_index;
+
+        // The set of transition systems (ids) in which the label is relevant
+        // and has at least one non-deterministic transition.
+        std::vector<int> relevant_non_deterministic_transition_systems;
+        // Set of targets (no duplicates) of transitions by this label in
+        // in non-deterministic transition systems. Indexed by indices of
+        // above vector.
+        std::vector<std::vector<int>> targets_by_ts_index;
+        // Set of FTS operators for the non-deterministic transition systems.
+        std::vector<OperatorID> fts_operators;
+        // TODO: bitset
+        std::vector<std::vector<boost::dynamic_bitset<>>> todo;
+    };
+    std::vector<LabelInformation> label_to_info;
 
     std::vector<int> goal_relevant_transition_systems;
 
     const int min_operator_cost;
 
-    //Generate all the combinations of targets for every variable
-    void create_operators(int label_no, const FTSTask & fts_task,
-                          std::vector<AbstractOperator> & operators,
-                          std::vector<Effect> & assignments, int var = 0) ;
+    bool is_label_group_relevant(
+        int num_states, const std::vector<Transition> &transitions);
+    bool are_transitions_deterministic(const std::vector<Transition> &transitions);
+    void multiply_out_non_deterministic_labels(
+        LabelID label_id,
+        int pos,
+        std::vector<FactPair> &effects);
+    void create_fts_operators();
 public:
     SearchTask(const FTSTask & fts_task);
 
     bool is_goal_state(const GlobalState &state) const;
 
-    void apply_operator(OperatorID op, PackedStateBin *buffer) ;
+    void apply_operator(OperatorID op, PackedStateBin *buffer);
 
-    void generate_applicable_ops(const GlobalState &state,
-                                 std::vector<OperatorID> &applicable_ops) const;
+    void generate_applicable_ops(
+        const GlobalState &state,
+        std::vector<OperatorID> &applicable_ops) const;
 
     bool is_applicable(const GlobalState & state, OperatorID op) const;
 
@@ -162,10 +170,10 @@ public:
         return initial_state.size();
     }
 
-    const std::vector<int> & get_initial_state_data() const {
+    const std::vector<int> &get_initial_state_data() const {
         return initial_state;
     }
-    const int_packer::IntPacker * get_state_packer() const {
+    const int_packer::IntPacker *get_state_packer() const {
         return state_packer.get();
     }
 
@@ -173,15 +181,11 @@ public:
 //        return axiom_evaluator;
 //    }
 
-    int get_operator_cost(OperatorID op) const {
-        return operators[op.get_index()].cost;
-    }
-
+    int get_operator_cost(OperatorID op) const;
 
     int get_min_operator_cost() const {
         return min_operator_cost;
     }
-
 };
 }
 

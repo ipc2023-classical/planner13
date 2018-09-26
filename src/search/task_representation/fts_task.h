@@ -75,7 +75,7 @@ public:
         return transition_systems.size();
     }
 
-    int get_label_cost(int label) const;
+    int get_label_cost(LabelID label) const;
 
     int get_min_operator_cost() const;
 

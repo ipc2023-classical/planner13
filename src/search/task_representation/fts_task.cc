@@ -43,7 +43,9 @@ public:
     }
 };
 
-
+int FTSTask::get_label_cost(LabelID label) const {
+    return labels->get_label_cost(label);
+}
 
 int FTSTask::get_num_labels() const {
     return labels->get_size();
