@@ -1,5 +1,7 @@
 #include "state.h"
 
+using namespace std;
+
 namespace task_representation {
 
 
