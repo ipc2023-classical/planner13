@@ -126,6 +126,7 @@ void SearchTask::multiply_out_non_deterministic_labels(
 void SearchTask::create_fts_operators() {
     size_t num_variables = fts_task.get_size();
     int num_labels = fts_task.get_num_labels();
+    label_to_info.resize(num_labels);
     // Set of targets (no duplicates) of transitions indexed by labels and by
     // the indices of the non-deterministic transition systems of that label.
     vector<vector<vector<int>>> targets_by_label_by_ts_index(num_labels);
