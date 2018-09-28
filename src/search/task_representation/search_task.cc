@@ -103,6 +103,7 @@ bool SearchTask::are_transitions_deterministic(const vector<Transition> &transit
 
 void SearchTask::multiply_out_non_deterministic_labels(
         LabelID label_id,
+        const vector<vector<int>> &targets_by_ts_index,
         int ts_index,
         vector<FactPair> &effects) {
     const vector<int> &non_det_ts = label_to_info[label_id].relevant_non_deterministic_transition_systems;
@@ -113,11 +114,11 @@ void SearchTask::multiply_out_non_deterministic_labels(
         label_to_info[label_id].fts_operators.push_back(op_id);
         return;
     }
-    const vector<int> &targets = label_to_info[label_id].targets_by_ts_index[ts_index];
+    const vector<int> &targets = targets_by_ts_index[ts_index];
     int var = label_to_info[label_id].relevant_non_deterministic_transition_systems[ts_index];
     for (int target : targets) {
         effects.emplace_back(var, target);
-        multiply_out_non_deterministic_labels(label_id, ts_index + 1, effects);
+        multiply_out_non_deterministic_labels(label_id, targets_by_ts_index, ts_index + 1, effects);
         effects.pop_back();
     }
 }
@@ -125,6 +126,9 @@ void SearchTask::multiply_out_non_deterministic_labels(
 void SearchTask::create_fts_operators() {
     size_t num_variables = fts_task.get_size();
     int num_labels = fts_task.get_num_labels();
+    // Set of targets (no duplicates) of transitions indexed by labels and by
+    // the indices of the non-deterministic transition systems of that label.
+    vector<vector<vector<int>>> targets_by_label_by_ts_index(num_labels);
     for (size_t var = 0; var < num_variables; ++var) {
         const TransitionSystem & ts = fts_task.get_ts(var);
         for (const GroupAndTransitions &gat : ts) {
@@ -132,22 +136,24 @@ void SearchTask::create_fts_operators() {
             const vector<Transition> &transitions = gat.transitions;
             if (is_label_group_relevant(ts.get_size(), transitions)) {
                 bool deterministic = are_transitions_deterministic(transitions);
-                for (LabelID label_id : label_group) {
-                    if (deterministic) {
+                if (deterministic) {
+                    unordered_map<int, int> src_to_target;
+                    for (const Transition &t : transitions) {
+                        assert(!src_to_target.count(t.src));
+                        src_to_target[t.src] = t.target;
+                    }
+                    for (LabelID label_id : label_group) {
                         label_to_info[label_id].relevant_deterministic_transition_systems.push_back(var);
-                        unordered_map<int, int> src_to_target;
-                        for (const Transition &t : transitions) {
-                            assert(!src_to_target.count(t.src));
-                            src_to_target[t.src] = t.target;
-                        }
-                        label_to_info[label_id].src_to_target_by_ts_index.push_back(move(src_to_target));
-                    } else {
+                        label_to_info[label_id].src_to_target_by_ts_index.push_back(src_to_target);
+                    }
+                } else {
+                    set<int> targets;
+                    for (const Transition &t : transitions) {
+                        targets.insert(t.target);
+                    }
+                    for (LabelID label_id : label_group) {
                         label_to_info[label_id].relevant_non_deterministic_transition_systems.push_back(var);
-                        set<int> targets;
-                        for (const Transition &t : transitions) {
-                            targets.insert(t.target);
-                        }
-                        label_to_info[label_id].targets_by_ts_index.emplace_back(targets.begin(), targets.end());
+                        targets_by_label_by_ts_index[label_id].emplace_back(targets.begin(), targets.end());
                     }
                 }
             }
@@ -157,7 +163,7 @@ void SearchTask::create_fts_operators() {
     operators_by_label.resize(num_labels);
     for (LabelID label_id(0); label_id < num_labels; ++label_id) {
         vector<FactPair> effects;
-        multiply_out_non_deterministic_labels(label_id, 0, effects);
+        multiply_out_non_deterministic_labels(label_id, targets_by_label_by_ts_index[label_id], 0, effects);
     }
 }
 

@@ -130,10 +130,6 @@ private:
         // The set of transition systems (ids) in which the label is relevant
         // and has at least one non-deterministic transition.
         std::vector<int> relevant_non_deterministic_transition_systems;
-        // Set of targets (no duplicates) of transitions by this label in
-        // in non-deterministic transition systems. Indexed by indices of
-        // above vector.
-        std::vector<std::vector<int>> targets_by_ts_index;
         // Set of FTS operators for the non-deterministic transition systems.
         std::vector<OperatorID> fts_operators;
         // TODO: bitset
@@ -150,6 +146,7 @@ private:
     bool are_transitions_deterministic(const std::vector<Transition> &transitions);
     void multiply_out_non_deterministic_labels(
         LabelID label_id,
+        const std::vector<std::vector<int>> &targets_by_ts_index,
         int pos,
         std::vector<FactPair> &effects);
     void create_fts_operators();
