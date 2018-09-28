@@ -48,17 +48,17 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
 
     size_t num_variables = fts_task.get_size();
     int num_labels = fts_task.get_num_labels();
-    activated_labels_by_state.resize(num_variables);
+    activated_labels_by_var_by_state.resize(num_variables);
     for (size_t var = 0; var < num_variables; ++var) {
         const TransitionSystem & ts = fts_task.get_ts(var);
-        activated_labels_by_state[var].resize(ts.get_size(), boost::dynamic_bitset<>(num_labels, false));
+        activated_labels_by_var_by_state[var].resize(ts.get_size(), boost::dynamic_bitset<>(num_labels, false));
         for (const auto & group_and_transitions : ts) {
             boost::dynamic_bitset<> bs (num_labels, false);
             for (int label : group_and_transitions.label_group) {
                 bs.set(label);
             }
             for (const auto & transition :  group_and_transitions.transitions) {
-                activated_labels_by_state[var][transition.src] |= bs;
+                activated_labels_by_var_by_state[var][transition.src] |= bs;
             }
         }
     }
@@ -101,6 +101,10 @@ bool SearchTask::are_transitions_deterministic(const vector<Transition> &transit
     return true;
 }
 
+/*
+  If there are no relevant non-deterministic transition systems for the label,
+  then this method adds a single FTSOperator with empty effects.
+*/
 void SearchTask::multiply_out_non_deterministic_labels(
         LabelID label_id,
         const vector<vector<int>> &targets_by_ts_index,
@@ -110,7 +114,6 @@ void SearchTask::multiply_out_non_deterministic_labels(
     if (ts_index == static_cast<int>(non_det_ts.size())) {
         OperatorID op_id(operators.size());
         operators.emplace_back(op_id, label_id, fts_task.get_label_cost(label_id), effects);
-        operators_by_label[label_id].push_back(op_id);
         label_to_info[label_id].fts_operators.push_back(op_id);
         return;
     }
@@ -161,10 +164,43 @@ void SearchTask::create_fts_operators() {
         }
     }
 
-    operators_by_label.resize(num_labels);
+    /*
+      Compute the FTSOperators for all labels by multiplying out the
+      combinations of possible target states in all relevant non-deterministic
+      transition systems. For the relevant deterministic transition systems,
+      add one "dummy" FTSOperator to have an ID for the label.
+
+      Furthermore, for all relevant non-deterministic transition systems of
+      a label, compute bitsets indexed by their states that have bits sets to
+      true if the corresponding FTSOperator of the label is applicable.
+    */
     for (LabelID label_id(0); label_id < num_labels; ++label_id) {
         vector<FactPair> effects;
         multiply_out_non_deterministic_labels(label_id, targets_by_label_by_ts_index[label_id], 0, effects);
+
+        const vector<int> &relevant_non_det_ts = label_to_info[label_id].relevant_non_deterministic_transition_systems;
+        const vector<OperatorID> &fts_operators = label_to_info[label_id].fts_operators;
+        vector<vector<boost::dynamic_bitset<>>> &applicable_fts_ops_by_ts_index_by_state = label_to_info[label_id].applicable_ops_by_ts_index_by_state;
+        applicable_fts_ops_by_ts_index_by_state.resize(relevant_non_det_ts.size());
+        for (size_t ts_index = 0; ts_index < relevant_non_det_ts.size(); ++ ts_index) {
+            int var = relevant_non_det_ts[ts_index];
+            const TransitionSystem &ts = fts_task.get_ts(var);
+            applicable_fts_ops_by_ts_index_by_state[ts_index].resize(ts.get_size(), boost::dynamic_bitset<>(fts_operators.size(), false));
+
+            /*
+              For each FTS operator and state of the TS, check if the label
+              corresponding to the fts operator is activated. If so, set the
+              FTS operator to be applicable.
+            */
+            for (size_t op_index = 0; op_index < fts_operators.size(); ++op_index) {
+                LabelID label = operators[fts_operators[op_index].get_index()].get_label();
+                for (int value = 0; value < ts.get_size(); ++value) {
+                    if (activated_labels_by_var_by_state[var][value].test(label)) {
+                        applicable_fts_ops_by_ts_index_by_state[ts_index][value].set(op_index);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -178,7 +214,11 @@ void SearchTask::create_fts_operators() {
 // }
 
 void SearchTask::apply_operator(OperatorID op_id, PackedStateBin *buffer) {
-    for (const FactPair &effect : operators[op_id.get_index()].get_effects()) {
+    const FTSOperator &fts_op = operators[op_id.get_index()];
+//    LabelID label = fts_op.get_label();
+    // TODO: use the label to get the deterministic effets on all variables
+
+    for (const FactPair &effect : fts_op.get_effects()) {
         state_packer->set(buffer, effect.var, effect.value);
     }
 //    axiom_evaluator.evaluate(buffer, *state_packer);
@@ -186,30 +226,54 @@ void SearchTask::apply_operator(OperatorID op_id, PackedStateBin *buffer) {
 
 void SearchTask::generate_applicable_ops(
     const GlobalState &state, vector<OperatorID> &applicable_ops) const {
-
-    // TODO: implement this
-
-    auto activated_labels = activated_labels_by_state[0][state[(size_t)0]];
-
-    for(size_t var = 1; var < activated_labels_by_state.size(); ++var) {
-        activated_labels &= activated_labels_by_state[var][state[var]];
+    size_t var = 0;
+    boost::dynamic_bitset<> activated_labels = activated_labels_by_var_by_state[var][state[var]];
+    for (var = 1; var < activated_labels_by_var_by_state.size(); ++var) {
+        activated_labels &= activated_labels_by_var_by_state[var][state[var]];
     }
 
-    applicable_ops.push_back(operators_by_label[0][0]);
-    // for(size_t label = 0; label < activated_labels.size(); ++label) {
-    //         if(activated_labels[label]) {
-    //             for (int var : relevant_vars_for_label[label]) {
-    //                 applicable_ops.push_back(operators_by_label[xxx]);
-    //             }
-    //         }
-    // }
+    for (LabelID label(0); label < static_cast<int>(activated_labels.size()); ++label) {
+        if (activated_labels[label]) {
+            const vector<OperatorID> &label_operators = label_to_info[label].fts_operators;
+            if (label_operators.size() == 1) {
+                OperatorID op_id = label_operators[0];
+                assert(operators[op_id.get_index()].get_effects().empty());
+                applicable_ops.push_back(op_id);
+            } else {
+                const vector<int> &non_det_ts =
+                    label_to_info[label].relevant_non_deterministic_transition_systems;
+                assert(!non_det_ts.empty());
+                const vector<vector<boost::dynamic_bitset<>>>
+                    &applicable_fts_ops_by_ts_index_by_state =
+                        label_to_info[label].applicable_ops_by_ts_index_by_state;
+
+                size_t ts_index = 0;
+                int var = non_det_ts[ts_index];
+                boost::dynamic_bitset<> applicable_fts_ops =  applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
+                for (ts_index = 1;
+                     ts_index < applicable_fts_ops_by_ts_index_by_state.size(); ++ts_index) {
+                    var = non_det_ts[ts_index];
+                    applicable_fts_ops &=
+                        applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
+                }
+
+                for (boost::dynamic_bitset<>::size_type op_index = 0;
+                     op_index < applicable_fts_ops.size(); ++op_index) {
+                    if (applicable_fts_ops[op_index]) {
+                        applicable_ops.push_back(label_operators[op_index]);
+                    }
+                }
+
+            }
+        }
+    }
 }
 
 bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
     LabelID label = operators[op.get_index()].get_label();
     for (int var = 0; var < fts_task.get_size(); ++var) {
         int value = state[var];
-        if (!activated_labels_by_state[var][value].test(label)) {
+        if (!activated_labels_by_var_by_state[var][value].test(label)) {
             return false;
         }
     }

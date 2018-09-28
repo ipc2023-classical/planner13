@@ -114,8 +114,7 @@ private:
     std::vector<int> initial_state;
 
     std::vector<FTSOperator> operators;
-    std::vector<std::vector<OperatorID>> operators_by_label;
-    std::vector<std::vector<boost::dynamic_bitset<>>> activated_labels_by_state;
+    std::vector<std::vector<boost::dynamic_bitset<>>> activated_labels_by_var_by_state;
     //std::vector<OperatorTree> operator_tree;
 
     struct LabelInformation {
@@ -132,8 +131,11 @@ private:
         std::vector<int> relevant_non_deterministic_transition_systems;
         // Set of FTS operators for the non-deterministic transition systems.
         std::vector<OperatorID> fts_operators;
-        // TODO: bitset
-        std::vector<std::vector<boost::dynamic_bitset<>>> todo;
+        // For each of the above TS, indexed by the index of the vector,
+        // store for each state a bitset (num bits equal to num operators in
+        // fts_operators) with bits set to true if the corresponding operator
+        // is applicable in the state.
+        std::vector<std::vector<boost::dynamic_bitset<>>> applicable_ops_by_ts_index_by_state;
     };
     std::vector<LabelInformation> label_to_info;
 
