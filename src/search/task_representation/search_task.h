@@ -157,7 +157,8 @@ public:
 
     bool is_goal_state(const GlobalState &state) const;
 
-    void apply_operator(OperatorID op, PackedStateBin *buffer);
+    void apply_operator(
+        const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer);
 
     void generate_applicable_ops(
         const GlobalState &state,

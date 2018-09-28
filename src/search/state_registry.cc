@@ -89,7 +89,7 @@ GlobalState StateRegistry::get_successor_state(const GlobalState &predecessor,
     //assert(!op.is_axiom());
     state_data_pool.push_back(predecessor.get_packed_buffer());
     PackedStateBin *buffer = state_data_pool[state_data_pool.size() - 1];
-    task->apply_operator(op, buffer);
+    task->apply_operator(predecessor, op, buffer);
     StateID id = insert_id_or_pop_state();
     return lookup_state(id);
 }
