@@ -258,34 +258,18 @@ void FTSTask::assert_all_components_valid() const {
     }
 }
 
-
-
 std::string FTSTask::get_fact_name(const FactPair & fp) const {
     return "fact" + std::to_string(fp.var) + "-" + std::to_string(fp.value);
 }
 
-
-bool FTSTask::are_facts_mutex(const FactPair & , const FactPair & ) const {
-    cerr <<  "FTSTask::are_facts_mutex not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
-    return false;
-}
-
-std::vector<int> FTSTask::get_initial_state_data() const {
-    cerr <<  "FTSTask::get_initial_state_data not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
-    return vector<int> ();
-}
-
-State FTSTask::get_initial_state() const {
-    cerr <<  "FTSTask::get_initial_state not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
-    return State(*this, vector<int>());
-}
-
-bool FTSTask::is_goal_state (const GlobalState & /*state*/) const {
-    cerr <<  "FTSTask::is_goal_state not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
-    return false;
+bool FTSTask::is_goal_state (const GlobalState & state) const {
+    // TODO: this is duplicate with SearchTask. Use SearchTask everywhere?
+    for (size_t i = 0; i < transition_systems.size(); ++i) {
+        const TransitionSystem &ts = *transition_systems[i];
+        if (!ts.is_goal_state(state[i])) {
+            return false;
+        }
+    }
+    return true;
 }
 }

@@ -75,11 +75,13 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
         }
     }
 
+    initial_state.reserve(num_variables);
     for (size_t index = 0; index < num_variables; ++index) {
         const TransitionSystem & ts = fts_task.get_ts(index);
         if (ts.is_goal_relevant()) {
             goal_relevant_transition_systems.push_back(index);
         }
+        initial_state.push_back(ts.get_init_state());
     }
 }
 
@@ -217,6 +219,7 @@ void SearchTask::create_fts_operators() {
 }
 
  bool SearchTask::is_goal_state(const GlobalState &state) const {
+     // TODO: should use our own method in the long term
      return fts_task.is_goal_state(state);
  }
 

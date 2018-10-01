@@ -72,12 +72,6 @@ public:
 
     std::string get_fact_name(const FactPair & fact) const;
 
-    bool are_facts_mutex(const FactPair & f1, const FactPair & f2) const;
-
-    std::vector<int> get_initial_state_data() const;
-
-    State get_initial_state() const;
-
     bool is_goal_state (const GlobalState & state) const;
 
     bool has_axioms() const {
