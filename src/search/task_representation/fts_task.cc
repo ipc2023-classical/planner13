@@ -10,7 +10,6 @@
 #include "../utils/system.h"
 #include "../algorithms/int_packer.h"
 
-#include "search_task.h"
 #include "sas_task.h"
 #include "sas_operator.h"
 
@@ -288,22 +287,5 @@ bool FTSTask::is_goal_state (const GlobalState & /*state*/) const {
     cerr <<  "FTSTask::is_goal_state not implemented" << endl;
     utils::exit_with(utils::ExitCode::UNSUPPORTED);
     return false;
-}
-
-
-std::shared_ptr<SearchTask> FTSTask::get_search_task() const {
-    if (!search_task) {
-        search_task = make_shared<SearchTask> (*this);
-    }
-    return search_task;
-}
-
-std::unique_ptr<int_packer::IntPacker> FTSTask::get_state_packer() const {
-    std::vector<int> sizes;
-    sizes.reserve(transition_systems.size());
-    for (const auto & tr : transition_systems) {
-        sizes.push_back(tr->get_size());
-    }
-    return utils::make_unique_ptr<int_packer::IntPacker>(sizes);
 }
 }

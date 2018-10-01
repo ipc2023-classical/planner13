@@ -187,6 +187,9 @@ public:
         return min_operator_cost;
     }
 };
+
+extern std::shared_ptr<SearchTask> get_search_task(
+    const std::shared_ptr<FTSTask> &fts_task);
 }
 
 #endif

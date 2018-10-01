@@ -10,18 +10,10 @@
 
 class GlobalState;
 
-namespace int_packer {
-    class IntPacker;
-}
-
 namespace task_representation {
-class Distances;
-class FactoredTransitionSystem;
 struct FactPair;
-class FTSOperators;
 class Labels;
 class SASTask;
-class SearchTask;
 class State;
 class TransitionSystem;
 
@@ -44,9 +36,6 @@ class FTSTask {
     bool is_component_valid(int index) const;
 
     void assert_all_components_valid() const;
-
-    mutable std::shared_ptr<SearchTask> search_task;
-
 public:
     FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
     FTSTask(FTSTask &&other) = default;
@@ -94,9 +83,6 @@ public:
     bool has_axioms() const {
         return false;
     }
-    std::shared_ptr<SearchTask> get_search_task() const;
-
-    std::unique_ptr<int_packer::IntPacker> get_state_packer() const;
 };
 }
 

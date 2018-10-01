@@ -6,6 +6,8 @@
 
 #include "../algorithms/int_packer.h"
 
+#include "../utils/memory.h"
+
 #include <map>
 #include <unordered_map>
 
@@ -32,10 +34,20 @@ namespace task_representation {
 //     return nodes[node_index].index_operators;
 // }
 
+std::unique_ptr<int_packer::IntPacker> compute_state_packer(const FTSTask &fts_task) {
+    std::vector<int> sizes;
+    sizes.reserve(fts_task.get_size());
+    for (int ts_index = 0; ts_index < fts_task.get_size(); ++ts_index) {
+        const TransitionSystem &ts = fts_task.get_ts(ts_index);
+        sizes.push_back(ts.get_size());
+    }
+    return utils::make_unique_ptr<int_packer::IntPacker>(sizes);
+}
+
 
 SearchTask::SearchTask(const FTSTask &fts_task) :
     fts_task(fts_task),
-    state_packer(move(fts_task.get_state_packer())),
+    state_packer(move(compute_state_packer(fts_task))),
 //    axiom_evaluator (fts_task),
     min_operator_cost (fts_task.get_min_operator_cost()) {
 
@@ -204,14 +216,9 @@ void SearchTask::create_fts_operators() {
     }
 }
 
-// bool SearchTask::is_goal_state(const GlobalState &state) const {
-//     for (int i : goal_relevant_transition_systems) {
-//         if (!transition_systems[i]->is_goal_state(state[i])) {
-//             return false;
-//         }
-//     }
-//     return true;
-// }
+ bool SearchTask::is_goal_state(const GlobalState &state) const {
+     return fts_task.is_goal_state(state);
+ }
 
 // We only need to predecessor to access certain varaiables' values.
 void SearchTask::apply_operator(
@@ -293,5 +300,10 @@ bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
 
 int SearchTask::get_operator_cost(OperatorID op) const {
     return fts_task.get_label_cost(operators[op.get_index()].get_label());
+}
+
+shared_ptr<SearchTask> get_search_task(const shared_ptr<FTSTask> &fts_task) {
+    static shared_ptr<SearchTask> search_task = make_shared<SearchTask>(*fts_task);
+    return search_task;
 }
 }

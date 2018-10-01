@@ -7,6 +7,8 @@
 
 #include "algorithms/ordered_set.h"
 
+#include "task_representation/search_task.h"
+
 #include "utils/countdown_timer.h"
 #include "utils/rng_options.h"
 #include "utils/system.h"
@@ -24,12 +26,12 @@ class PruningMethod;
 SearchEngine::SearchEngine(const Options &opts)
     : status(IN_PROGRESS),
       solution_found(false),
-      state_registry(g_main_task->get_search_task()),
+      state_registry(get_search_task(g_main_task)),
       search_space(state_registry,
                    static_cast<OperatorCost>(opts.get_enum("cost_type"))),
       cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
       max_time(opts.get<double>("max_time")),
-      task(g_main_task->get_search_task()) {
+      task(get_search_task(g_main_task)) {
     if (opts.get<int>("bound") < 0) {
         cerr << "error: negative cost bound " << opts.get<int>("bound") << endl;
         utils::exit_with(ExitCode::INPUT_ERROR);
@@ -80,7 +82,7 @@ void SearchEngine::search() {
 }
 
 bool SearchEngine::check_goal_and_set_plan(const GlobalState &state) {
-    if (g_main_task->is_goal_state(state)) {
+    if (task->is_goal_state(state)) {
         cout << "Solution found!" << endl;
         Plan plan;
         search_space.trace_path(state, plan);
