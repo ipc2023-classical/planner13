@@ -223,7 +223,7 @@ void SearchTask::create_fts_operators() {
      return fts_task.is_goal_state(state);
  }
 
-// We only need predecessor to access certain varaiables' values.
+// We only need predecessor to access certain variables' values.
 void SearchTask::apply_operator(
     const GlobalState &predecessor, OperatorID op_id, PackedStateBin *buffer) {
     const FTSOperator &fts_op = operators[op_id.get_index()];
@@ -303,6 +303,28 @@ bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
 
 int SearchTask::get_operator_cost(OperatorID op) const {
     return fts_task.get_label_cost(operators[op.get_index()].get_label());
+}
+
+void SearchTask::dump_op(OperatorID op) const {
+    const FTSOperator &fts_op = operators[op.get_index()];
+    LabelID label = fts_op.get_label();
+
+    cout << "op:"; // TODO: get the name of the original operator via the label
+    const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
+    const vector<unordered_map<int, int>> &src_to_target_by_ts_index = label_to_info[label].src_to_target_by_ts_index;
+    for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
+        int var = det_ts[ts_index];
+        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[ts_index];
+        for (const pair<int, int> var_val : src_to_target) {
+            cout << " [var" << var << ": " << var_val.first << "] [var" << var << ":= " << var_val.second << "]";
+        }
+    }
+
+    // Effects on non-deterministic TS
+    for (const FactPair &effect : fts_op.get_effects()) {
+        cout << "[var" << effect.var << ":= " << effect.value << "]" << endl;
+    }
+    cout << endl;
 }
 
 shared_ptr<SearchTask> get_search_task(const shared_ptr<FTSTask> &fts_task) {

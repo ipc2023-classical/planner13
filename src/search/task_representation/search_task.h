@@ -186,6 +186,8 @@ public:
     int get_min_operator_cost() const {
         return min_operator_cost;
     }
+
+    void dump_op(OperatorID op) const;
 };
 
 extern std::shared_ptr<SearchTask> get_search_task(
