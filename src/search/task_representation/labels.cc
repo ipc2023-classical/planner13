@@ -12,16 +12,25 @@ using namespace std;
 
 namespace task_representation {
 Labels::Labels(const SASTask & sas_task) {
-    for (int index = 0; index < sas_task.get_num_operators(); ++index) {
+    int num_ops = sas_task.get_num_operators();
+    int max_num_labels = (num_ops ? num_ops * 2 - 1 : 0);
+    labels.reserve(max_num_labels);
+    sas_op_indices_by_label.reserve(max_num_labels);
+    for (int index = 0; index < num_ops; ++index) {
         labels.push_back(utils::make_unique_ptr<Label>(sas_task.get_operator_cost(index, false)));
+        sas_op_indices_by_label.push_back({index});
     }
 }
 
 void Labels::reduce_labels(const vector<LabelID> &old_label_nos) {
     int new_label_cost = labels[old_label_nos[0]]->get_cost();
+    sas_op_indices_by_label.push_back(vector<int>());
     for (size_t i = 0; i < old_label_nos.size(); ++i) {
         int old_label_no = old_label_nos[i];
         labels[old_label_no] = nullptr;
+        const vector<int> &ops = sas_op_indices_by_label[old_label_no];
+        sas_op_indices_by_label.back().insert(sas_op_indices_by_label.back().end(), ops.begin(), ops.end());
+        sas_op_indices_by_label[old_label_no].clear();
     }
     labels.push_back(utils::make_unique_ptr<Label>(new_label_cost));
 }

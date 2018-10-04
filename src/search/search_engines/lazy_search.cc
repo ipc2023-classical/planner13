@@ -97,8 +97,10 @@ void LazySearch::generate_successors() {
 
     statistics.inc_generated(successor_operators.size());
 
+    cout << "applicable operators:" << endl;
     for (OperatorID op_id : successor_operators) {
-	int operator_cost = task->get_operator_cost(op_id);
+        task->dump_op(op_id);
+        int operator_cost = task->get_operator_cost(op_id);
         int new_g = current_g + get_adjusted_cost(operator_cost);
         int new_real_g = current_real_g + operator_cost;
         bool is_preferred = preferred_operators.contains(op_id);
@@ -155,6 +157,7 @@ SearchStatus LazySearch::step() {
     bool reopen = reopen_closed_nodes && !node.is_new() &&
                   !node.is_dead_end() && (current_g < node.get_g());
 
+    cout << "step:" << endl;
     if (node.is_new() || reopen) {
         StateID dummy_id = current_predecessor_id;
         // HACK! HACK! we do this because SearchNode has no default/copy constructor
@@ -163,6 +166,7 @@ SearchStatus LazySearch::step() {
             dummy_id = initial_state.get_id();
         }
         GlobalState parent_state = state_registry.lookup_state(dummy_id);
+        parent_state.dump_pddl();
         SearchNode parent_node = search_space.get_node(parent_state);
 
         if (current_operator.is_valid()) {

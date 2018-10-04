@@ -1,7 +1,6 @@
 #ifndef FTS_REPRESENTATION_LABELS_H
 #define FTS_REPRESENTATION_LABELS_H
 
-
 #include "types.h"
 
 #include <memory>
@@ -32,6 +31,7 @@ public:
 */
 class Labels {
     std::vector<std::unique_ptr<Label>> labels;
+    std::vector<std::vector<int>> sas_op_indices_by_label;
 public:
     explicit Labels(const SASTask & sas_task);
     ~Labels() = default;
@@ -52,6 +52,10 @@ public:
     void dump_labels() const;
     int get_size() const {
         return labels.size();
+    }
+
+    const std::vector<int> &get_sas_op_indices_for_label(int label) const {
+        return sas_op_indices_by_label[label];
     }
 };
 }
