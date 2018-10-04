@@ -1,5 +1,11 @@
 #include "state.h"
 
+#include "sas_task.h"
+
+#include "../globals.h"
+
+#include <iostream>
+
 using namespace std;
 
 namespace task_representation {
@@ -23,12 +29,19 @@ namespace task_representation {
 
 
 void State::dump_pddl() const {
-    cerr <<  "State::dump_pddl not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
+    for (size_t var = 0; var < values.size(); ++var) {
+        string fact_name = g_sas_task()->get_fact_name(FactPair(var, values[var]));
+        if (fact_name != "<none of those>") {
+            cout << fact_name << endl;
+        }
+    }
 }
 
 void State::dump_fdr() const {
-    cerr <<  "State::dump_fdr not implemented" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
+    // The original dump_fdr method also printed the name of variables, which
+    // we cannot do of course since we merge variables.
+    for (size_t var = 0; var < values.size(); ++var) {
+        cout << "  #" << var << " -> " << values[var] << endl;
+    }
 }
 }
