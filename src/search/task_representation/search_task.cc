@@ -223,7 +223,7 @@ void SearchTask::create_fts_operators() {
      return fts_task.is_goal_state(state);
  }
 
-// We only need to predecessor to access certain varaiables' values.
+// We only need predecessor to access certain varaiables' values.
 void SearchTask::apply_operator(
     const GlobalState &predecessor, OperatorID op_id, PackedStateBin *buffer) {
     const FTSOperator &fts_op = operators[op_id.get_index()];
