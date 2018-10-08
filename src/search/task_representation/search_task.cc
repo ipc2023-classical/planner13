@@ -1,8 +1,12 @@
 ﻿#include "search_task.h"
 
-#include "../task_representation/fts_task.h"
-#include "../task_representation/transition_system.h"
-#include "../task_representation/label_equivalence_relation.h"
+#include "fts_task.h"
+#include "label_equivalence_relation.h"
+#include "labels.h"
+#include "sas_task.h"
+#include "transition_system.h"
+
+#include "../globals.h"
 
 #include "../algorithms/int_packer.h"
 
@@ -308,8 +312,18 @@ int SearchTask::get_operator_cost(OperatorID op) const {
 void SearchTask::dump_op(OperatorID op) const {
     const FTSOperator &fts_op = operators[op.get_index()];
     LabelID label = fts_op.get_label();
+    const vector<int> &sas_op_indices = fts_task.get_labels().get_sas_op_indices_for_label(label);
+    string operator_names = "";
+    for (size_t i = 0; i < sas_op_indices.size(); ++i) {
+        int sas_op_index = sas_op_indices[i];
+        operator_names += g_sas_task()->get_operator_name(sas_op_index, false);
+        if (i != sas_op_indices.size() - 1) {
+            operator_names += " ";
+        }
+    }
+    operator_names += ":";
 
-    cout << "op:"; // TODO: get the name of the original operator via the label
+    cout << operator_names;
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
     const vector<unordered_map<int, int>> &src_to_target_by_ts_index = label_to_info[label].src_to_target_by_ts_index;
     for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
