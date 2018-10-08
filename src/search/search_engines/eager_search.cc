@@ -8,7 +8,7 @@
 #include "../pruning_method.h"
 
 #include "../algorithms/ordered_set.h"
-#include "../task_utils/successor_generator.h"
+#include "../task_representation/search_task.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -81,7 +81,7 @@ void EagerSearch::initialize() {
 
     print_initial_h_values(eval_context);
 
-    pruning_method->initialize(g_root_task());
+    pruning_method->initialize(g_main_task);
 }
 
 void EagerSearch::print_checkpoint_line(int g) const {
@@ -108,7 +108,7 @@ SearchStatus EagerSearch::step() {
         return SOLVED;
 
     vector<OperatorID> applicable_ops;
-    g_successor_generator->generate_applicable_ops(s, applicable_ops);
+    task->generate_applicable_ops(s, applicable_ops);
 
     /*
       TODO: When preferred operators are in use, a preferred operator will be
@@ -122,11 +122,12 @@ SearchStatus EagerSearch::step() {
         collect_preferred_operators(eval_context, preferred_operator_heuristics);
 
     for (OperatorID op_id : applicable_ops) {
-        const GlobalOperator *op = &g_operators[op_id.get_index()];
-        if ((node.get_real_g() + op->get_cost()) >= bound)
+        int cost = task->get_operator_cost(op_id);
+        int operator_cost = get_adjusted_cost(cost);
+        if ((node.get_real_g() + operator_cost) >= bound)
             continue;
 
-        GlobalState succ_state = state_registry.get_successor_state(s, *op);
+        GlobalState succ_state = state_registry.get_successor_state(s, op_id);
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
 
@@ -143,7 +144,7 @@ SearchStatus EagerSearch::step() {
               don't break out of the for loop early.
             */
             for (Heuristic *heuristic : heuristics) {
-                heuristic->notify_state_transition(s, *op, succ_state);
+                heuristic->notify_state_transition(s, op_id, succ_state);
             }
         }
 
@@ -154,7 +155,7 @@ SearchStatus EagerSearch::step() {
             // Careful: succ_node.get_g() is not available here yet,
             // hence the stupid computation of succ_g.
             // TODO: Make this less fragile.
-            int succ_g = node.get_g() + get_adjusted_cost(*op);
+            int succ_g = node.get_g() + operator_cost;
 
             EvaluationContext eval_context(
                 succ_state, succ_g, is_preferred, &statistics);
@@ -165,14 +166,14 @@ SearchStatus EagerSearch::step() {
                 statistics.inc_dead_ends();
                 continue;
             }
-            succ_node.open(node, op);
+            succ_node.open(node, op_id, operator_cost);
 
             open_list->insert(eval_context, succ_state.get_id());
             if (search_progress.check_progress(eval_context)) {
                 print_checkpoint_line(succ_node.get_g());
                 reward_progress();
             }
-        } else if (succ_node.get_g() > node.get_g() + get_adjusted_cost(*op)) {
+        } else if (succ_node.get_g() > node.get_g() + operator_cost) {
             // We found a new cheapest path to an open or closed state.
             if (reopen_closed_nodes) {
                 if (succ_node.is_closed()) {
@@ -185,7 +186,7 @@ SearchStatus EagerSearch::step() {
                     */
                     statistics.inc_reopened();
                 }
-                succ_node.reopen(node, op);
+                succ_node.reopen(node, op_id, operator_cost);
 
                 EvaluationContext eval_context(
                     succ_state, succ_node.get_g(), is_preferred, &statistics);
@@ -212,7 +213,7 @@ SearchStatus EagerSearch::step() {
                 // If we do not reopen closed nodes, we just update the parent pointers.
                 // Note that this could cause an incompatibility between
                 // the g-value and the actual path that is traced back.
-                succ_node.update_parent(node, op);
+                succ_node.update_parent(node, op_id, operator_cost);
             }
         }
     }

@@ -6,7 +6,7 @@
 using namespace std;
 
 namespace null_pruning_method {
-void NullPruningMethod::initialize(const shared_ptr<AbstractTask> &task) {
+void NullPruningMethod::initialize(const std::shared_ptr<task_representation::FTSTask> &task) {
     PruningMethod::initialize(task);
     cout << "pruning method: none" << endl;
 }
