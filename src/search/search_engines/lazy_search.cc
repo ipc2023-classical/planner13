@@ -5,9 +5,9 @@
 #include "../option_parser.h"
 
 #include "../algorithms/ordered_set.h"
+#include "../task_representation/search_task.h"
 #include "../utils/rng.h"
 #include "../utils/rng_options.h"
-#include "../task_representation/search_task.h"
 
 #include <algorithm>
 #include <limits>
