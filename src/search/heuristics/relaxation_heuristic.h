@@ -51,7 +51,9 @@ class RelaxationHeuristic : public Heuristic {
     void simplify();
 protected:
     std::vector<UnaryOperator> unary_operators;
-    std::vector<std::vector<Proposition>> propositions;
+    std::vector<std::vector<Proposition>> propositions_per_var;
+
+
     std::vector<Proposition *> goal_propositions;
 
     virtual int compute_heuristic(const GlobalState &state) = 0;
