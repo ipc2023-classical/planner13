@@ -80,15 +80,17 @@ fast_downward_plugin(
     NAME FTS_REPRESENTATION
     HELP "FTS REPRESENTATION"
     SOURCES
-    task_representation/search_task
-    task_representation/sas_operator
-    task_representation/sas_task
-    task_representation/fts_operators
-    task_representation/state
     task_representation/distances
+    task_representation/factored_transition_system
+    task_representation/fts_factory
+    task_representation/fts_operators
     task_representation/fts_task
     task_representation/labels
     task_representation/label_equivalence_relation
+    task_representation/sas_operator
+    task_representation/sas_task
+    task_representation/search_task
+    task_representation/state
     task_representation/transition_system
     task_representation/types
     CORE_PLUGIN
