@@ -30,6 +30,8 @@ class FTSTask {
     std::unique_ptr<Labels> labels;
     std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
 
+
+    mutable std::vector<std::vector<int>> label_preconditions;
 public:
     FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
     ~FTSTask();

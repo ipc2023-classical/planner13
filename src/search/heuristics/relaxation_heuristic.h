@@ -61,6 +61,10 @@ public:
     RelaxationHeuristic(const options::Options &options);
     virtual ~RelaxationHeuristic();
     virtual bool dead_ends_are_reliable() const;
+
+    const Proposition * get_proposition(int var, int val) const {
+	return &(propositions_per_var[var][val]);
+    }
 };
 }
 

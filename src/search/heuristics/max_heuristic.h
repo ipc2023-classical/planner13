@@ -10,6 +10,7 @@
 namespace max_heuristic {
 using relaxation_heuristic::Proposition;
 using relaxation_heuristic::UnaryOperator;
+using task_representation::State;
 
 class HSPMaxHeuristic : public relaxation_heuristic::RelaxationHeuristic {
     priority_queues::AdaptiveQueue<Proposition *> queue;

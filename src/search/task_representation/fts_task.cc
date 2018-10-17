@@ -47,8 +47,8 @@ FTSTask::~FTSTask() {
     }
 }
 
-int FTSTask::get_label_cost(LabelID label) const {
-    return labels->get_label_cost(label);
+int FTSTask::get_label_cost(int label) const {
+    return labels->get_label_cost(LabelID(label));
 }
 
 int FTSTask::get_num_labels() const {

@@ -3,12 +3,14 @@
 #include "../global_state.h"
 #include "../option_parser.h"
 #include "../plugin.h"
+#include "../task_representation/state.h"
 
 #include <cassert>
 #include <vector>
 using namespace std;
 
 namespace max_heuristic {
+
 /*
   TODO: At the time of this writing, this shares huge amounts of code
         with h^add, and the two should be refactored so that the
@@ -34,7 +36,7 @@ HSPMaxHeuristic::~HSPMaxHeuristic() {
 void HSPMaxHeuristic::setup_exploration_queue() {
     queue.clear();
 
-    for (vector<Proposition> &props_of_var : propositions) {
+    for (vector<Proposition> &props_of_var : propositions_per_var) {
         for (Proposition &prop : props_of_var) {
             prop.cost = -1;
         }
@@ -51,8 +53,8 @@ void HSPMaxHeuristic::setup_exploration_queue() {
 }
 
 void HSPMaxHeuristic::setup_exploration_queue_state(const State &state) {
-    for (FactProxy fact : state) {
-        Proposition *init_prop = get_proposition(fact);
+    for (size_t var = 0; var < propositions_per_var.size(); ++var) {
+        Proposition *init_prop = &(propositions_per_var[var][state[var]]);
         enqueue_if_necessary(init_prop, 0);
     }
 }
