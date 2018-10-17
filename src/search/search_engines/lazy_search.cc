@@ -5,9 +5,9 @@
 #include "../option_parser.h"
 
 #include "../algorithms/ordered_set.h"
+#include "../task_representation/search_task.h"
 #include "../utils/rng.h"
 #include "../utils/rng_options.h"
-#include "../task_representation/search_task.h"
 
 #include <algorithm>
 #include <limits>
@@ -98,7 +98,7 @@ void LazySearch::generate_successors() {
     statistics.inc_generated(successor_operators.size());
 
     for (OperatorID op_id : successor_operators) {
-	int operator_cost = task->get_operator_cost(op_id);
+        int operator_cost = task->get_operator_cost(op_id);
         int new_g = current_g + get_adjusted_cost(operator_cost);
         int new_real_g = current_real_g + operator_cost;
         bool is_preferred = preferred_operators.contains(op_id);

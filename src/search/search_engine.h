@@ -1,7 +1,6 @@
 #ifndef SEARCH_ENGINE_H
 #define SEARCH_ENGINE_H
 
-#include "task_representation/sas_operator.h"
 #include "operator_cost.h"
 #include "search_progress.h"
 #include "search_space.h"
