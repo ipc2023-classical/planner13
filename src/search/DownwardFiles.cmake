@@ -96,6 +96,16 @@ fast_downward_plugin(
     CORE_PLUGIN
 )
 
+
+fast_downward_plugin(
+    NAME TASK_TRANSFORMATION
+    HELP "FTS REPRESENTATION"
+    SOURCES
+    task_transformation/plan_reconstruction
+    task_transformation/task_transformation_method
+    CORE_PLUGIN
+    )
+  
 fast_downward_plugin(
     NAME OPTIONS
     HELP "Option parsing and plugin definition"
