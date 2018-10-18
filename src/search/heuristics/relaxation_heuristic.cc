@@ -126,14 +126,14 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
     // of labels by the auxiliary propositions
     for (int lts_id = 0; lts_id < task->get_size(); ++lts_id){
         const auto & ts = task->get_ts(lts_id);
-
         int op_no = 0; //TODO: Set op_no to get preferred operators
-        
         // Build propositions for each label group in each transition system if it has relevant transitions
         for (const task_representation::GroupAndTransitions & gat : ts) {
             std::map<int, vector<int> > sources_by_target;
             for (const auto & tr : gat.transitions) {
-                sources_by_target[tr.target].push_back(tr.src);
+		if (tr.src != tr.target) {
+		    sources_by_target[tr.target].push_back(tr.src);
+		}
             }
             
             std::set<std::vector<Proposition *> > outside_conditions;
@@ -155,8 +155,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 
                 }
                 
-                insert_all_combinations(pre_per_ts, outside_conditions);
- 
+                insert_all_combinations(pre_per_ts, outside_conditions); 
             }
             
             for (const auto & item  : sources_by_target) {
@@ -183,10 +182,6 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                 
         }
     }
-
-
-
-
 
     
     // Simplify unary operators.
