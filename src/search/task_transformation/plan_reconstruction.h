@@ -1,5 +1,5 @@
-
-
+#ifndef TASK_REPRESENTATION_PLAN_RECONSTRUCTION_H
+#define TASK_REPRESENTATION_PLAN_RECONSTRUCTION_H
 
 
 class PlanReconstruction {
@@ -27,3 +27,5 @@ class ShrinkingPlanReconstruction : public PlanReconstruction {
     }
 };
 
+
+#endif

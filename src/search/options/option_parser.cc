@@ -27,6 +27,8 @@ namespace landmarks {
 class LandmarkFactory;
 }
 
+using task_transformation::TaskTransformationMethod;
+
 namespace options {
 const string OptionParser::NONE = "<none>";
 
@@ -170,7 +172,48 @@ shared_ptr<SearchEngine> OptionParser::parse_cmd_line(
     return parse_cmd_line_aux(args, dry_run);
 }
 
+    shared_ptr<TaskTransformationMethod> OptionParser::parse_cmd_line_transform(
+    int argc, const char **argv, bool dry_run, bool is_unit_cost) {
+    vector<string> args;
+    bool active = true;
+    for (int i = 1; i < argc; ++i) {
+        string arg = argv[i];
 
+        // Ignore case.
+        transform(arg.begin(), arg.end(), arg.begin(), ::tolower);
+
+        // Sanitize argument by removing newlines.
+        arg.erase(remove(arg.begin(), arg.end(), '\n'), arg.end());
+
+        if (arg == "--if-unit-cost") {
+            active = is_unit_cost;
+        } else if (arg == "--if-non-unit-cost") {
+            active = !is_unit_cost;
+        } else if (arg == "--always") {
+            active = true;
+        } else if (active) {
+            args.push_back(arg);
+        }
+    }
+    return parse_cmd_line_transform_aux(args, dry_run);
+}
+   
+shared_ptr<TaskTransformationMethod> OptionParser::parse_cmd_line_transform_aux(
+    const vector<string> &args, bool dry_run) {
+    shared_ptr<TaskTransformationMethod> task_transformation;
+    for (size_t i = 0; i < args.size(); ++i) {
+        string arg = args[i];
+        bool is_last = (i == args.size() - 1);
+        if (arg == "--transform") {
+            if (is_last)
+                throw ArgError("missing argument after --transform");
+            ++i;
+            OptionParser parser(args[i], dry_run);
+            task_transformation = parser.start_parsing<shared_ptr<TaskTransformationMethod>>();
+        } 
+    }
+    return task_transformation;
+}
 int OptionParser::parse_int_arg(const string &name, const string &value) {
     try {
         return stoi(value);

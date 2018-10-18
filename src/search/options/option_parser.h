@@ -9,6 +9,9 @@
 #include <vector>
 
 class SearchEngine;
+namespace task_transformation {
+    class TaskTransformationMethod;
+}
 
 namespace options {
 /*
@@ -34,6 +37,10 @@ class OptionParser {
     static int parse_int_arg(const std::string &name, const std::string &value);
     static std::shared_ptr<SearchEngine> parse_cmd_line_aux(
         const std::vector<std::string> &args, bool dry_run);
+
+    static std::shared_ptr<task_transformation::TaskTransformationMethod> parse_cmd_line_transform_aux(
+        const std::vector<std::string> &args, bool dry_run);
+
 
 public:
     OptionParser(const ParseTree &parse_tree, bool dry_run, bool help_mode = false);
@@ -102,6 +109,9 @@ public:
     static const std::string NONE;
 
     static std::shared_ptr<SearchEngine> parse_cmd_line(
+        int argc, const char **argv, bool dry_run, bool is_unit_cost);
+
+    static std::shared_ptr<task_transformation::TaskTransformationMethod> parse_cmd_line_transform(
         int argc, const char **argv, bool dry_run, bool is_unit_cost);
 
     static std::string usage(const std::string &progname);

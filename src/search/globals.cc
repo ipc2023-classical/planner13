@@ -76,5 +76,6 @@ const shared_ptr<task_representation::SASTask> g_sas_task() {
 }
 
 std::shared_ptr<task_representation::FTSTask> g_main_task;
+std::shared_ptr<task_transformation::PlanReconstruction> g_plan_reconstruction;
 
 utils::Log g_log;

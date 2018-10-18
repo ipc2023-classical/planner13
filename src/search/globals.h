@@ -27,6 +27,10 @@ struct FactPair;
 class FTSTask;
 }
 
+namespace task_transformation {
+    class PlanReconstruction;
+}
+
 namespace utils {
 struct Log;
 class RandomNumberGenerator;
@@ -67,7 +71,7 @@ extern std::string g_plan_filename;
 extern int g_num_previously_generated_plans;
 extern bool g_is_part_of_anytime_portfolio;
 
-//extern std::shared_ptr<TaskTransformation> g_task_transformation;
+extern std::shared_ptr<task_transformation::PlanReconstruction> g_plan_reconstruction;
 extern const std::shared_ptr<task_representation::SASTask> g_sas_task();
 extern std::shared_ptr<task_representation::FTSTask> g_main_task;
 //extern const std::shared_ptr<FTSTask> g_root_task();

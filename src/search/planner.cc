@@ -5,10 +5,14 @@
 #include "utils/timer.h"
 #include "utils/logging.h"
 
+#include "task_transformation/task_transformation_method.h"
+
 #include <iostream>
 
 using namespace std;
 using utils::ExitCode;
+
+using task_transformation::TaskTransformationMethod;
 
 int main(int argc, const char **argv) {
     utils::register_event_handlers();
@@ -24,35 +28,33 @@ int main(int argc, const char **argv) {
         g_log << "Main task constructed" << endl;
     }
     
-    // shared_ptr<TaskTransformationMethod> transformer;
+    shared_ptr<TaskTransformationMethod> transformer;
 
-    // The command line is parsed twice: once in dry-run mode, to
-    // check for simple input errors, and then in normal mode.
-    // bool unit_cost = is_unit_cost();
-    // try {
-    //     OptionParser::parse_cmd_line_transformer(argc, argv, true, unit_cost);
-    //     transformer = OptionParser::parse_cmd_line_transformer(argc, argv, false, unit_cost);
-    // } catch (ArgError &error) {
-    //     cerr << error << endl;
-    //     OptionParser::usage(argv[0]);
-    //     utils::exit_with(ExitCode::INPUT_ERROR);
-    // } catch (ParseError &error) {
-    //     cerr << error << endl;
-    //     utils::exit_with(ExitCode::INPUT_ERROR);
-    // }
+    // The command line is parsed twice: once in dry-run mode, to check for simple input
+    // errors, and then in normal mode.
+    bool is_unit_cost = g_sas_task()->is_unit_cost();
+    try {
+        OptionParser::parse_cmd_line_transform(argc, argv, true, is_unit_cost);
+        transformer = OptionParser::parse_cmd_line_transform(argc, argv, false, is_unit_cost);
+    } catch (ArgError &error) {
+        cerr << error << endl;
+        OptionParser::usage(argv[0]);
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    } catch (ParseError &error) {
+        cerr << error << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
 
-    // if (transformer) {
     utils::Timer transform_timer;
-
-    // 	cout << "Transform task... " << endl;
-    // 	auto transformation = transformer->transform_task(g_fts_task);
-    // 	g_fts_task = transformation.first;
-    // 	g_task_transformation = transformation.second;
-
-    // 	cout << "Transform time: " << transform_timer << endl;
+    if (transformer) {
+    	cout << "Transform task... " << endl;
+    	auto transformation = transformer->transform_task(g_main_task);
+    	g_main_task = transformation.first;
+    	g_plan_reconstruction = transformation.second;
+    	// cout << "Transform time: " << transform_timer << endl;
 	
-    // }
-
+	//TODO is_unit_cost = g_main_task->is_unit_cost();
+    }
     g_log << "Transform time: " << transform_timer << endl;
 	
     // 
@@ -61,8 +63,8 @@ int main(int argc, const char **argv) {
     // The command line is parsed twice: once in dry-run mode, to
     // check for simple input errors, and then in normal mode.
     try {
-        OptionParser::parse_cmd_line(argc, argv, true, g_sas_task()->is_unit_cost());
-        engine = OptionParser::parse_cmd_line(argc, argv, false, g_sas_task()->is_unit_cost());
+        OptionParser::parse_cmd_line(argc, argv, true, is_unit_cost);
+        engine = OptionParser::parse_cmd_line(argc, argv, false, is_unit_cost);
     } catch (ArgError &error) {
         cerr << error << endl;
         OptionParser::usage(argv[0]);
