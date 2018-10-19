@@ -18,32 +18,53 @@
 
 using namespace std;
 
+using task_representation::LabelID;
+using task_representation::FTSTask;
+
 namespace relaxation_heuristic {
 
+
+    void insert_outside_condition(LabelID l, const FTSTask * task,
+				  std::map<std::vector<Proposition *>, LabelID> & result,
+				  const std::vector<Proposition * > & new_outside_condition){
+
+	auto pos = result.lower_bound(new_outside_condition);
+
+	if(pos != result.end() && !(result.key_comp()(new_outside_condition, pos->first))) {
+	    // key already exists, update if the new label has lower cost
+	    if (task->get_label_cost(pos->second)  > task->get_label_cost(l)) {
+		pos->second = l;
+	    }
+	} else {
+	    result.insert(pos, std::map<std::vector<Proposition *>, LabelID>::value_type(new_outside_condition, l));
+	}	
+    }
     //Auxiliary function to compute all combinations of preconditions. 
-    void insert_all_combinations_recursive (const std::vector<std::vector<Proposition * > > & psets,
-                                  std::vector<Proposition * > & new_combination,
-                                  std::set<std::vector<Proposition *> > & result) {
+    void insert_all_combinations_recursive (LabelID l, const FTSTask * task, 
+					    const std::vector<std::vector<Proposition * > > & psets,
+					    std::vector<Proposition * > & new_combination,
+					    std::map<std::vector<Proposition *>, LabelID> & result) {
 
         const auto &  pset = psets[new_combination.size()];
         for (Proposition * p : pset) {
             new_combination.push_back(p);
             if(new_combination.size() == psets.size()) {
-                result.insert(new_combination);
-            } else {
-                insert_all_combinations_recursive(psets, new_combination, result);
+		insert_outside_condition(l, task, result, new_combination);
+	    } else {
+                insert_all_combinations_recursive(l, task, psets, new_combination, result);
             }
             new_combination.pop_back();
         }        
     }
     
-    void insert_all_combinations (const std::vector<std::vector<Proposition * > > & psets,
-                                  std::set<std::vector<Proposition *> > & result) {
+    void insert_all_combinations (LabelID l, FTSTask * task,
+				  const std::vector<std::vector<Proposition * > > & psets,
+                                  std::map<std::vector<Proposition *> , LabelID> & result) {
 
 	assert(!psets.empty()) ;
 	std::vector<Proposition * > new_combination;
 	new_combination.reserve(psets.size());
-	insert_all_combinations_recursive(psets, new_combination, result);    
+	insert_all_combinations_recursive(l, task, psets, new_combination, result);    
     }
 
     
@@ -138,13 +159,13 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 		}
             }
             
-            std::set<std::vector<Proposition *> > outside_conditions;
+	    std::map<std::vector<Proposition *> , LabelID>  outside_conditions;
             for(task_representation::LabelID l : gat.label_group) {
                 std::vector<std::vector<Proposition * > > pre_per_ts;
                 const auto & pre_transition_systems = task->get_label_preconditions(l);
 
 		if (pre_transition_systems.empty()) {
-		    outside_conditions.insert(std::vector<Proposition *>());
+		    insert_outside_condition(l, task.get(), outside_conditions, std::vector<Proposition *>());
 		} else {
 		    for (int pre_ts : pre_transition_systems) {
 			const auto & pre = task->get_ts(pre_ts).get_label_precondition(l);
@@ -161,7 +182,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 
 		    }
                 
-		    insert_all_combinations(pre_per_ts, outside_conditions);
+		    insert_all_combinations(l, task.get(), pre_per_ts, outside_conditions);
 		}
             }
             
@@ -169,19 +190,20 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                 int target = item.first;
                 const vector<int> & sources = item.second;
                 for (const auto & outside_condition : outside_conditions) {
+		    
                     if ((int)(sources.size()) == ts.get_size() ) {
-                        unary_operators.push_back(UnaryOperator(outside_condition,
+                        unary_operators.push_back(UnaryOperator(outside_condition.first,
                                                                 &(propositions_per_var[lts_id][target]),
-                                                                op_no, gat.label_group.get_cost()));
+                                                                op_no, task->get_label_cost(outside_condition.second)));
                     } else {
-                        auto pre = outside_condition; //copy 
+                        auto pre = outside_condition.first; //copy 
                         pre.push_back(nullptr); // add dummy
                         for (int src : sources) {
                             //set dummy 
                             pre[pre.size() -1] = &(propositions_per_var[lts_id][src]);
                             unary_operators.push_back(UnaryOperator(pre,
                                                                     &(propositions_per_var[lts_id][target]),
-                                                                    op_no, gat.label_group.get_cost()));
+                                                                    op_no, task->get_label_cost(outside_condition.second)));
                         }
                     }
                 }
@@ -209,31 +231,6 @@ bool RelaxationHeuristic::dead_ends_are_reliable() const {
     //return !has_axioms();
     return true;
 }
-
-// void RelaxationHeuristic::build_unary_operators(int label) {
-//     int base_cost = op.get_cost();
-//     vector<Proposition *> precondition_props; 
-    
-//     for (FactProxy precondition : op.get_preconditions()) {
-//         precondition_props.push_back(get_proposition(precondition));
-//     }
-
-//     for (size_t i = 0; i < task->get_size(); ++i){
-//         const auto & ts = task->get_ts(i);
-//         ts.get_transitions_label();
-
-//     }
-    
-//     for (EffectProxy effect : op.get_effects()) {
-//         Proposition *effect_prop = get_proposition(effect.get_fact());
-//         EffectConditionsProxy eff_conds = effect.get_conditions();
-//         for (FactProxy eff_cond : eff_conds) {
-//             precondition_props.push_back(get_proposition(eff_cond));
-//         }
-//         unary_operators.push_back(UnaryOperator(precondition_props, effect_prop, op_no, base_cost));
-//         precondition_props.erase(precondition_props.end() - eff_conds.size(), precondition_props.end());
-//     }
-// }
 
 void RelaxationHeuristic::simplify() {
     // Remove duplicate or dominated unary operators.
