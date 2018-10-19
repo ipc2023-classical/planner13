@@ -164,10 +164,14 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                 std::vector<std::vector<Proposition * > > pre_per_ts;
                 const auto & pre_transition_systems = task->get_label_preconditions(l);
 
-		if (pre_transition_systems.empty()) {
+		if (pre_transition_systems.empty() ||
+		    (pre_transition_systems.size() == 1 && pre_transition_systems[0] == lts_id)) {
 		    insert_outside_condition(l, task.get(), outside_conditions, std::vector<Proposition *>());
 		} else {
 		    for (int pre_ts : pre_transition_systems) {
+			if (pre_ts == lts_id) {
+			    continue;
+			}
 			const auto & pre = task->get_ts(pre_ts).get_label_precondition(l);
 			if (auxiliary_propositions_per_var[pre_ts].count(pre)){
 			    pre_per_ts.push_back(vector<Proposition *> ());
@@ -179,7 +183,6 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 				pre_per_ts.back().push_back(&(propositions_per_var[pre_ts][s]));
 			    }
 			}
-
 		    }
                 
 		    insert_all_combinations(l, task.get(), pre_per_ts, outside_conditions);
@@ -191,14 +194,15 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                 const vector<int> & sources = item.second;
                 for (const auto & outside_condition : outside_conditions) {
 		    
-                    if ((int)(sources.size()) == ts.get_size() ) {
+                    if ((int)(sources.size()) == ts.get_size() - 1 ) {
                         unary_operators.push_back(UnaryOperator(outside_condition.first,
                                                                 &(propositions_per_var[lts_id][target]),
                                                                 op_no, task->get_label_cost(outside_condition.second)));
                     } else {
-                        auto pre = outside_condition.first; //copy 
+                        auto pre = outside_condition.first; //copy
                         pre.push_back(nullptr); // add dummy
                         for (int src : sources) {
+			    assert (src != target);
                             //set dummy 
                             pre[pre.size() -1] = &(propositions_per_var[lts_id][src]);
                             unary_operators.push_back(UnaryOperator(pre,

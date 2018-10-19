@@ -4,7 +4,7 @@
 #include "../option_parser.h"
 #include "../plugin.h"
 
-#include "../task_utils/task_properties.h"
+#include "../task_representation/state.h"
 
 #include <cassert>
 #include <vector>
@@ -12,6 +12,7 @@
 using namespace std;
 
 namespace additive_heuristic {
+    
 // construction and destruction
 AdditiveHeuristic::AdditiveHeuristic(const Options &opts)
     : RelaxationHeuristic(opts),
@@ -38,9 +39,9 @@ void AdditiveHeuristic::write_overflow_warning() {
 void AdditiveHeuristic::setup_exploration_queue() {
     queue.clear();
 
-    for (size_t var = 0; var < propositions.size(); ++var) {
-        for (size_t value = 0; value < propositions[var].size(); ++value) {
-            Proposition &prop = propositions[var][value];
+    for (size_t var = 0; var < propositions_per_var.size(); ++var) {
+        for (size_t value = 0; value < propositions_per_var[var].size(); ++value) {
+            Proposition &prop = propositions_per_var[var][value];
             prop.cost = -1;
             prop.marked = false;
         }
@@ -58,8 +59,8 @@ void AdditiveHeuristic::setup_exploration_queue() {
 }
 
 void AdditiveHeuristic::setup_exploration_queue_state(const State &state) {
-    for (FactProxy fact : state) {
-        Proposition *init_prop = get_proposition(fact);
+    for (size_t var = 0; var < propositions_per_var.size(); ++var) {
+        Proposition *init_prop = &(propositions_per_var[var][state[var]]);
         enqueue_if_necessary(init_prop, 0, 0);
     }
 }
@@ -106,9 +107,12 @@ void AdditiveHeuristic::mark_preferred_operators(
                 // more expensive applicability test.
                 // If we had no 0-cost operators and axioms to worry
                 // about, this would also be a sufficient condition.
-                OperatorProxy op = task_proxy.get_operators()[operator_no];
-                if (task_properties::is_applicable(op, state))
-                    set_preferred(op);
+                // OperatorProxy op = task_proxy.get_operators()[operator_no];
+                // if (task_properties::is_applicable(op, state))
+                //     set_preferred(op);
+                //OperatorProxy op = task_proxy.get_operators()[operator_no];
+                //if (task_properties::is_applicable(op, state))
+                //    set_preferred(op);
             }
         }
     }
@@ -140,10 +144,6 @@ int AdditiveHeuristic::compute_heuristic(const State &state) {
 
 int AdditiveHeuristic::compute_heuristic(const GlobalState &global_state) {
     return compute_heuristic(convert_global_state(global_state));
-}
-
-void AdditiveHeuristic::compute_heuristic_for_cegar(const State &state) {
-    compute_heuristic(state);
 }
 
 static Heuristic *_parse(OptionParser &parser) {
