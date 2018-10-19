@@ -39,9 +39,11 @@ namespace relaxation_heuristic {
     
     void insert_all_combinations (const std::vector<std::vector<Proposition * > > & psets,
                                   std::set<std::vector<Proposition *> > & result) {
-        std::vector<Proposition * > new_combination;
-        new_combination.reserve(psets.size());
-        insert_all_combinations_recursive(psets, new_combination, result);
+
+	assert(!psets.empty()) ;
+	std::vector<Proposition * > new_combination;
+	new_combination.reserve(psets.size());
+	insert_all_combinations_recursive(psets, new_combination, result);    
     }
 
     
@@ -140,22 +142,27 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
             for(task_representation::LabelID l : gat.label_group) {
                 std::vector<std::vector<Proposition * > > pre_per_ts;
                 const auto & pre_transition_systems = task->get_label_preconditions(l);
-                for (int pre_ts : pre_transition_systems) {
-                    const auto & pre = task->get_ts(pre_ts).get_label_precondition(l);
-                    if (auxiliary_propositions_per_var[pre_ts].count(pre)){
-                        pre_per_ts.push_back(vector<Proposition *> ());
-                        pre_per_ts.back().push_back(auxiliary_propositions_per_var[pre_ts].at(pre));
-                    } else {
-                        pre_per_ts.push_back(vector<Proposition *> ());
-                        pre_per_ts.back().reserve(pre.size());
-                        for (int s : pre) {
-                            pre_per_ts.back().push_back(&(propositions_per_var[pre_ts][s]));
-                        }
-                    }
 
-                }
+		if (pre_transition_systems.empty()) {
+		    outside_conditions.insert(std::vector<Proposition *>());
+		} else {
+		    for (int pre_ts : pre_transition_systems) {
+			const auto & pre = task->get_ts(pre_ts).get_label_precondition(l);
+			if (auxiliary_propositions_per_var[pre_ts].count(pre)){
+			    pre_per_ts.push_back(vector<Proposition *> ());
+			    pre_per_ts.back().push_back(auxiliary_propositions_per_var[pre_ts].at(pre));
+			} else {
+			    pre_per_ts.push_back(vector<Proposition *> ());
+			    pre_per_ts.back().reserve(pre.size());
+			    for (int s : pre) {
+				pre_per_ts.back().push_back(&(propositions_per_var[pre_ts][s]));
+			    }
+			}
+
+		    }
                 
-                insert_all_combinations(pre_per_ts, outside_conditions); 
+		    insert_all_combinations(pre_per_ts, outside_conditions);
+		}
             }
             
             for (const auto & item  : sources_by_target) {
