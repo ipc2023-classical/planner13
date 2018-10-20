@@ -4,21 +4,18 @@
 #include <utility>
 #include <memory>
 
-class PlanReconstruction;
-
 namespace task_representation {
     class FTSTask;
 }
 
 namespace task_transformation {
+class PlanReconstruction;
 
-    class TaskTransformationMethod {
-    public:    
-	virtual std::pair<std::shared_ptr<task_representation::FTSTask>,
-	    std::shared_ptr<PlanReconstruction>>
-	    transform_task(const std::shared_ptr<task_representation::FTSTask> & g_fts_task) = 0;
-
-    };
-
+class TaskTransformationMethod {
+public:
+    virtual std::pair<std::shared_ptr<task_representation::FTSTask>,
+        std::shared_ptr<PlanReconstruction>> transform_task(
+            const std::shared_ptr<task_representation::FTSTask> &fts_task) = 0;
+};
 }
 #endif

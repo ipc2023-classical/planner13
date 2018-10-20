@@ -12,11 +12,11 @@ namespace task_representation {
 
 namespace task_transformation {
 class PlanReconstruction {
-    public:
+public:
     // Given a sequence of actions that is a plan for the successor task, retrieve a plan
     // for the predecessor task. Directly modifies the contents of plan and traversed_states
     virtual void reconstruct_plan(std::vector<task_representation::LabelID> & plan,
-				  std::vector<task_representation::State> & traversed_states) const = 0;   
+        std::vector<task_representation::State> & traversed_states) const = 0;
 };
 
 class PlanReconstructionSequence : public PlanReconstruction {
@@ -24,10 +24,10 @@ class PlanReconstructionSequence : public PlanReconstruction {
 
 public:
     virtual void reconstruct_plan(std::vector<task_representation::LabelID> & plan,
-				  std::vector<task_representation::State> & traversed_states) const {
-	for (const auto & pr : plan_reconstruction) {
-	    pr->reconstruct_plan(plan, traversed_states);
-	}
+        std::vector<task_representation::State> & traversed_states) const {
+        for (const auto & pr : plan_reconstruction) {
+            pr->reconstruct_plan(plan, traversed_states);
+        }
     }
 };
 
@@ -54,12 +54,12 @@ class PlanReconstructionStep : public PlanReconstruction {
 public:
 
     /* PlanReconstructionStep (std::shared_ptr<task_representation::FTSTask> predecessor_task, */
-    /* 			    std::vector<MergeAndShrinkRepresentation> merge_and_shrink_representation, */
-    /* 			    LabelMap label_map, */
-    /* 			    std::vector<int> tau_labels); */
+    /*                 std::vector<MergeAndShrinkRepresentation> merge_and_shrink_representation, */
+    /*                 LabelMap label_map, */
+    /*                 std::vector<int> tau_labels); */
     
     virtual void reconstruct_plan (std::vector<task_representation::LabelID> & plan,
-				   std::vector<task_representation::State> & traversed_states) const;
+                   std::vector<task_representation::State> & traversed_states) const;
 
 };
 

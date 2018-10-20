@@ -47,16 +47,16 @@ int main(int argc, const char **argv) {
 
     utils::Timer transform_timer;
     if (transformer) {
-    	cout << "Transform task... " << endl;
-    	auto transformation = transformer->transform_task(g_main_task);
-    	g_main_task = transformation.first;
-    	g_plan_reconstruction = transformation.second;
-    	// cout << "Transform time: " << transform_timer << endl;
-	
-	//TODO is_unit_cost = g_main_task->is_unit_cost();
+        cout << "Transform task... " << endl;
+        auto transformation = transformer->transform_task(g_main_task);
+        g_main_task = transformation.first;
+        g_plan_reconstruction = transformation.second;
+        // cout << "Transform time: " << transform_timer << endl;
+
+    //TODO is_unit_cost = g_main_task->is_unit_cost();
     }
     g_log << "Transform time: " << transform_timer << endl;
-	
+
     // 
     shared_ptr<SearchEngine> engine;
 

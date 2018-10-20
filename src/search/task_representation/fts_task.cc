@@ -87,7 +87,7 @@ const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
         }
     }
     
-    assert(label >= 0 && label < label_preconditions.size()); 
+    assert(label >= 0 && label < static_cast<int>(label_preconditions.size()));
     return label_preconditions[label];
 }
 
