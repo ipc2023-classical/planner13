@@ -110,7 +110,7 @@ static Heuristic *_parse(OptionParser &parser) {
 
     Heuristic::add_options_to_parser(parser);
 
-    parser.add_option<int>("optimize_relaxed_plan", "If true, computes a relaxed plan where no action is included twice, otherwise just approximates it.", "false");
+    parser.add_option<bool>("optimize_relaxed_plan", "If true, computes a relaxed plan where no action is included twice, otherwise just approximates it.", "false");
     Options opts = parser.parse();
     if (parser.dry_run())
         return 0;
