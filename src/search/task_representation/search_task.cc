@@ -11,6 +11,7 @@
 #include "../algorithms/int_packer.h"
 
 #include "../utils/memory.h"
+#include "state.h"
 
 #include <map>
 #include <unordered_map>
@@ -302,8 +303,12 @@ bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
             return false;
         }
     }
+    // TODO: This is not implemented yet
+    
+    exit_with(utils::ExitCode::UNSUPPORTED);
     return true;
 }
+
 
 int SearchTask::get_operator_cost(OperatorID op) const {
     return fts_task.get_label_cost(operators[op.get_index()].get_label());
@@ -341,8 +346,4 @@ void SearchTask::dump_op(OperatorID op) const {
     cout << endl;
 }
 
-shared_ptr<SearchTask> get_search_task(const shared_ptr<FTSTask> &fts_task) {
-    static shared_ptr<SearchTask> search_task = make_shared<SearchTask>(*fts_task);
-    return search_task;
-}
 }

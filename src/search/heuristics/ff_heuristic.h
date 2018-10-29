@@ -4,10 +4,12 @@
 #include "additive_heuristic.h"
 
 #include <vector>
+#include <memory>
 
 namespace ff_heuristic {
 using Proposition = relaxation_heuristic::Proposition;
 using UnaryOperator = relaxation_heuristic::UnaryOperator;
+using RelaxedPlanStep = relaxation_heuristic::RelaxedPlanStep;
 
 /*
   TODO: In a better world, this should not derive from
@@ -18,12 +20,11 @@ using UnaryOperator = relaxation_heuristic::UnaryOperator;
         implementation in the landmark code.
 */
 class FFHeuristic : public additive_heuristic::AdditiveHeuristic {
-    // Relaxed plans are represented as a set of operators implemented
-    // as a bit vector.
-    typedef std::vector<bool> RelaxedPlan;
-    RelaxedPlan relaxed_plan;
-    void mark_preferred_operators_and_relaxed_plan(
-        const State &state, Proposition *goal);
+    std::vector<RelaxedPlanStep> relaxed_plan;
+
+    const bool optimize_relaxed_plan; 
+   
+    void relaxed_plan_extraction(Proposition *goal);
 protected:
     virtual int compute_heuristic(const GlobalState &global_state);
 public:

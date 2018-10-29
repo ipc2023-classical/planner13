@@ -57,15 +57,6 @@ public:
         return values.size();
     }
 
-    /* Fact operator[](std::size_t var_id) const { */
-    /*     assert(var_id < size()); */
-    /*     return Fact(*task, var_id, values[var_id]); */
-    /* } */
-
-    /* Fact operator[](int var) const { */
-    /*     return (*this)[var]; */
-    /* } */
-
     int operator[](std::size_t var_id) const {
         return values[var_id];
     }

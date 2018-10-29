@@ -164,10 +164,15 @@ public:
         const GlobalState &state,
         std::vector<OperatorID> &applicable_ops) const;
 
+
     bool is_applicable(const GlobalState & state, OperatorID op) const;
 
     int num_variables() const {
         return initial_state.size();
+    }
+    
+    int num_operators() const {
+        return operators.size();
     }
 
     const std::vector<int> &get_initial_state_data() const {

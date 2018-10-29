@@ -14,6 +14,8 @@
 #include "../utils/system.h"
 #include "../algorithms/int_packer.h"
 
+#include "search_task.h"
+
 #include <cassert>
 
 using namespace std;
@@ -91,5 +93,12 @@ const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
     return label_preconditions[label];
 }
 
-    
+
+shared_ptr<SearchTask> FTSTask::get_search_task() const {
+    if(!search_task){
+	search_task = make_shared<SearchTask> (*this);
+    }
+    return search_task;
+}
+
 }

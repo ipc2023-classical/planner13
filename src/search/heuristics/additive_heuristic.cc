@@ -100,8 +100,8 @@ void AdditiveHeuristic::mark_preferred_operators(
         if (unary_op) { // We have not yet chained back to a start node.
             for (size_t i = 0; i < unary_op->precondition.size(); ++i)
                 mark_preferred_operators(state, unary_op->precondition[i]);
-            int operator_no = unary_op->operator_no;
-            if (unary_op->cost == unary_op->base_cost && operator_no != -1) {
+            // int operator_no = unary_op->operator_no;
+            // if (unary_op->cost == unary_op->base_cost && operator_no != -1) {
                 // Necessary condition for this being a preferred
                 // operator, which we use as a quick test before the
                 // more expensive applicability test.
@@ -113,7 +113,7 @@ void AdditiveHeuristic::mark_preferred_operators(
                 //OperatorProxy op = task_proxy.get_operators()[operator_no];
                 //if (task_properties::is_applicable(op, state))
                 //    set_preferred(op);
-            }
+            // }
         }
     }
 }

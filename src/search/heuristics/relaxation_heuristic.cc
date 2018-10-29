@@ -20,6 +20,7 @@ using namespace std;
 
 using task_representation::LabelID;
 using task_representation::FTSTask;
+using task_representation::FactPair;
 
 namespace relaxation_heuristic {
 
@@ -60,7 +61,6 @@ namespace relaxation_heuristic {
     void insert_all_combinations (LabelID l, FTSTask * task,
 				  const std::vector<std::vector<Proposition * > > & psets,
                                   std::map<std::vector<Proposition *> , LabelID> & result) {
-
 	assert(!psets.empty()) ;
 	std::vector<Proposition * > new_combination;
 	new_combination.reserve(psets.size());
@@ -131,7 +131,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
             for (const auto & s : set_of_states) {
                 precondition.push_back(&(propositions[s]));
             }
-            unary_operators.push_back(UnaryOperator(precondition, aux_prop, -1, 0));
+            unary_operators.push_back(UnaryOperator(precondition, aux_prop, RelaxedPlanStep(), 0));
         }
         
         // Build goal propositions.
@@ -149,7 +149,6 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
     // of labels by the auxiliary propositions
     for (int lts_id = 0; lts_id < task->get_size(); ++lts_id){
         const auto & ts = task->get_ts(lts_id);
-        int op_no = 0; //TODO: Set op_no to get preferred operators
         // Build propositions for each label group in each transition system if it has relevant transitions
         for (const task_representation::GroupAndTransitions & gat : ts) {
             std::map<int, vector<int> > sources_by_target;
@@ -193,11 +192,15 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                 int target = item.first;
                 const vector<int> & sources = item.second;
                 for (const auto & outside_condition : outside_conditions) {
-		    
+		    RelaxedPlanStep rs_step (outside_condition.second, FactPair(lts_id, target));
                     if ((int)(sources.size()) == ts.get_size() - 1 ) {
                         unary_operators.push_back(UnaryOperator(outside_condition.first,
                                                                 &(propositions_per_var[lts_id][target]),
-                                                                op_no, task->get_label_cost(outside_condition.second)));
+                                                                rs_step,
+								task->get_label_cost(outside_condition.second)));
+			// for (OperatorID op_id : rs_step.get_operator_ids()) {
+			//     unary_operators_per_operator_id[op_id].push_back(&(unary_operators.back()));
+			// }
                     } else {
                         auto pre = outside_condition.first; //copy
                         pre.push_back(nullptr); // add dummy
@@ -207,7 +210,12 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                             pre[pre.size() -1] = &(propositions_per_var[lts_id][src]);
                             unary_operators.push_back(UnaryOperator(pre,
                                                                     &(propositions_per_var[lts_id][target]),
-                                                                    op_no, task->get_label_cost(outside_condition.second)));
+                                                                    rs_step,
+								    task->get_label_cost(outside_condition.second)));
+
+			    // for (OperatorID op_id : rs_step.get_operator_ids()) {
+			    // 	unary_operators_per_operator_id[op_id].push_back(&(unary_operators.back()));
+			    // }
                         }
                     }
                 }
@@ -320,9 +328,9 @@ void RelaxationHeuristic::simplify() {
 
     sort(unary_operators.begin(), unary_operators.end(),
          [&] (const UnaryOperator &o1, const UnaryOperator &o2) {
-            if (o1.operator_no != o2.operator_no)
-                return o1.operator_no < o2.operator_no;
-            if (o1.effect != o2.effect)
+	     if (o1.rp_step.label != o2.rp_step.label)
+		 return o1.rp_step.label < o2.rp_step.label;
+	     if (o1.effect != o2.effect)
                 return o1.effect->id < o2.effect->id;
             if (o1.base_cost != o2.base_cost)
                 return o1.base_cost < o2.base_cost;

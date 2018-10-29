@@ -32,6 +32,7 @@ class FTSTask {
 
 
     mutable std::vector<std::vector<int>> label_preconditions;
+    mutable std::shared_ptr<SearchTask> search_task;
 public:
     FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
     ~FTSTask();
@@ -64,6 +65,8 @@ public:
     bool is_goal_state (const GlobalState & state) const;
 
     const std::vector<int> & get_label_preconditions(int label) const;
+
+    std::shared_ptr<SearchTask> get_search_task() const;
 };
 }
 
