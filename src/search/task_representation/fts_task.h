@@ -15,25 +15,23 @@ namespace int_packer {
 }
 
 namespace task_representation {
-class Distances;
 class FactoredTransitionSystem;
 struct FactPair;
-class FTSOperators;
 class Labels;
 class SASTask;
 class SearchTask;
-class State;
 class TransitionSystem;
 
 
 class FTSTask {
-    std::unique_ptr<Labels> labels;
     std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
-
+    std::unique_ptr<Labels> labels;
 
     mutable std::vector<std::vector<int>> label_preconditions;
 public:
-    FTSTask(const SASTask & sas_task); //Creates the fts task from the SAS+ representation
+    FTSTask(
+        std::vector<std::unique_ptr<TransitionSystem>> &&transition_systems,
+        std::unique_ptr<Labels> labels);
     ~FTSTask();
     FTSTask(FTSTask &&other) = delete;
     FTSTask(const FTSTask &other) = delete;

@@ -80,19 +80,20 @@ fast_downward_plugin(
     NAME FTS_REPRESENTATION
     HELP "FTS REPRESENTATION"
     SOURCES
-    task_representation/distances
-    task_representation/factored_transition_system
-    task_representation/fts_factory
-    task_representation/fts_operators
-    task_representation/fts_task
-    task_representation/labels
-    task_representation/label_equivalence_relation
-    task_representation/sas_operator
-    task_representation/sas_task
-    task_representation/search_task
-    task_representation/state
-    task_representation/transition_system
-    task_representation/types
+        task_representation/distances
+        task_representation/factored_transition_system
+        task_representation/fts_factory
+        task_representation/fts_operators
+        task_representation/fts_task
+        task_representation/labels
+        task_representation/label_equivalence_relation
+        task_representation/merge_and_shrink_algorithm
+        task_representation/sas_operator
+        task_representation/sas_task
+        task_representation/search_task
+        task_representation/state
+        task_representation/transition_system
+        task_representation/types
     CORE_PLUGIN
 )
 
@@ -101,11 +102,12 @@ fast_downward_plugin(
     NAME TASK_TRANSFORMATION
     HELP "FTS REPRESENTATION"
     SOURCES
-    task_transformation/plan_reconstruction
-    task_transformation/task_transformation_method
+        task_transformation/merge_and_shrink_task_transformation
+        task_transformation/plan_reconstruction
+        task_transformation/task_transformation_method
     CORE_PLUGIN
     )
-  
+
 fast_downward_plugin(
     NAME OPTIONS
     HELP "Option parsing and plugin definition"

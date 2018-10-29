@@ -24,7 +24,6 @@ int main(int argc, const char **argv) {
 
     if (static_cast<string>(argv[1]) != "--help") {
         g_sas_task()->read_from_file(cin);
-        g_main_task = make_shared<task_representation::FTSTask>(*g_sas_task());
         g_log << "Main task constructed" << endl;
     }
     
@@ -46,18 +45,15 @@ int main(int argc, const char **argv) {
     }
 
     utils::Timer transform_timer;
-    if (transformer) {
-        cout << "Transform task... " << endl;
-        auto transformation = transformer->transform_task(g_main_task);
-        g_main_task = transformation.first;
-        g_plan_reconstruction = transformation.second;
-        // cout << "Transform time: " << transform_timer << endl;
+    assert(transformer);
 
+    cout << "Transform task... " << endl;
+    auto transformation = transformer->transform_task(*g_sas_task());
+    g_main_task = transformation.first;
+    g_plan_reconstruction = transformation.second;
     //TODO is_unit_cost = g_main_task->is_unit_cost();
-    }
     g_log << "Transform time: " << transform_timer << endl;
 
-    // 
     shared_ptr<SearchEngine> engine;
 
     // The command line is parsed twice: once in dry-run mode, to

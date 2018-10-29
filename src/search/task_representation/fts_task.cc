@@ -20,24 +20,11 @@ using namespace std;
 
 
 namespace task_representation {
-FTSTask::FTSTask(const SASTask &sas_task) {
-    // TODO: turn into option
-    Verbosity verbosity(Verbosity::NORMAL);
-    FactoredTransitionSystem fts =
-        create_factored_transition_system(
-            sas_task,
-            verbosity);
-
-    // Possibly add further M&S-like transformations
-
-    int num_factors = fts.get_num_active_entries();
-    transition_systems.reserve(num_factors);
-    for (int ts_index : fts) {
-        if (fts.is_active(ts_index)) {
-            transition_systems.push_back(move(fts.extract_transition_system(ts_index)));
-        }
-    }
-    labels = move(fts.extract_labels());
+FTSTask::FTSTask(
+    vector<unique_ptr<TransitionSystem>> &&transition_systems,
+    unique_ptr<Labels> labels)
+    : transition_systems(move(transition_systems)),
+      labels(move(labels)) {
 }
 
 FTSTask::~FTSTask() {

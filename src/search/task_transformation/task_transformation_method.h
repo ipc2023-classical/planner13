@@ -6,6 +6,7 @@
 
 namespace task_representation {
     class FTSTask;
+    class SASTask;
 }
 
 namespace task_transformation {
@@ -13,9 +14,10 @@ class PlanReconstruction;
 
 class TaskTransformationMethod {
 public:
+    virtual ~TaskTransformationMethod() = 0;
     virtual std::pair<std::shared_ptr<task_representation::FTSTask>,
         std::shared_ptr<PlanReconstruction>> transform_task(
-            const std::shared_ptr<task_representation::FTSTask> &fts_task) = 0;
+            const task_representation::SASTask &sas_task) = 0;
 };
 }
 #endif
