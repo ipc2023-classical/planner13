@@ -1,5 +1,5 @@
-#ifndef MERGE_AND_SHRINK_MERGE_SCORING_FUNCTION_H
-#define MERGE_AND_SHRINK_MERGE_SCORING_FUNCTION_H
+#ifndef TASK_TRANSFORMATION_MERGE_SCORING_FUNCTION_H
+#define TASK_TRANSFORMATION_MERGE_SCORING_FUNCTION_H
 
 #include <string>
 #include <vector>
@@ -10,7 +10,7 @@ class SASTask;
 
 using namespace task_representation;
 
-namespace merge_and_shrink {
+namespace task_transformation {
 class FactoredTransitionSystem;
 class MergeScoringFunction {
 protected:

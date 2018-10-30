@@ -98,35 +98,33 @@ fast_downward_plugin(
     NAME TASK_TRANSFORMATION
     HELP "Task transformation"
     SOURCES
-        #task_transformation/distances
+        task_transformation/distances
         task_transformation/factored_transition_system
         task_transformation/fts_factory
-        #task_transformation/label_reduction
+        task_transformation/label_reduction
         task_transformation/merge_and_shrink_algorithm
-        #task_transformation/merge_and_shrink_representation
+        task_transformation/merge_and_shrink_representation
         task_transformation/merge_and_shrink_task_transformation
         task_transformation/plan_reconstruction
-        #task_transformation/merge_scoring_function
-        #task_transformation/merge_scoring_function_dfp
-        #task_transformation/merge_scoring_function_goal_relevance
-        #task_transformation/merge_scoring_function_single_random
-        #task_transformation/merge_scoring_function_total_order
-        #task_transformation/merge_selector
-        #task_transformation/merge_selector_score_based_filtering
-        #task_transformation/merge_strategy
-        #task_transformation/merge_strategy_aliases
-        #task_transformation/merge_strategy_factory
-        #task_transformation/merge_strategy_factory_precomputed
-        #task_transformation/merge_strategy_factory_sccs
-        #task_transformation/merge_strategy_factory_stateless
-        #task_transformation/merge_strategy_precomputed
-        #task_transformation/merge_strategy_sccs
-        #task_transformation/merge_strategy_stateless
-        #task_transformation/merge_tree
-        #task_transformation/merge_tree_factory
-        #task_transformation/merge_tree_factory_linear
-        #task_transformation/shrink_bisimulation
-        #task_transformation/shrink_strategy
+        task_transformation/merge_scoring_function
+        task_transformation/merge_scoring_function_dfp
+        task_transformation/merge_scoring_function_goal_relevance
+        task_transformation/merge_scoring_function_single_random
+        task_transformation/merge_scoring_function_total_order
+        task_transformation/merge_selector
+        task_transformation/merge_selector_score_based_filtering
+        task_transformation/merge_strategy
+        task_transformation/merge_strategy_aliases
+        task_transformation/merge_strategy_factory
+        task_transformation/merge_strategy_factory_precomputed
+        task_transformation/merge_strategy_factory_stateless
+        task_transformation/merge_strategy_precomputed
+        task_transformation/merge_strategy_stateless
+        task_transformation/merge_tree
+        task_transformation/merge_tree_factory
+        task_transformation/merge_tree_factory_linear
+        task_transformation/shrink_bisimulation
+        task_transformation/shrink_strategy
         task_transformation/task_transformation_method
         task_transformation/types
         task_transformation/utils

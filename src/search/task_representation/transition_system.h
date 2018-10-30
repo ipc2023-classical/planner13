@@ -48,7 +48,7 @@ struct GroupAndTransitions {
     LabelGroupID group_id;
     const LabelGroup &label_group;
     const std::vector<Transition> &transitions;
-   GroupAndTransitions(LabelGroupID id, const LabelGroup &label_group,
+    GroupAndTransitions(LabelGroupID id, const LabelGroup &label_group,
                        const std::vector<Transition> &transitions)
         : group_id (id), label_group(label_group),
         transitions(transitions) {
