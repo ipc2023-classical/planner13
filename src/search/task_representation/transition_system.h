@@ -3,14 +3,21 @@
 
 #include "labels.h"
 
+#include "../task_transformation/types.h"
+
 #include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-namespace task_representation {
+namespace task_transformation {
 class Distances;
+}
+
+using namespace task_transformation;
+
+namespace task_representation {
 class LabelEquivalenceRelation;
 class LabelGroup;
 class Labels;
@@ -117,10 +124,6 @@ private:
     std::vector<bool> goal_states;
     int init_state;
 
-    std::shared_ptr<Distances> init_distances, goal_distances;
-
-
-
     //list of goal states
     mutable std::vector<int> goal_state_list;
 
@@ -130,8 +133,6 @@ private:
     //List of label groups that have a non-self-loop transition
     mutable std::vector<LabelGroupID> relevant_label_groups;
   
-    
-    
     /*
       Check if two or more labels are locally equivalent to each other, and
       if so, update the label equivalence relation.
@@ -156,6 +157,38 @@ public:
         int init_state,
         bool compute_label_equivalence_relation);
     ~TransitionSystem();
+    /*
+      Factory method to construct the merge of two transition systems.
+
+      Invariant: the children ts1 and ts2 must be solvable.
+      (It is a bug to merge an unsolvable transition system.)
+    */
+    static std::unique_ptr<TransitionSystem> merge(
+        const Labels &labels,
+        const TransitionSystem &ts1,
+        const TransitionSystem &ts2,
+        Verbosity verbosity);
+
+    /*
+      Applies the given state equivalence relation to the transition system.
+      abstraction_mapping is a mapping from old states to new states, and it
+      must be consistent with state_equivalence_relation in the sense that
+      old states are only mapped to the same new state if they are in the same
+      equivalence class as specified in state_equivalence_relation.
+    */
+    void apply_abstraction(
+        const StateEquivalenceRelation &state_equivalence_relation,
+        const std::vector<int> &abstraction_mapping,
+        Verbosity verbosity);
+
+    /*
+      Applies the given label mapping, mapping old to new label numbers. This
+      updates the label equivalence relation which is internally used to group
+      locally equivalent labels and store their transitions only once.
+    */
+    void apply_label_reduction(
+        const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
+        bool only_equivalent_labels);
 
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,
@@ -184,17 +217,7 @@ public:
     */
     bool are_transitions_sorted_unique() const;
 
-    bool is_solvable() const;
-
-    
-    const Distances &get_init_distances() const {
-        return *init_distances;
-    }
-
-    const Distances &get_goal_distances() const {
-        return *goal_distances;
-    }
-
+    bool is_solvable(const Distances &distances) const;
     void dump_dot_graph() const;
     void dump_labels_and_transitions() const;
     void statistics() const;
@@ -212,7 +235,7 @@ public:
     bool is_goal_state(int state) const {
         return goal_states[state];
     }
-    
+
     const std::vector<int> &get_incorporated_variables() const {
         return incorporated_variables;
     }

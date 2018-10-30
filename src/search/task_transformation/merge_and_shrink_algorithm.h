@@ -17,6 +17,8 @@ class SASTask;
 class TransitionSystem;
 }
 
+using namespace task_representation;
+
 namespace task_transformation {
 class FactoredTransitionSystem;
 class LabelReduction;
@@ -42,18 +44,18 @@ class MergeAndShrinkAlgorithm {
     const int shrink_threshold_before_merge;
 
     // Options for pruning
-    const bool prune_unreachable_states;
-    const bool prune_irrelevant_states;
+//    const bool prune_unreachable_states;
+//    const bool prune_irrelevant_states;
 
     const Verbosity verbosity;
     long starting_peak_memory;
 
     // Return true iff fts has been detected to be unsolvable.
-    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
+//    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
     void statistics(int maximum_intermediate_size) const;
     void main_loop(
         FactoredTransitionSystem &fts,
-        const task_representation::SASTask &sas_task,
+        const SASTask &sas_task,
         const utils::Timer &timer);
 
     void report_peak_memory_delta(bool final = false) const;
@@ -61,7 +63,7 @@ public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;
     void warn_on_unusual_options() const;
-    FactoredTransitionSystem build_factored_transition_system(const task_representation::SASTask &sas_task);
+    FactoredTransitionSystem build_factored_transition_system(const SASTask &sas_task);
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

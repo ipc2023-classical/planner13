@@ -102,7 +102,7 @@ fast_downward_plugin(
         task_transformation/factored_transition_system
         task_transformation/fts_factory
         #task_transformation/label_reduction
-        #task_transformation/merge_and_shrink_algorithm
+        task_transformation/merge_and_shrink_algorithm
         #task_transformation/merge_and_shrink_representation
         task_transformation/merge_and_shrink_task_transformation
         task_transformation/plan_reconstruction
@@ -129,7 +129,7 @@ fast_downward_plugin(
         #task_transformation/shrink_strategy
         task_transformation/task_transformation_method
         task_transformation/types
-        #task_transformation/utils
+        task_transformation/utils
     CORE_PLUGIN
     )
 
