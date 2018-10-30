@@ -1,7 +1,7 @@
 #include "factored_transition_system.h"
 
-#include "labels.h"
-#include "transition_system.h"
+#include "../task_representation/labels.h"
+#include "../task_representation/transition_system.h"
 
 #include "../utils/collections.h"
 #include "../utils/memory.h"
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace task_representation {
+namespace task_transformation {
 FTSConstIterator::FTSConstIterator(
     const FactoredTransitionSystem &fts,
     bool end)

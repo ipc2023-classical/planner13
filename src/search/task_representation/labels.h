@@ -1,13 +1,46 @@
 #ifndef FTS_REPRESENTATION_LABELS_H
 #define FTS_REPRESENTATION_LABELS_H
 
-#include "types.h"
-
 #include <memory>
 #include <vector>
 
 namespace task_representation {
 class SASTask;
+
+struct LabelID {
+    int id;
+    LabelID() : id(0) {
+    }
+    explicit LabelID(int id_) :
+    id(id_) {
+    }
+    operator int() const {
+        return id;
+    }
+
+    LabelID & operator++ () {
+        ++id;
+        return *this;
+    }
+};
+
+struct LabelGroupID {
+    public:
+    int id;
+    LabelGroupID() : id(0) {
+    }
+    explicit LabelGroupID(int id_) :
+    id(id_) {
+    }
+    operator int() const {
+        return id;
+    }
+
+    LabelGroupID & operator++ () {
+        ++id;
+        return *this;
+    }
+};
 
 class Label {
     /*
@@ -58,6 +91,24 @@ public:
         return sas_op_indices_by_label[label];
     }
 };
+}
+
+namespace std {
+    template<> struct hash<task_representation::LabelGroupID> {
+    public:
+    size_t operator()(const task_representation::LabelGroupID & g) const
+        {
+            return g.id;
+        }
+    };
+
+    template<> struct hash<task_representation::LabelID> {
+    public:
+    size_t operator()(const task_representation::LabelID & g) const
+        {
+            return g.id;
+        }
+    };
 }
 
 #endif

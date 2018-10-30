@@ -1,5 +1,5 @@
-#ifndef FTS_REPRESENTATION_FTS_SUCCESSOR_GENERATOR_H
-#define FTS_REPRESENTATION_FTS_SUCCESSOR_GENERATOR_H
+#ifndef TASK_REPRESENTATION_FTS_SUCCESSOR_GENERATOR_H
+#define TASK_REPRESENTATION_FTS_SUCCESSOR_GENERATOR_H
 
 #include <memory>
 #include <vector>
@@ -12,7 +12,7 @@ class FTSTask;
 class State;
 
 class FTSSuccessorGenerator {
-    
+
 public:
     explicit FTSSuccessorGenerator(const FTSTask &task_proxy);
     /*

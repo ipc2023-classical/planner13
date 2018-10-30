@@ -1,18 +1,17 @@
 #ifndef TASK_REPRESENTATION_SEARCH_TASK_H
 #define TASK_REPRESENTATION_SEARCH_TASK_H
 
+#include "fact.h"
+#include "labels.h"
+
+#include "../global_state.h"
+#include "../operator_id.h"
+
 #include <memory>
 #include <set>
 #include <unordered_map>
 
 #include <boost/dynamic_bitset.hpp>
-
-#include "types.h"
-
-//#include "../axioms.h"
-#include "fact.h"
-#include "../global_state.h"
-#include "../operator_id.h"
 
 namespace int_packer {
     class IntPacker;

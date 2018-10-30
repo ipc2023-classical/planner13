@@ -1,7 +1,6 @@
 #ifndef FTS_REPRESENTATION_LABEL_EQUIVALENCE_RELATION_H
 #define FTS_REPRESENTATION_LABEL_EQUIVALENCE_RELATION_H
 
-#include "types.h"
 #include "labels.h"
 
 #include <algorithm>
@@ -18,8 +17,7 @@ class LabelGroup {
     std::vector<LabelID> labels;
     int cost;
 public:
-    LabelGroup() : cost(INF) {
-    }
+    LabelGroup();
 
     void set_cost(int cost_) {
         cost = cost_;

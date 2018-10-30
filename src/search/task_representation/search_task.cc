@@ -1,5 +1,6 @@
 ﻿#include "search_task.h"
 
+#include "fts_operators.h"
 #include "fts_task.h"
 #include "label_equivalence_relation.h"
 #include "labels.h"

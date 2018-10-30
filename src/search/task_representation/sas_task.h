@@ -1,9 +1,9 @@
-#ifndef SAS_REPRESENTATION_SAS_TASK_H
-#define SAS_REPRESENTATION_SAS_TASK_H
-
-#include "../operator_id.h"
+#ifndef TASK_REPRESENTATION_SAS_TASK_H
+#define TASK_REPRESENTATION_SAS_TASK_H
 
 #include "sas_operator.h"
+
+#include "../operator_id.h"
 
 #include "../utils/hash.h"
 #include "../utils/collections.h"

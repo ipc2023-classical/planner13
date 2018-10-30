@@ -1,5 +1,5 @@
-#ifndef TASK_REPRESENTATION_FTS_FACTORY_H
-#define TASK_REPRESENTATION_FTS_FACTORY_H
+#ifndef TASK_TRANSFORMATION_FTS_FACTORY_H
+#define TASK_TRANSFORMATION_FTS_FACTORY_H
 
 /*
   Factory for factored transition systems.
@@ -12,12 +12,15 @@
 */
 
 namespace task_representation {
-class FactoredTransitionSystem;
 class SASTask;
+}
+
+namespace task_transformation {
+class FactoredTransitionSystem;
 enum class Verbosity;
 
 extern FactoredTransitionSystem create_factored_transition_system(
-    const SASTask &sas_task, Verbosity verbosity);
+    const task_representation::SASTask &sas_task, Verbosity verbosity);
 }
 
 #endif

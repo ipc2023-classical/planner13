@@ -35,7 +35,7 @@ using options::OptionParser;
 using options::Options;
 using utils::ExitCode;
 
-namespace task_representation {
+namespace task_transformation {
 static void print_time(const utils::Timer &timer, string text) {
     cout << "t=" << timer << " (" << text << ")" << endl;
 }

@@ -1,22 +1,15 @@
 #include "fts_task.h"
 
-#include "factored_transition_system.h"
-#include "fts_factory.h"
-#include "label_equivalence_relation.h"
+#include "fact.h"
 #include "labels.h"
-#include "sas_operator.h"
-#include "sas_task.h"
-#include "state.h"
 #include "transition_system.h"
 
-#include "../utils/collections.h"
-#include "../utils/memory.h"
-#include "../utils/system.h"
-#include "../algorithms/int_packer.h"
+#include "../global_state.h"
 
 #include <cassert>
 
 using namespace std;
+using namespace task_transformation;
 
 
 namespace task_representation {

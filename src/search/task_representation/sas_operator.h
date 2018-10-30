@@ -1,5 +1,5 @@
-#ifndef GLOBAL_OPERATOR_H
-#define GLOBAL_OPERATOR_H
+#ifndef TASK_REPRESENTATION_SAS_OPERATOR_H
+#define TASK_REPRESENTATION_SAS_OPERATOR_H
 
 #include "../global_state.h"
 

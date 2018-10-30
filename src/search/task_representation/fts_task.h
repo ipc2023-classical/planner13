@@ -1,9 +1,5 @@
-#ifndef FTS_REPRESENTATION_FTS_TASK_H
-#define FTS_REPRESENTATION_FTS_TASK_H
-
-#include "types.h"
-
-#include "fts_operators.h"
+#ifndef TASK_REPRESENTATION_FTS_TASK_H
+#define TASK_REPRESENTATION_FTS_TASK_H
 
 #include <memory>
 #include <vector>
@@ -14,8 +10,11 @@ namespace int_packer {
     class IntPacker;
 }
 
-namespace task_representation {
+namespace task_transformation {
 class FactoredTransitionSystem;
+}
+
+namespace task_representation {
 struct FactPair;
 class Labels;
 class SASTask;

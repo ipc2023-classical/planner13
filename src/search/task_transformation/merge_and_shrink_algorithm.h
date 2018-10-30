@@ -1,5 +1,5 @@
-#ifndef TASK_REPRESENTATION_MERGE_AND_SHRINK_ALGORITHM_H
-#define TASK_REPRESENTATION_MERGE_AND_SHRINK_ALGORITHM_H
+#ifndef TASK_TRANSFORMATION_MERGE_AND_SHRINK_ALGORITHM_H
+#define TASK_TRANSFORMATION_MERGE_AND_SHRINK_ALGORITHM_H
 
 #include <memory>
 
@@ -13,13 +13,16 @@ class Timer;
 }
 
 namespace task_representation {
+class SASTask;
+class TransitionSystem;
+}
+
+namespace task_transformation {
 class FactoredTransitionSystem;
 class LabelReduction;
 class MergeAndShrinkRepresentation;
 class MergeStrategyFactory;
-class SASTask;
 class ShrinkStrategy;
-class TransitionSystem;
 enum class Verbosity;
 
 class MergeAndShrinkAlgorithm {
@@ -50,7 +53,7 @@ class MergeAndShrinkAlgorithm {
     void statistics(int maximum_intermediate_size) const;
     void main_loop(
         FactoredTransitionSystem &fts,
-        const SASTask &sas_task,
+        const task_representation::SASTask &sas_task,
         const utils::Timer &timer);
 
     void report_peak_memory_delta(bool final = false) const;
@@ -58,7 +61,7 @@ public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;
     void warn_on_unusual_options() const;
-    FactoredTransitionSystem build_factored_transition_system(const SASTask &sas_task);
+    FactoredTransitionSystem build_factored_transition_system(const task_representation::SASTask &sas_task);
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

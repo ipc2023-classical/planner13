@@ -1,5 +1,5 @@
-#ifndef TASK_REPRESENTATION_FACTORED_TRANSITION_SYSTEM_H
-#define TASK_REPRESENTATION_FACTORED_TRANSITION_SYSTEM_H
+#ifndef TASK_TRANSFORMATION_FACTORED_TRANSITION_SYSTEM_H
+#define TASK_TRANSFORMATION_FACTORED_TRANSITION_SYSTEM_H
 
 #include "types.h"
 
@@ -7,11 +7,16 @@
 #include <vector>
 
 namespace task_representation {
+class Labels;
+class TransitionSystem;
+}
+
+using namespace task_representation;
+
+namespace task_transformation {
 //class Distances;
 class FactoredTransitionSystem;
 //class MergeAndShrinkRepresentation;
-class Labels;
-class TransitionSystem;
 
 class FTSConstIterator {
     /*

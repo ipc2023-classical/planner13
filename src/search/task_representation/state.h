@@ -1,5 +1,5 @@
-#ifndef FTS_REPRESENTATION_STATE_H
-#define FTS_REPRESENTATION_STATE_H
+#ifndef TASK_REPRESENTATION_STATE_H
+#define TASK_REPRESENTATION_STATE_H
 
 #include "fts_task.h"
 #include "fts_operators.h"

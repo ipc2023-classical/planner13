@@ -1,12 +1,15 @@
 #include "label_equivalence_relation.h"
 
-#include "labels.h"
+#include "../task_transformation/types.h"
 
 #include <cassert>
 
 using namespace std;
 
 namespace task_representation {
+LabelGroup::LabelGroup() : cost(task_transformation::INF) {
+}
+
 LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels)
     : labels(labels) {
     label_to_groups.resize(labels.get_size());
@@ -52,7 +55,7 @@ void LabelEquivalenceRelation::apply_label_mapping(
         for (LabelGroupID group_id : group_ids) {
             LabelGroup &label_group = label_groups[group_id];
             // Setting cost to infinity for empty groups does not hurt.
-            label_group.set_cost(INF);
+            label_group.set_cost(task_transformation::INF);
             for (LabelID label_no : label_group) {
                 int cost = labels.get_label_cost(label_no);
                 if (cost < label_group.get_cost()) {

@@ -1,12 +1,15 @@
 #ifndef STATE_REGISTRY_H
 #define STATE_REGISTRY_H
 
-#include "task_representation/fts_task.h"
 #include "global_state.h"
+#include "operator_id.h"
 #include "state_id.h"
 
 #include "algorithms/int_packer.h"
 #include "algorithms/segmented_vector.h"
+
+#include "task_representation/fts_task.h"
+
 #include "utils/hash.h"
 
 #include <set>

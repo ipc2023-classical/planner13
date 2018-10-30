@@ -1,9 +1,9 @@
 #include "merge_and_shrink_task_transformation.h"
 
+#include "factored_transition_system.h"
+#include "merge_and_shrink_algorithm.h"
 #include "plan_reconstruction.h"
 
-#include "../task_representation/merge_and_shrink_algorithm.h"
-#include "../task_representation/factored_transition_system.h"
 #include "../task_representation/fts_task.h"
 #include "../task_representation/labels.h"
 #include "../task_representation/sas_task.h"
@@ -19,8 +19,8 @@ MergeAndShrinkTaskTransformation::MergeAndShrinkTaskTransformation(
 pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     MergeAndShrinkTaskTransformation::transform_task(
         const task_representation::SASTask &sas_task) {
-    task_representation::MergeAndShrinkAlgorithm mas_algorithm(options);
-    task_representation::FactoredTransitionSystem fts =
+    MergeAndShrinkAlgorithm mas_algorithm(options);
+    FactoredTransitionSystem fts =
         mas_algorithm.build_factored_transition_system(sas_task);
 
     // "Renumber" factors

@@ -2,12 +2,14 @@
 
 //#include "distances.h"
 #include "factored_transition_system.h"
-#include "label_equivalence_relation.h"
-#include "labels.h"
 //#include "merge_and_shrink_representation.h"
-#include "sas_task.h"
-#include "transition_system.h"
+
 #include "types.h"
+
+#include "../task_representation/labels.h"
+#include "../task_representation/label_equivalence_relation.h"
+#include "../task_representation/sas_task.h"
+#include "../task_representation/transition_system.h"
 
 #include "../utils/memory.h"
 
@@ -17,8 +19,9 @@
 #include <vector>
 
 using namespace std;
+using namespace task_representation;
 
-namespace task_representation {
+namespace task_transformation {
 class FTSFactory {
     const SASTask &sas_task;
 

@@ -1,7 +1,7 @@
-#ifndef FTS_REPRESENTATION_TRANSITION_SYSTEM_H
-#define FTS_REPRESENTATION_TRANSITION_SYSTEM_H
+#ifndef TASK_REPRESENTATION_TRANSITION_SYSTEM_H
+#define TASK_REPRESENTATION_TRANSITION_SYSTEM_H
 
-#include "types.h"
+#include "labels.h"
 
 #include <iostream>
 #include <memory>

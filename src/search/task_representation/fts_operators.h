@@ -2,7 +2,7 @@
 #define FTS_REPRESENTATION_FTS_OPERATORS_H
 
 #include "fact.h"
-#include "types.h"
+#include "labels.h"
 
 #include "../operator_id.h"
 
