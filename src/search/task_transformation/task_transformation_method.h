@@ -14,7 +14,7 @@ class PlanReconstruction;
 
 class TaskTransformationMethod {
 public:
-    virtual ~TaskTransformationMethod() = 0;
+    virtual ~TaskTransformationMethod() = default;
     virtual std::pair<std::shared_ptr<task_representation::FTSTask>,
         std::shared_ptr<PlanReconstruction>> transform_task(
             const task_representation::SASTask &sas_task) = 0;
