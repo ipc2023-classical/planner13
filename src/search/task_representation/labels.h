@@ -7,41 +7,6 @@
 namespace task_representation {
 class SASTask;
 
-struct LabelID {
-    int id;
-    LabelID() : id(0) {
-    }
-    explicit LabelID(int id_) :
-    id(id_) {
-    }
-    operator int() const {
-        return id;
-    }
-
-    LabelID & operator++ () {
-        ++id;
-        return *this;
-    }
-};
-
-struct LabelGroupID {
-    public:
-    int id;
-    LabelGroupID() : id(0) {
-    }
-    explicit LabelGroupID(int id_) :
-    id(id_) {
-    }
-    operator int() const {
-        return id;
-    }
-
-    LabelGroupID & operator++ () {
-        ++id;
-        return *this;
-    }
-};
-
 class Label {
     /*
       This class implements labels as used by merge-and-shrink transition systems.
@@ -71,9 +36,9 @@ public:
         std::vector<std::unique_ptr<Label>> &&labels,
         int max_size,
         std::vector<std::vector<int>> &&sas_op_indices_by_label);
-    void reduce_labels(const std::vector<LabelID> &old_label_nos);
-    bool is_current_label(LabelID label_no) const;
-    int get_label_cost(LabelID label_no) const;
+    void reduce_labels(const std::vector<int> &old_label_nos);
+    bool is_current_label(int label_no) const;
+    int get_label_cost(int label_no) const;
 
     int get_min_operator_cost() const {
         if(labels.empty()) {
@@ -99,24 +64,6 @@ public:
         return sas_op_indices_by_label[label];
     }
 };
-}
-
-namespace std {
-    template<> struct hash<task_representation::LabelGroupID> {
-    public:
-    size_t operator()(const task_representation::LabelGroupID & g) const
-        {
-            return g.id;
-        }
-    };
-
-    template<> struct hash<task_representation::LabelID> {
-    public:
-    size_t operator()(const task_representation::LabelID & g) const
-        {
-            return g.id;
-        }
-    };
 }
 
 #endif

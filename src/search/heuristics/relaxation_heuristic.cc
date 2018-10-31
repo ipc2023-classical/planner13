@@ -137,7 +137,8 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
             }
             
             std::set<std::vector<Proposition *> > outside_conditions;
-            for(task_representation::LabelID l : gat.label_group) {
+            for(int label_no : gat.label_group) {
+                task_representation::LabelID l(label_no);
                 std::vector<std::vector<Proposition * > > pre_per_ts;
                 const auto & pre_transition_systems = task->get_label_preconditions(l);
                 for (int pre_ts : pre_transition_systems) {

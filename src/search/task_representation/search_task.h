@@ -2,7 +2,7 @@
 #define TASK_REPRESENTATION_SEARCH_TASK_H
 
 #include "fact.h"
-#include "labels.h"
+#include "types.h"
 
 #include "../global_state.h"
 #include "../operator_id.h"

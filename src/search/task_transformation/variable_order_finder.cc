@@ -4,7 +4,6 @@
 
 #include "../globals.h"
 
-#include "../task_utils/causal_graph.h"
 #include "../utils/system.h"
 
 #include <algorithm>
@@ -30,7 +29,9 @@ VariableOrderFinder::VariableOrderFinder(const SASTask &sas_task,
             remaining_vars.push_back(i);
     }
 
-    if (variable_order_type == CG_GOAL_RANDOM || CG_GOAL_LEVEL || GOAL_CG_LEVEL) {
+    if (variable_order_type == CG_GOAL_RANDOM ||
+            variable_order_type == CG_GOAL_LEVEL ||
+            variable_order_type == GOAL_CG_LEVEL) {
         cerr << "Variable orders based on causal graph not implemented" << endl;
         utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
     }

@@ -1,20 +1,21 @@
 #ifndef FTS_REPRESENTATION_LABEL_EQUIVALENCE_RELATION_H
 #define FTS_REPRESENTATION_LABEL_EQUIVALENCE_RELATION_H
 
-#include "labels.h"
+#include "types.h"
 
-#include <algorithm>
+#include <list>
 #include <unordered_set>
 #include <vector>
-#include <cassert>
 
 namespace task_representation {
+class Labels;
+
 class LabelGroup {
     /*
       A label group contains a set of locally equivalent labels, possibly of
       different cost, and stores the minimum cost of all labels of the group.
     */
-    std::vector<LabelID> labels;
+    std::list<int> labels;
     int cost;
 public:
     LabelGroup();
@@ -23,13 +24,11 @@ public:
         cost = cost_;
     }
 
-    void insert(LabelID label) {
-        return labels.push_back(label);
+    LabelIter insert(int label) {
+        return labels.insert(labels.end(), label);
     }
 
-    void erase(LabelID label) {
-        auto pos = std::find(labels.begin(), labels.end(), label);
-        assert (pos != labels.end());
+    void erase(LabelIter pos) {
         labels.erase(pos);
     }
 
@@ -37,11 +36,11 @@ public:
         labels.clear();
     }
 
-    std::vector<LabelID>::const_iterator begin() const {
+    LabelConstIter begin() const {
         return labels.begin();
     }
 
-    std::vector<LabelID>::const_iterator end() const {
+    LabelConstIter end() const {
         return labels.end();
     }
 
@@ -56,18 +55,25 @@ public:
 
 class LabelEquivalenceRelation {
     /*
-      This class groups labels together and allows easy access to the group. It is used by
-      the class TransitionSystem to group locally equivalent labels. Label groups have
-      implicit IDs defined by their index in label_groups.
+      This class groups labels together and allows easy acces to the group
+      and position within a group for every label. It is used by the class
+      TransitionSystem to group locally equivalent labels. Label groups
+      have implicit IDs defined by their index in grouped_labels.
     */
 
     const Labels &labels;
 
-    std::vector<LabelGroup> label_groups;
+    /*
+      NOTE: it is somewhat dangerous to use lists inside vectors and storing
+      iterators to these lists, because whenever the vector needs to be
+      resized, these iterators may become invalid. In the constructor, we
+      make sure to reserve enough memory so reallocation is never needed.
+    */
+    std::vector<LabelGroup> grouped_labels;
     // maps each label to its group's ID and its iterator within the group.
-    std::vector<LabelGroupID> label_to_groups;
+    std::vector<std::pair<LabelGroupID, LabelIter>> label_to_positions;
 
-    void add_label_to_group(LabelGroupID group_id, LabelID label_no);
+    void add_label_to_group(LabelGroupID group_id, int label_no);
 public:
     /*
       Constructs an empty label equivalence relation. It can be filled using
@@ -85,27 +91,27 @@ public:
       label is added to a new group. Furthermore, the costs of the affected
       groups are recomputed.
     */
-    void apply_label_mapping(const std::vector<std::pair<LabelID, std::vector<LabelID>>> &label_mapping,
-                             const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
-
+    void apply_label_mapping(
+        const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
+        const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
     // Moves all labels from one goup into the other
     void move_group_into_group(LabelGroupID from_group_id, LabelGroupID to_group_id);
-    int add_label_group(const std::vector<LabelID> &new_labels);
+    int add_label_group(const std::vector<int> &new_labels);
 
     bool is_empty_group(LabelGroupID group_id) const {
-        return label_groups[group_id].empty();
+        return grouped_labels[group_id].empty();
     }
 
-    LabelGroupID get_group_id(LabelID label_no) const {
-        return label_to_groups[label_no];
+    LabelGroupID get_group_id(int label_no) const {
+        return label_to_positions[label_no].first;
     }
 
     int get_size() const {
-        return label_groups.size();
+        return grouped_labels.size();
     }
 
     const LabelGroup &get_group(LabelGroupID group_id) const {
-        return label_groups.at(group_id);
+        return grouped_labels.at(group_id);
     }
 };
 }

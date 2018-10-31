@@ -357,7 +357,7 @@ void TransitionSystem::apply_label_reduction(
           we cannot find out the group ID of reduced labels anymore.
         */
         unordered_map<int, vector<Transition>> new_label_to_transitions;
-        unordered_set<int> affected_group_ids;
+        unordered_set<LabelGroupID> affected_group_ids;
         for (const pair<int, vector<int>> &mapping: label_mapping) {
             int new_label_no = mapping.first;
             const vector<int> &old_label_nos = mapping.second;
@@ -365,7 +365,7 @@ void TransitionSystem::apply_label_reduction(
             unordered_set<int> seen_group_ids;
             set<Transition> new_label_transitions;
             for (int old_label_no : old_label_nos) {
-                int group_id = label_equivalence_relation->get_group_id(old_label_no);
+                LabelGroupID group_id = label_equivalence_relation->get_group_id(old_label_no);
                 if (seen_group_ids.insert(group_id).second) {
                     affected_group_ids.insert(group_id);
                     const vector<Transition> &transitions = transitions_by_group_id[group_id];
@@ -395,7 +395,7 @@ void TransitionSystem::apply_label_reduction(
 
         // Go over all affected group IDs and remove their transitions if the
         // group is empty.
-        for (int group_id : affected_group_ids) {
+        for (LabelGroupID group_id : affected_group_ids) {
             if (label_equivalence_relation->is_empty_group(group_id)) {
                 utils::release_vector_memory(transitions_by_group_id[group_id]);
             }
@@ -467,7 +467,7 @@ void TransitionSystem::dump_dot_graph() const {
             int src = transition.src;
             int target = transition.target;
             cout << "    node" << src << " -> node" << target << " [label = ";
-            for (auto label_it = label_group.begin();
+            for (LabelConstIter label_it = label_group.begin();
                  label_it != label_group.end(); ++label_it) {
                 if (label_it != label_group.begin())
                     cout << "_";
@@ -485,7 +485,7 @@ void TransitionSystem::dump_labels_and_transitions() const {
         const LabelGroup &label_group = gat.label_group;
 //        cout << "group ID: " << ts_it.get_id() << endl;
         cout << "labels: ";
-        for (auto label_it = label_group.begin();
+        for (LabelConstIter label_it = label_group.begin();
              label_it != label_group.end(); ++label_it) {
             if (label_it != label_group.begin())
                 cout << ",";

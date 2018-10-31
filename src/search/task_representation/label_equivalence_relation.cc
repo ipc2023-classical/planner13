@@ -1,5 +1,7 @@
 #include "label_equivalence_relation.h"
 
+#include "labels.h"
+
 #include "../task_transformation/types.h"
 
 #include <cassert>
@@ -12,25 +14,26 @@ LabelGroup::LabelGroup() : cost(task_transformation::INF) {
 
 LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels)
     : labels(labels) {
-    label_to_groups.resize(labels.get_size());
+    grouped_labels.reserve(labels.get_max_size());
+    label_to_positions.resize(labels.get_max_size());
 }
 
-void LabelEquivalenceRelation::add_label_to_group(LabelGroupID group_id, LabelID label_no) {
-    label_groups[group_id].insert(label_no);
-    label_to_groups[label_no] = group_id;
+void LabelEquivalenceRelation::add_label_to_group(LabelGroupID group_id,
+                                                  int label_no) {
+    LabelIter label_it = grouped_labels[group_id].insert(label_no);
+    label_to_positions[label_no] = make_pair(group_id, label_it);
 
     int label_cost = labels.get_label_cost(label_no);
-    if (label_cost < label_groups[group_id].get_cost()) {
-        label_groups[group_id].set_cost(label_cost);
-    }
+    if (label_cost < grouped_labels[group_id].get_cost())
+        grouped_labels[group_id].set_cost(label_cost);
 }
 
 void LabelEquivalenceRelation::apply_label_mapping(
-    const vector<pair<LabelID, vector<LabelID>>> &label_mapping,
+    const vector<pair<int, vector<int>>> &label_mapping,
     const unordered_set<LabelGroupID> *affected_group_ids) {
-    for (const auto &mapping : label_mapping) {
-        LabelID new_label_no = mapping.first;
-        const auto &old_label_nos = mapping.second;
+    for (const pair<int, vector<int>> &mapping : label_mapping) {
+        int new_label_no = mapping.first;
+        const vector<int> &old_label_nos = mapping.second;
 
         // Add new label to group
         LabelGroupID canonical_group_id = get_group_id(old_label_nos.front());
@@ -41,22 +44,23 @@ void LabelEquivalenceRelation::apply_label_mapping(
         }
 
         // Remove old labels from group
-        for (LabelID old_label_no : old_label_nos) {
+        for (int old_label_no : old_label_nos) {
             if (!affected_group_ids) {
                 assert(canonical_group_id == get_group_id(old_label_no));
             }
-            label_groups[get_group_id(old_label_no)].erase(old_label_no);
+            LabelIter label_it = label_to_positions[old_label_no].second;
+            grouped_labels[get_group_id(old_label_no)].erase(label_it);
         }
     }
 
     if (affected_group_ids) {
         // Recompute the cost of all affected label groups.
-        const auto &group_ids = *affected_group_ids;
+        const unordered_set<LabelGroupID> &group_ids = *affected_group_ids;
         for (LabelGroupID group_id : group_ids) {
-            LabelGroup &label_group = label_groups[group_id];
+            LabelGroup &label_group = grouped_labels[group_id];
             // Setting cost to infinity for empty groups does not hurt.
             label_group.set_cost(task_transformation::INF);
-            for (LabelID label_no : label_group) {
+            for (int label_no : label_group) {
                 int cost = labels.get_label_cost(label_no);
                 if (cost < label_group.get_cost()) {
                     label_group.set_cost(cost);
@@ -66,20 +70,21 @@ void LabelEquivalenceRelation::apply_label_mapping(
     }
 }
 
-void LabelEquivalenceRelation::move_group_into_group(LabelGroupID from_group_id, LabelGroupID to_group_id) {
+void LabelEquivalenceRelation::move_group_into_group(
+    LabelGroupID from_group_id, LabelGroupID to_group_id) {
     assert(!is_empty_group(from_group_id));
     assert(!is_empty_group(to_group_id));
-    LabelGroup &from_group = label_groups[from_group_id];
-    for (LabelID label_no : from_group) {
+    LabelGroup &from_group = grouped_labels[from_group_id];
+    for (int label_no : from_group) {
         add_label_to_group(to_group_id, label_no);
     }
     from_group.clear();
 }
 
-int LabelEquivalenceRelation::add_label_group(const vector<LabelID> &new_labels) {
-    LabelGroupID new_group_id (label_groups.size());
-    label_groups.push_back(LabelGroup());
-    for (LabelID label_no : new_labels) {
+int LabelEquivalenceRelation::add_label_group(const vector<int> &new_labels) {
+    LabelGroupID new_group_id(grouped_labels.size());
+    grouped_labels.push_back(LabelGroup());
+    for (int label_no : new_labels) {
         add_label_to_group(new_group_id, label_no);
     }
     return new_group_id;

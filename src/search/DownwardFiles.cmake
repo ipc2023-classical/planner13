@@ -128,7 +128,9 @@ fast_downward_plugin(
         task_transformation/task_transformation_method
         task_transformation/types
         task_transformation/utils
+        task_transformation/variable_order_finder
     CORE_PLUGIN
+    DEPENDS EQUIVALENCE_RELATION
     )
 
 fast_downward_plugin(

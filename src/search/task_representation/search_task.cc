@@ -165,7 +165,7 @@ void SearchTask::create_fts_operators() {
                         assert(!src_to_target.count(t.src));
                         src_to_target[t.src] = t.target;
                     }
-                    for (LabelID label_id : label_group) {
+                    for (int label_id : label_group) {
                         label_to_info[label_id].relevant_deterministic_transition_systems.push_back(var);
                         label_to_info[label_id].src_to_target_by_ts_index.push_back(src_to_target);
                     }
@@ -174,7 +174,7 @@ void SearchTask::create_fts_operators() {
                     for (const Transition &t : transitions) {
                         targets.insert(t.target);
                     }
-                    for (LabelID label_id : label_group) {
+                    for (int label_id : label_group) {
                         label_to_info[label_id].relevant_non_deterministic_transition_systems.push_back(var);
                         targets_by_label_by_ts_index[label_id].emplace_back(targets.begin(), targets.end());
                     }

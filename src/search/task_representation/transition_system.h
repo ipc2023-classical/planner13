@@ -1,8 +1,7 @@
 #ifndef TASK_REPRESENTATION_TRANSITION_SYSTEM_H
 #define TASK_REPRESENTATION_TRANSITION_SYSTEM_H
 
-#include "labels.h"
-
+#include "types.h"
 #include "../task_transformation/types.h"
 
 #include <iostream>
