@@ -2,8 +2,8 @@
 
 #include "distances.h"
 #include "factored_transition_system.h"
-#include "label_equivalence_relation.h"
-#include "transition_system.h"
+#include "../task_representation/label_equivalence_relation.h"
+#include "../task_representation/transition_system.h"
 
 #include "../option_parser.h"
 #include "../plugin.h"

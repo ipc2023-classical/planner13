@@ -1,14 +1,14 @@
 #include "label_reduction.h"
 
 #include "factored_transition_system.h"
-#include "label_equivalence_relation.h"
+#include "../task_representation/label_equivalence_relation.h"
 #include "../task_representation/labels.h"
-#include "transition_system.h"
+#include "../task_representation/sas_task.h"
+#include "../task_representation/transition_system.h"
 #include "types.h"
 
 #include "../option_parser.h"
 #include "../plugin.h"
-#include "../task_proxy.h"
 
 #include "../algorithms/equivalence_relation.h"
 #include "../utils/collections.h"
@@ -38,11 +38,11 @@ bool LabelReduction::initialized() const {
     return !transition_system_order.empty();
 }
 
-void LabelReduction::initialize(const TaskProxy &task_proxy) {
+void LabelReduction::initialize(const SASTask &sas_task) {
     assert(!initialized());
 
     // Compute the transition system order.
-    size_t max_transition_system_count = task_proxy.get_variables().size() * 2 - 1;
+    size_t max_transition_system_count = sas_task.get_num_variables()  * 2 - 1;
     transition_system_order.reserve(max_transition_system_count);
     if (lr_system_order == REGULAR
         || lr_system_order == RANDOM) {

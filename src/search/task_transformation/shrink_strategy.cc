@@ -1,8 +1,5 @@
 #include "shrink_strategy.h"
 
-#include "factored_transition_system.h"
-#include "transition_system.h"
-
 #include "../plugin.h"
 
 #include <iostream>

@@ -1,9 +1,8 @@
 #include "fts_factory.h"
 
-//#include "distances.h"
+#include "distances.h"
 #include "factored_transition_system.h"
-//#include "merge_and_shrink_representation.h"
-
+#include "merge_and_shrink_representation.h"
 #include "types.h"
 
 #include "../task_representation/labels.h"
@@ -52,6 +51,7 @@ class FTSFactory {
     };
     vector<TransitionSystemData> transition_system_data_by_var;
 
+    unique_ptr<Labels> create_labels();
     void build_label_equivalence_relation(LabelEquivalenceRelation &label_equivalence_relation);
     void build_state_data(int var_no);
     void initialize_transition_system_data(const Labels &labels);
@@ -59,6 +59,9 @@ class FTSFactory {
                         int src_value, int dest_value);
     void build_transitions();
     vector<unique_ptr<TransitionSystem>> create_transition_systems();
+    vector<unique_ptr<MergeAndShrinkRepresentation>> create_mas_representations();
+    vector<unique_ptr<Distances>> create_distances(
+        const vector<unique_ptr<TransitionSystem>> &transition_systems);
 public:
     explicit FTSFactory(const SASTask &sas_task);
 
@@ -66,10 +69,27 @@ public:
       Note: create() may only be called once. We don't worry about
       misuse because the class is only used internally in this file.
     */
-    FactoredTransitionSystem create(Verbosity verbosity);
+    FactoredTransitionSystem create(
+        const bool compute_init_distances,
+        const bool compute_goal_distances,
+        Verbosity verbosity);
 };
 
 FTSFactory::FTSFactory(const SASTask &sas_task) : sas_task(sas_task) {
+}
+
+unique_ptr<Labels> FTSFactory::create_labels() {
+    vector<unique_ptr<Label>> result;
+    vector<vector<int>> sas_op_indices_by_label;
+    int num_ops = sas_task.get_num_operators();
+    int max_num_labels = (num_ops ? num_ops * 2 - 1 : 0);
+    result.reserve(max_num_labels);
+    sas_op_indices_by_label.reserve(max_num_labels);
+    for (int index = 0; index < num_ops; ++index) {
+        result.push_back(utils::make_unique_ptr<Label>(sas_task.get_operator_cost(index, false)));
+        sas_op_indices_by_label.push_back({index});
+    }
+    return utils::make_unique_ptr<Labels>(move(result), max_num_labels, move(sas_op_indices_by_label));
 }
 
 void FTSFactory::build_label_equivalence_relation(
@@ -111,8 +131,7 @@ void FTSFactory::initialize_transition_system_data(const Labels &labels) {
         ts_data.incorporated_variables.push_back(var_no);
         ts_data.label_equivalence_relation = utils::make_unique_ptr<LabelEquivalenceRelation>(labels);
         build_label_equivalence_relation(*ts_data.label_equivalence_relation);
-        // TODO: max num labels if reducing labels!
-        ts_data.transitions_by_label.resize(num_labels);
+        ts_data.transitions_by_label.resize(labels.get_max_size());
         ts_data.relevant_labels.resize(num_labels, false);
         build_state_data(var_no);
     }
@@ -260,10 +279,12 @@ vector<unique_ptr<TransitionSystem>> FTSFactory::create_transition_systems() {
     // Create the actual TransitionSystem objects.
     int num_variables = sas_task.get_num_variables();
 
-    // TODO: reserve space for merges when we want to add merging!
+    // We reserve space for the transition systems added later by merging.
     vector<unique_ptr<TransitionSystem>> result;
+    assert(num_variables >= 1);
+    result.reserve(num_variables * 2 - 1);
 
-    constexpr bool compute_label_equivalence_relation = true;
+    const bool compute_label_equivalence_relation = true;
     for (int var_no = 0; var_no < num_variables; ++var_no) {
         TransitionSystemData &ts_data = transition_system_data_by_var[var_no];
         result.push_back(utils::make_unique_ptr<TransitionSystem>(
@@ -280,26 +301,77 @@ vector<unique_ptr<TransitionSystem>> FTSFactory::create_transition_systems() {
     return result;
 }
 
-FactoredTransitionSystem FTSFactory::create(Verbosity verbosity) {
+vector<unique_ptr<MergeAndShrinkRepresentation>> FTSFactory::create_mas_representations() {
+    // Create the actual MergeAndShrinkRepresentation objects.
+    int num_variables = sas_task.get_num_variables();
+
+    // We reserve space for the transition systems added later by merging.
+    vector<unique_ptr<MergeAndShrinkRepresentation>> result;
+    assert(num_variables >= 1);
+    result.reserve(num_variables * 2 - 1);
+
+    for (int var_no = 0; var_no < num_variables; ++var_no) {
+        int range = sas_task.get_variable_domain_size(var_no);
+        result.push_back(
+            utils::make_unique_ptr<MergeAndShrinkRepresentationLeaf>(var_no, range));
+    }
+    return result;
+}
+
+vector<unique_ptr<Distances>> FTSFactory::create_distances(
+    const vector<unique_ptr<TransitionSystem>> &transition_systems) {
+    // Create the actual Distances objects.
+    int num_variables = sas_task.get_num_variables();
+
+    // We reserve space for the transition systems added later by merging.
+    vector<unique_ptr<Distances>> result;
+    assert(num_variables >= 1);
+    result.reserve(num_variables * 2 - 1);
+
+    for (int var_no = 0; var_no < num_variables; ++var_no) {
+        result.push_back(
+            utils::make_unique_ptr<Distances>(*transition_systems[var_no]));
+    }
+    return result;
+}
+
+FactoredTransitionSystem FTSFactory::create(
+    const bool compute_init_distances,
+    const bool compute_goal_distances,
+    Verbosity verbosity) {
     if (verbosity >= Verbosity::NORMAL) {
         cout << "Building atomic transition systems... " << endl;
     }
 
-    unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(sas_task);
+    unique_ptr<Labels> labels = create_labels();
 
     initialize_transition_system_data(*labels);
     build_transitions();
     vector<unique_ptr<TransitionSystem>> transition_systems =
         create_transition_systems();
+    vector<unique_ptr<MergeAndShrinkRepresentation>> mas_representations =
+        create_mas_representations();
+    vector<unique_ptr<Distances>> distances =
+        create_distances(transition_systems);
 
     return FactoredTransitionSystem(
         move(labels),
         move(transition_systems),
+        move(mas_representations),
+        move(distances),
+        compute_init_distances,
+        compute_goal_distances,
         verbosity);
 }
 
 FactoredTransitionSystem create_factored_transition_system(
-    const SASTask &sas_task, Verbosity verbosity) {
-    return FTSFactory(sas_task).create(verbosity);
+    const SASTask &sas_task,     
+    const bool compute_init_distances,
+    const bool compute_goal_distances,
+    Verbosity verbosity) {
+    return FTSFactory(sas_task).create(
+        compute_init_distances,
+        compute_goal_distances,
+        verbosity);
 }
 }

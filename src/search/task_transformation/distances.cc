@@ -1,7 +1,7 @@
 #include "distances.h"
 
-#include "label_equivalence_relation.h"
-#include "transition_system.h"
+#include "../task_representation/label_equivalence_relation.h"
+#include "../task_representation/transition_system.h"
 
 #include "../algorithms/priority_queues.h"
 

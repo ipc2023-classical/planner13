@@ -4,7 +4,6 @@
 #include "merge_scoring_function.h"
 
 namespace task_transformation {
-class TransitionSystem;
 class MergeScoringFunctionDFP : public MergeScoringFunction {
     std::vector<int> compute_label_ranks(
         const FactoredTransitionSystem &fts, int index) const;

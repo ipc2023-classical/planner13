@@ -64,13 +64,17 @@ public:
 */
 class Labels {
     std::vector<std::unique_ptr<Label>> labels;
+    int max_size; // the maximum number of labels that can be created
     std::vector<std::vector<int>> sas_op_indices_by_label;
 public:
-    explicit Labels(const SASTask & sas_task);
-    ~Labels() = default;
+    Labels(
+        std::vector<std::unique_ptr<Label>> &&labels,
+        int max_size,
+        std::vector<std::vector<int>> &&sas_op_indices_by_label);
     void reduce_labels(const std::vector<LabelID> &old_label_nos);
     bool is_current_label(LabelID label_no) const;
     int get_label_cost(LabelID label_no) const;
+
     int get_min_operator_cost() const {
         if(labels.empty()) {
             return 0;
@@ -85,6 +89,10 @@ public:
     void dump_labels() const;
     int get_size() const {
         return labels.size();
+    }
+
+    int get_max_size() const {
+        return max_size;
     }
 
     const std::vector<int> &get_sas_op_indices_for_label(int label) const {

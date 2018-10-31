@@ -20,7 +20,10 @@ class FactoredTransitionSystem;
 enum class Verbosity;
 
 extern FactoredTransitionSystem create_factored_transition_system(
-    const task_representation::SASTask &sas_task, Verbosity verbosity);
+    const task_representation::SASTask &sas_task, 
+    const bool compute_init_distances,
+    const bool compute_goal_distances,
+    Verbosity verbosity);
 }
 
 #endif

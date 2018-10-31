@@ -4,8 +4,6 @@
 #include <memory>
 #include <vector>
 
-class TaskProxy;
-
 namespace equivalence_relation {
 class EquivalenceRelation;
 }
@@ -13,6 +11,12 @@ class EquivalenceRelation;
 namespace options {
 class Options;
 }
+
+namespace task_representation {
+class SASTask;
+}
+
+using namespace task_representation;
 
 namespace utils {
 class RandomNumberGenerator;
@@ -75,7 +79,7 @@ class LabelReduction {
         const FactoredTransitionSystem &fts) const;
 public:
     explicit LabelReduction(const options::Options &options);
-    void initialize(const TaskProxy &task_proxy);
+    void initialize(const SASTask &sas_task);
     bool reduce(
         const std::pair<int, int> &next_merge,
         FactoredTransitionSystem &fts,

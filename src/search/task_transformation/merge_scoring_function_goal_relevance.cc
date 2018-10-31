@@ -1,7 +1,7 @@
 #include "merge_scoring_function_goal_relevance.h"
 
 #include "factored_transition_system.h"
-#include "transition_system.h"
+#include "../task_representation/transition_system.h"
 #include "utils.h"
 
 #include "../options/option_parser.h"

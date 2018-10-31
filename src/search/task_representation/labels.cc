@@ -11,15 +11,13 @@
 using namespace std;
 
 namespace task_representation {
-Labels::Labels(const SASTask & sas_task) {
-    int num_ops = sas_task.get_num_operators();
-    int max_num_labels = (num_ops ? num_ops * 2 - 1 : 0);
-    labels.reserve(max_num_labels);
-    sas_op_indices_by_label.reserve(max_num_labels);
-    for (int index = 0; index < num_ops; ++index) {
-        labels.push_back(utils::make_unique_ptr<Label>(sas_task.get_operator_cost(index, false)));
-        sas_op_indices_by_label.push_back({index});
-    }
+Labels::Labels(
+    vector<unique_ptr<Label>> &&labels,
+    int max_size,
+    vector<vector<int>> &&sas_op_indices_by_label)
+    : labels(move(labels)),
+      max_size(max_size),
+      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
 }
 
 void Labels::reduce_labels(const vector<LabelID> &old_label_nos) {
