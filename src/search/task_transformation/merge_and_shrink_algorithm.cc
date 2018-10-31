@@ -378,15 +378,15 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         OptionParser::NONE);
 
     // Pruning options.
-    parser.add_option<bool>(
-        "prune_unreachable_states",
-        "If true, prune abstract states unreachable from the initial state.",
-        "true");
-    parser.add_option<bool>(
-        "prune_irrelevant_states",
-        "If true, prune abstract states from which no goal state can be "
-        "reached.",
-        "true");
+//    parser.add_option<bool>(
+//        "prune_unreachable_states",
+//        "If true, prune abstract states unreachable from the initial state.",
+//        "true");
+//    parser.add_option<bool>(
+//        "prune_irrelevant_states",
+//        "If true, prune abstract states from which no goal state can be "
+//        "reached.",
+//        "true");
 
     add_transition_system_size_limit_options_to_parser(parser);
 

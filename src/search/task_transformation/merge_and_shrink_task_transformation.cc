@@ -9,6 +9,8 @@
 #include "../task_representation/sas_task.h"
 #include "../task_representation/transition_system.h"
 
+#include "../plugin.h"
+
 using namespace std;
 
 namespace task_transformation {
@@ -44,4 +46,16 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     // of factors and labels to it.
     return make_pair(fts_task, plan_reconstruction);
 }
+
+static shared_ptr<MergeAndShrinkTaskTransformation> _parse(options::OptionParser &parser) {
+    add_merge_and_shrink_algorithm_options_to_parser(parser);
+
+    options::Options opts = parser.parse();
+    if (parser.dry_run())
+        return nullptr;
+    else
+        return make_shared<MergeAndShrinkTaskTransformation>(opts);
+}
+
+static options::PluginShared<MergeAndShrinkTaskTransformation> _plugin("transform_merge_and_shrink", _parse);
 }
