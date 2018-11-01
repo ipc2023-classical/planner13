@@ -43,6 +43,7 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
 
     // Renumber labels consecutively
     unique_ptr<Labels> labels = fts.extract_labels();
+    // TODO: extract label map and update it
     int num_labels = labels->get_num_active_entries();
     cout << "Number of remaining labels: " << num_labels << endl;
     vector<unique_ptr<task_representation::Label>> active_labels;

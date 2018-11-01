@@ -4,6 +4,10 @@
 #include <memory>
 #include <vector>
 
+namespace task_transformation {
+class LabelMap;
+}
+
 namespace task_representation {
 class SASTask;
 
@@ -32,6 +36,7 @@ class Labels {
     int max_size; // the maximum number of labels that can be created
     int num_active_entries; // the number of valid indices in labels
 //    std::vector<std::vector<int>> sas_op_indices_by_label;
+    std::unique_ptr<task_transformation::LabelMap> label_map;
 public:
     Labels(
         std::vector<std::unique_ptr<Label>> &&labels,

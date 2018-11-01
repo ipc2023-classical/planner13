@@ -1,5 +1,7 @@
 #include "labels.h"
 
+#include "label_map.h"
+
 #include "../utils/collections.h"
 #include "../utils/memory.h"
 
@@ -19,6 +21,8 @@ Labels::Labels(
       max_size(max_size),
       num_active_entries(this->labels.size()) {
 //      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
+    label_map = utils::make_unique_ptr<task_transformation::LabelMap>(
+        this->labels.size());
 }
 
 void Labels::reduce_labels(const vector<int> &old_label_nos) {
@@ -33,6 +37,8 @@ void Labels::reduce_labels(const vector<int> &old_label_nos) {
     }
     labels.push_back(utils::make_unique_ptr<Label>(new_label_cost));
     num_active_entries -= (old_label_nos.size() - 1);
+    int new_label_no = labels.size() - 1;
+    label_map->update(new_label_no, old_label_nos);
 }
 
 unique_ptr<Label> Labels::extract_label(int label_no) {
