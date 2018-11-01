@@ -50,6 +50,10 @@ unique_ptr<Label> Labels::extract_label(int label_no) {
     return move(labels[label_no]);
 }
 
+unique_ptr<task_transformation::LabelMap> Labels::extract_label_map() {
+    return move(label_map);
+}
+
 bool Labels::is_current_label(int label_no) const {
     assert(utils::in_bounds(label_no, labels));
     return labels[label_no] != nullptr;

@@ -1,7 +1,9 @@
 #include "task_transformation_merge_and_shrink.h"
 
 #include "factored_transition_system.h"
+#include "label_map.h"
 #include "merge_and_shrink_algorithm.h"
+#include "merge_and_shrink_representation.h"
 #include "plan_reconstruction.h"
 
 #include "../task_representation/fts_task.h"
@@ -33,17 +35,19 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     cout << "Number of remaining factors: " << num_factors << endl;
     vector<unique_ptr<task_representation::TransitionSystem>>
         transition_systems;
+    vector<unique_ptr<MergeAndShrinkRepresentation>> mas_representations;
     transition_systems.reserve(num_factors);
+    mas_representations.reserve(num_factors);
     for (int ts_index : fts) {
         if (fts.is_active(ts_index)) {
             transition_systems.push_back(fts.extract_transition_system(ts_index));
+            mas_representations.push_back(fts.extract_mas_representation(ts_index));
         }
     }
     cout << "Done renumbering factors." << endl;
 
     // Renumber labels consecutively
     unique_ptr<Labels> labels = fts.extract_labels();
-    // TODO: extract label map and update it
     int num_labels = labels->get_num_active_entries();
     cout << "Number of remaining labels: " << num_labels << endl;
     vector<unique_ptr<task_representation::Label>> active_labels;
@@ -60,6 +64,10 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     cout << "Renumbering labels: " << label_mapping << endl;
     for (unique_ptr<TransitionSystem> &ts : transition_systems) {
         ts->renumber_labels(label_mapping);
+    }
+    unique_ptr<LabelMap> label_map = labels->extract_label_map();
+    for (const pair<int, int> &new_and_old_label : label_mapping) {
+        label_map->update(new_and_old_label.first, vector<int>{new_and_old_label.second});
     }
     cout << "Done renumbering labels." << endl;
 

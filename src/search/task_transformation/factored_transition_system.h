@@ -125,6 +125,7 @@ public:
       Various extraction methods, rendering the FTS invalid.
     */
     std::unique_ptr<TransitionSystem> extract_transition_system(int index);
+    std::unique_ptr<MergeAndShrinkRepresentation> extract_mas_representation(int index);
     std::unique_ptr<Labels> extract_labels();
 
     void statistics(int index) const;

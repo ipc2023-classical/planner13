@@ -45,6 +45,7 @@ public:
     ~Labels();
     void reduce_labels(const std::vector<int> &old_label_nos);
     std::unique_ptr<Label> extract_label(int label_no);
+    std::unique_ptr<task_transformation::LabelMap> extract_label_map();
     bool is_current_label(int label_no) const;
     int get_label_cost(int label_no) const;
     void dump_labels() const;

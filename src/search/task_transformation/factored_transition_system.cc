@@ -196,6 +196,11 @@ unique_ptr<TransitionSystem> FactoredTransitionSystem::extract_transition_system
     return move(transition_systems[index]);
 }
 
+unique_ptr<MergeAndShrinkRepresentation> FactoredTransitionSystem::extract_mas_representation(int index) {
+    assert(is_active(index));
+    return move(mas_representations[index]);
+}
+
 unique_ptr<Labels> FactoredTransitionSystem::extract_labels() {
     return move(labels);
 }
