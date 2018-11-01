@@ -1,4 +1,4 @@
-#include "merge_and_shrink_task_transformation.h"
+#include "task_transformation_merge_and_shrink.h"
 
 #include "factored_transition_system.h"
 #include "merge_and_shrink_algorithm.h"
@@ -14,12 +14,12 @@
 using namespace std;
 
 namespace task_transformation {
-MergeAndShrinkTaskTransformation::MergeAndShrinkTaskTransformation(
+TaskTransformationMergeAndShrink::TaskTransformationMergeAndShrink(
     const Options &options) : options(options) {
 }
 
 pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
-    MergeAndShrinkTaskTransformation::transform_task(
+    TaskTransformationMergeAndShrink::transform_task(
         const task_representation::SASTask &sas_task) {
     MergeAndShrinkAlgorithm mas_algorithm(options);
     FactoredTransitionSystem fts =
@@ -47,15 +47,15 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     return make_pair(fts_task, plan_reconstruction);
 }
 
-static shared_ptr<MergeAndShrinkTaskTransformation> _parse(options::OptionParser &parser) {
+static shared_ptr<TaskTransformationMergeAndShrink> _parse(options::OptionParser &parser) {
     add_merge_and_shrink_algorithm_options_to_parser(parser);
 
     options::Options opts = parser.parse();
     if (parser.dry_run())
         return nullptr;
     else
-        return make_shared<MergeAndShrinkTaskTransformation>(opts);
+        return make_shared<TaskTransformationMergeAndShrink>(opts);
 }
 
-static options::PluginShared<MergeAndShrinkTaskTransformation> _plugin("transform_merge_and_shrink", _parse);
+static options::PluginShared<TaskTransformationMergeAndShrink> _plugin("transform_merge_and_shrink", _parse);
 }

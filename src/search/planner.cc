@@ -7,14 +7,14 @@
 
 #include "task_representation/sas_task.h"
 
-#include "task_transformation/task_transformation_method.h"
+#include "task_transformation/task_transformation.h"
 
 #include <iostream>
 
 using namespace std;
 using utils::ExitCode;
 
-using task_transformation::TaskTransformationMethod;
+using task_transformation::TaskTransformation;
 
 int main(int argc, const char **argv) {
     utils::register_event_handlers();
@@ -29,7 +29,7 @@ int main(int argc, const char **argv) {
         g_log << "Main task constructed" << endl;
     }
     
-    shared_ptr<TaskTransformationMethod> transformer;
+    shared_ptr<TaskTransformation> transformer;
 
     // The command line is parsed twice: once in dry-run mode, to check for simple input
     // errors, and then in normal mode.

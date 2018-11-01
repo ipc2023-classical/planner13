@@ -27,7 +27,7 @@ namespace landmarks {
 class LandmarkFactory;
 }
 
-using task_transformation::TaskTransformationMethod;
+using task_transformation::TaskTransformation;
 
 namespace options {
 const string OptionParser::NONE = "<none>";
@@ -172,7 +172,7 @@ shared_ptr<SearchEngine> OptionParser::parse_cmd_line(
     return parse_cmd_line_aux(args, dry_run);
 }
 
-    shared_ptr<TaskTransformationMethod> OptionParser::parse_cmd_line_transform(
+    shared_ptr<TaskTransformation> OptionParser::parse_cmd_line_transform(
     int argc, const char **argv, bool dry_run, bool is_unit_cost) {
     vector<string> args;
     bool active = true;
@@ -198,9 +198,9 @@ shared_ptr<SearchEngine> OptionParser::parse_cmd_line(
     return parse_cmd_line_transform_aux(args, dry_run);
 }
    
-shared_ptr<TaskTransformationMethod> OptionParser::parse_cmd_line_transform_aux(
+shared_ptr<TaskTransformation> OptionParser::parse_cmd_line_transform_aux(
     const vector<string> &args, bool dry_run) {
-    shared_ptr<TaskTransformationMethod> task_transformation;
+    shared_ptr<TaskTransformation> task_transformation;
     for (size_t i = 0; i < args.size(); ++i) {
         string arg = args[i];
         bool is_last = (i == args.size() - 1);
@@ -209,7 +209,7 @@ shared_ptr<TaskTransformationMethod> OptionParser::parse_cmd_line_transform_aux(
                 throw ArgError("missing argument after --transform");
             ++i;
             OptionParser parser(args[i], dry_run);
-            task_transformation = parser.start_parsing<shared_ptr<TaskTransformationMethod>>();
+            task_transformation = parser.start_parsing<shared_ptr<TaskTransformation>>();
         } 
     }
     return task_transformation;

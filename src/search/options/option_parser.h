@@ -10,7 +10,7 @@
 
 class SearchEngine;
 namespace task_transformation {
-    class TaskTransformationMethod;
+    class TaskTransformation;
 }
 
 namespace options {
@@ -38,7 +38,7 @@ class OptionParser {
     static std::shared_ptr<SearchEngine> parse_cmd_line_aux(
         const std::vector<std::string> &args, bool dry_run);
 
-    static std::shared_ptr<task_transformation::TaskTransformationMethod> parse_cmd_line_transform_aux(
+    static std::shared_ptr<task_transformation::TaskTransformation> parse_cmd_line_transform_aux(
         const std::vector<std::string> &args, bool dry_run);
 
 
@@ -111,7 +111,7 @@ public:
     static std::shared_ptr<SearchEngine> parse_cmd_line(
         int argc, const char **argv, bool dry_run, bool is_unit_cost);
 
-    static std::shared_ptr<task_transformation::TaskTransformationMethod> parse_cmd_line_transform(
+    static std::shared_ptr<task_transformation::TaskTransformation> parse_cmd_line_transform(
         int argc, const char **argv, bool dry_run, bool is_unit_cost);
 
     static std::string usage(const std::string &progname);

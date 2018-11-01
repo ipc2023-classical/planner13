@@ -104,7 +104,6 @@ fast_downward_plugin(
         task_transformation/label_reduction
         task_transformation/merge_and_shrink_algorithm
         task_transformation/merge_and_shrink_representation
-        task_transformation/merge_and_shrink_task_transformation
         task_transformation/plan_reconstruction
         task_transformation/merge_scoring_function
         task_transformation/merge_scoring_function_dfp
@@ -125,7 +124,8 @@ fast_downward_plugin(
         task_transformation/merge_tree_factory_linear
         task_transformation/shrink_bisimulation
         task_transformation/shrink_strategy
-        task_transformation/task_transformation_method
+        task_transformation/task_transformation
+        task_transformation/task_transformation_merge_and_shrink
         task_transformation/types
         task_transformation/utils
         task_transformation/variable_order_finder
