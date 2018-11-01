@@ -172,7 +172,7 @@ shared_ptr<SearchEngine> OptionParser::parse_cmd_line(
     return parse_cmd_line_aux(args, dry_run);
 }
 
-    shared_ptr<TaskTransformation> OptionParser::parse_cmd_line_transform(
+shared_ptr<TaskTransformation> OptionParser::parse_cmd_line_transform(
     int argc, const char **argv, bool dry_run, bool is_unit_cost) {
     vector<string> args;
     bool active = true;
@@ -248,6 +248,12 @@ shared_ptr<SearchEngine> OptionParser::parse_cmd_line_aux(
             ++i;
             OptionParser parser(args[i], dry_run);
             engine = parser.start_parsing<shared_ptr<SearchEngine>>();
+        } else if (arg == "--transform") {
+            if (is_last)
+                throw ArgError("missing argument after --transform");
+            ++i;
+            // Do not parse transformation again since we did before already.
+            continue;
         } else if (arg == "--help" && dry_run) {
             cout << "Help:" << endl;
             bool txt2tags = false;

@@ -13,24 +13,31 @@ using namespace std;
 namespace task_representation {
 Labels::Labels(
     vector<unique_ptr<Label>> &&labels,
-    int max_size,
-    vector<vector<int>> &&sas_op_indices_by_label)
+    int max_size)
+//    vector<vector<int>> &&sas_op_indices_by_label)
     : labels(move(labels)),
       max_size(max_size),
-      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
+      num_active_entries(this->labels.size()) {
+//      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
 }
 
 void Labels::reduce_labels(const vector<int> &old_label_nos) {
     int new_label_cost = labels[old_label_nos[0]]->get_cost();
-    sas_op_indices_by_label.push_back(vector<int>());
+//    sas_op_indices_by_label.push_back(vector<int>());
     for (size_t i = 0; i < old_label_nos.size(); ++i) {
         int old_label_no = old_label_nos[i];
         labels[old_label_no] = nullptr;
-        const vector<int> &ops = sas_op_indices_by_label[old_label_no];
-        sas_op_indices_by_label.back().insert(sas_op_indices_by_label.back().end(), ops.begin(), ops.end());
-        sas_op_indices_by_label[old_label_no].clear();
+//        const vector<int> &ops = sas_op_indices_by_label[old_label_no];
+//        sas_op_indices_by_label.back().insert(sas_op_indices_by_label.back().end(), ops.begin(), ops.end());
+//        sas_op_indices_by_label[old_label_no].clear();
     }
     labels.push_back(utils::make_unique_ptr<Label>(new_label_cost));
+    num_active_entries -= (old_label_nos.size() - 1);
+}
+
+unique_ptr<Label> Labels::extract_label(int label_no) {
+    assert(is_current_label(label_no));
+    return move(labels[label_no]);
 }
 
 bool Labels::is_current_label(int label_no) const {

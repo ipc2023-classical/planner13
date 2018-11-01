@@ -80,16 +80,16 @@ FTSFactory::FTSFactory(const SASTask &sas_task) : sas_task(sas_task) {
 
 unique_ptr<Labels> FTSFactory::create_labels() {
     vector<unique_ptr<Label>> result;
-    vector<vector<int>> sas_op_indices_by_label;
+//    vector<vector<int>> sas_op_indices_by_label;
     int num_ops = sas_task.get_num_operators();
     int max_num_labels = (num_ops ? num_ops * 2 - 1 : 0);
     result.reserve(max_num_labels);
-    sas_op_indices_by_label.reserve(max_num_labels);
+//    sas_op_indices_by_label.reserve(max_num_labels);
     for (int index = 0; index < num_ops; ++index) {
         result.push_back(utils::make_unique_ptr<Label>(sas_task.get_operator_cost(index, false)));
-        sas_op_indices_by_label.push_back({index});
+//        sas_op_indices_by_label.push_back({index});
     }
-    return utils::make_unique_ptr<Labels>(move(result), max_num_labels, move(sas_op_indices_by_label));
+    return utils::make_unique_ptr<Labels>(move(result), max_num_labels);
 }
 
 void FTSFactory::build_label_equivalence_relation(

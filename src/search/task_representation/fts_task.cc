@@ -15,28 +15,34 @@ using namespace task_transformation;
 namespace task_representation {
 FTSTask::FTSTask(
     vector<unique_ptr<TransitionSystem>> &&transition_systems,
-    unique_ptr<Labels> labels)
+    vector<unique_ptr<Label>> &&labels)
     : transition_systems(move(transition_systems)),
       labels(move(labels)) {
 }
 
 FTSTask::~FTSTask() {
-    labels = nullptr;
     for (auto &transition_system : transition_systems) {
         transition_system = nullptr;
+    }
+    for (auto &label : labels) {
+        label = nullptr;
     }
 }
 
 int FTSTask::get_label_cost(int label) const {
-    return labels->get_label_cost(LabelID(label));
-}
-
-int FTSTask::get_num_labels() const {
-    return labels->get_size();
+    return labels[label]->get_cost();
 }
 
 int FTSTask::get_min_operator_cost() const {
-    return labels->get_min_operator_cost();
+    if (labels.empty()) {
+        return 0;
+    }
+    assert(labels[0]);
+    int minimum_cost = labels[0]->get_cost();
+    for (const auto & label : labels) {
+        minimum_cost = std::min(minimum_cost, label->get_cost());
+    }
+    return minimum_cost;
 }
 
 bool FTSTask::is_goal_state(const GlobalState & state) const {
@@ -66,6 +72,4 @@ const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
     assert(label >= 0 && label < static_cast<int>(label_preconditions.size()));
     return label_preconditions[label];
 }
-
-    
 }

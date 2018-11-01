@@ -25,8 +25,10 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     FactoredTransitionSystem fts =
         mas_algorithm.build_factored_transition_system(sas_task);
 
-    // "Renumber" factors
+    cout << "Extracting transition systems and labels..." << endl;
+    // TODO: "Renumber" factors
     int num_factors = fts.get_num_active_entries();
+    cout << "Number of remaining factors: " << num_factors << endl;
     vector<unique_ptr<task_representation::TransitionSystem>>
         transition_systems;
     transition_systems.reserve(num_factors);
@@ -36,11 +38,22 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
         }
     }
 
-    // TODO: renumber label groups
-    unique_ptr<task_representation::Labels> labels = fts.extract_labels();
+    // TODO: "Renumber" labels; need to use label reduction for this because
+    // otherwise the labels are not renumbered in the transition systems
+    unique_ptr<Labels> labels = fts.extract_labels();
+    int num_labels = labels->get_num_active_entries();
+    cout << "Number of remaining labels: " << num_labels << endl;
+    vector<unique_ptr<task_representation::Label>> active_labels;
+    active_labels.reserve(num_labels);
+    for (int label_no = 0; label_no < labels->get_size(); ++label_no) {
+        if (labels->is_current_label(label_no)) {
+            active_labels.push_back(labels->extract_label(label_no));
+        }
+    }
 
+    cout << "Collection information on plan reconstruction..." << endl;
     shared_ptr<task_representation::FTSTask> fts_task =
-        make_shared<task_representation::FTSTask>(move(transition_systems), move(labels));
+        make_shared<task_representation::FTSTask>(move(transition_systems), move(active_labels));
     shared_ptr<PlanReconstruction> plan_reconstruction = nullptr;
     // TODO: get plan reconstruction from fts and add the final "renumbering"
     // of factors and labels to it.
@@ -49,8 +62,8 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
 
 static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {
     add_merge_and_shrink_algorithm_options_to_parser(parser);
-
     options::Options opts = parser.parse();
+    handle_shrink_limit_options_defaults(opts);
     if (parser.dry_run())
         return nullptr;
     else
