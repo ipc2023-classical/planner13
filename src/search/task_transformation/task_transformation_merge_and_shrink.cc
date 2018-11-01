@@ -15,7 +15,7 @@ using namespace std;
 
 namespace task_transformation {
 TaskTransformationMergeAndShrink::TaskTransformationMergeAndShrink(
-    const Options &options) : options(options) {
+    const Options &options) : TaskTransformation(), options(options) {
 }
 
 pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
@@ -47,7 +47,7 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     return make_pair(fts_task, plan_reconstruction);
 }
 
-static shared_ptr<TaskTransformationMergeAndShrink> _parse(options::OptionParser &parser) {
+static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {
     add_merge_and_shrink_algorithm_options_to_parser(parser);
 
     options::Options opts = parser.parse();
@@ -57,5 +57,5 @@ static shared_ptr<TaskTransformationMergeAndShrink> _parse(options::OptionParser
         return make_shared<TaskTransformationMergeAndShrink>(opts);
 }
 
-static options::PluginShared<TaskTransformationMergeAndShrink> _plugin("transform_merge_and_shrink", _parse);
+static options::PluginShared<TaskTransformation> _plugin("transform_merge_and_shrink", _parse);
 }
