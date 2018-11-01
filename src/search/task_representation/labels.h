@@ -42,6 +42,7 @@ public:
         std::vector<std::unique_ptr<Label>> &&labels,
         int max_size);
 //        std::vector<std::vector<int>> &&sas_op_indices_by_label);
+    ~Labels();
     void reduce_labels(const std::vector<int> &old_label_nos);
     std::unique_ptr<Label> extract_label(int label_no);
     bool is_current_label(int label_no) const;

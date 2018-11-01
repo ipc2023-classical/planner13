@@ -1,6 +1,6 @@
 #include "labels.h"
 
-#include "label_map.h"
+#include "../task_transformation/label_map.h"
 
 #include "../utils/collections.h"
 #include "../utils/memory.h"
@@ -23,6 +23,10 @@ Labels::Labels(
 //      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
     label_map = utils::make_unique_ptr<task_transformation::LabelMap>(
         this->labels.size());
+}
+
+// Due to the LabelMap pointer
+Labels::~Labels() {
 }
 
 void Labels::reduce_labels(const vector<int> &old_label_nos) {
