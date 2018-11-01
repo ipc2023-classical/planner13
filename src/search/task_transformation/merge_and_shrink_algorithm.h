@@ -32,6 +32,7 @@ class MergeAndShrinkAlgorithm {
     // unique pointers.
     std::shared_ptr<MergeStrategyFactory> merge_strategy_factory;
     std::shared_ptr<ShrinkStrategy> shrink_strategy;
+    bool shrink_atomic_fts;
     std::shared_ptr<LabelReduction> label_reduction;
 
     // Options for shrinking

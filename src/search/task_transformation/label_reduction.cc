@@ -27,7 +27,8 @@ using utils::ExitCode;
 
 namespace task_transformation {
 LabelReduction::LabelReduction(const Options &options)
-    : lr_before_shrinking(options.get<bool>("before_shrinking")),
+    : lr_on_atomic_fts(options.get<bool>("atomic_fts")),
+      lr_before_shrinking(options.get<bool>("before_shrinking")),
       lr_before_merging(options.get<bool>("before_merging")),
       lr_method(LabelReductionMethod(options.get_enum("method"))),
       lr_system_order(LabelReductionSystemOrder(options.get_enum("system_order"))),
@@ -311,6 +312,9 @@ static shared_ptr<LabelReduction>_parse(OptionParser &parser) {
             " Intelligence (AAAI 2014)",
             "2358-2366",
             "AAAI Press 2014"));
+    parser.add_option<bool>("atomic_fts",
+                            "apply label reduction to atomic FTS",
+                            "false");
     parser.add_option<bool>("before_shrinking",
                             "apply label reduction before shrinking");
     parser.add_option<bool>("before_merging",

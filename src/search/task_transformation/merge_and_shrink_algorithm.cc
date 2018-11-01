@@ -40,8 +40,10 @@ static void print_time(const utils::Timer &timer, string text) {
 }
 
 MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
-    merge_strategy_factory(opts.get<shared_ptr<MergeStrategyFactory>>("merge_strategy")),
-    shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy")),
+    merge_strategy_factory(
+        opts.get<shared_ptr<MergeStrategyFactory>>("merge_strategy", nullptr)),
+    shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy", nullptr)),
+    shrink_atomic_fts(opts.get<bool>("shrink_atomic_fts")),
     label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
     max_states(opts.get<int>("max_states")),
     max_states_before_merge(opts.get<int>("max_states_before_merge")),
@@ -69,6 +71,8 @@ void MergeAndShrinkAlgorithm::dump_options() const {
     if (merge_strategy_factory) { // deleted after merge strategy extraction
         merge_strategy_factory->dump_options();
         cout << endl;
+    } else {
+        cout << "Merging disabled" << endl;
     }
 
     cout << "Options related to size limits and shrinking: " << endl;
@@ -79,7 +83,11 @@ void MergeAndShrinkAlgorithm::dump_options() const {
          << shrink_threshold_before_merge << endl;
     cout << endl;
 
-    shrink_strategy->dump_options();
+    if (shrink_strategy) {
+        shrink_strategy->dump_options();
+    } else {
+        cout << "Shrinking disabled" << endl;
+    }
     cout << endl;
 
     if (label_reduction) {
@@ -340,10 +348,38 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         cout << endl;
     }
 
+    // Label reduction of atomic FTS.
+    if (label_reduction && label_reduction->reduce_atomic_fts()) {
+        bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
+        if (verbosity >= Verbosity::NORMAL && reduced) {
+            print_time(timer, "after label reduction of atomic FTS");
+        }
+    }
+
+    if (shrink_strategy && shrink_atomic_fts) {
+        // Shrinking of atomic FTS.
+        for (int ts_index = 0; ts_index < fts.get_size(); ++ts_index) {
+            bool shrunk = shrink_factor(
+                fts,
+                ts_index,
+                max_states,
+                shrink_threshold_before_merge,
+                *shrink_strategy,
+                verbosity);
+            if (verbosity >= Verbosity::VERBOSE && shrunk) {
+                fts.statistics(ts_index);
+            }
+        }
+        if (verbosity >= Verbosity::NORMAL) {
+            print_time(timer, "after shrinking of atomic FTS");
+        }
+    }
+
+    // TODO: enable main loop and use suitable limits.
 //    if (unsolvable) {
 //        cout << "Atomic FTS is unsolvable, stopping computation." << endl;
 //    } else {
-        main_loop(fts, sas_task, timer);
+//        main_loop(fts, sas_task, timer);
 //    }
     const bool final = true;
     report_peak_memory_delta(final);
@@ -360,14 +396,20 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "We currently recommend SCC-DFP, which can be achieved using "
         "{{{merge_strategy=merge_sccs(order_of_sccs=topological,merge_selector="
         "score_based_filtering(scoring_functions=[goal_relevance,dfp,total_order"
-        "]))}}}");
+        "]))}}}",
+        OptionParser::NONE);
 
     // Shrink strategy option.
     parser.add_option<shared_ptr<ShrinkStrategy>>(
         "shrink_strategy",
         "See detailed documentation for shrink strategies. "
         "We currently recommend non-greedy shrink_bisimulation, which can be "
-        "achieved using {{{shrink_strategy=shrink_bisimulation(greedy=false)}}}");
+        "achieved using {{{shrink_strategy=shrink_bisimulation(greedy=false)}}}",
+        OptionParser::NONE);
+    parser.add_option<bool>(
+        "shrink_atomic_fts",
+        "Shrink the atomic factored transition system.",
+        "false");
 
     // Label reduction option.
     parser.add_option<shared_ptr<LabelReduction>>(

@@ -55,13 +55,7 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
     state_packer(move(compute_state_packer(fts_task))),
 //    axiom_evaluator (fts_task),
     min_operator_cost (fts_task.get_min_operator_cost()) {
-
-    /*
-      TODO: we currently assume that there are no gaps in the transition
-      systems of FTSTask, which for normal M&S is not true.
-    */
-
-    create_fts_operators();
+    cout << "Building search task wrapper for FTS task..." << endl;
 
     size_t num_variables = fts_task.get_size();
     int num_labels = fts_task.get_num_labels();
@@ -80,6 +74,8 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
         }
     }
 
+    create_fts_operators();
+
     initial_state.reserve(num_variables);
     for (size_t index = 0; index < num_variables; ++index) {
         const TransitionSystem & ts = fts_task.get_ts(index);
@@ -88,6 +84,8 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
         }
         initial_state.push_back(ts.get_init_state());
     }
+
+    cout << "Done building search task wrapper for FTS task." << endl;
 }
 
 bool SearchTask::is_label_group_relevant(
@@ -214,7 +212,10 @@ void SearchTask::create_fts_operators() {
             for (size_t op_index = 0; op_index < fts_operators.size(); ++op_index) {
                 LabelID label = operators[fts_operators[op_index].get_index()].get_label();
                 for (int value = 0; value < ts.get_size(); ++value) {
-                    if (activated_labels_by_var_by_state[var][value].test(label)) {
+                    vector<boost::dynamic_bitset<>> &activated_labels_by_state =
+                            activated_labels_by_var_by_state[var];
+                    boost::dynamic_bitset<> &activated_labels = activated_labels_by_state[value];
+                    if (activated_labels.test(label)) {
                         applicable_fts_ops_by_ts_index_by_state[ts_index][value].set(op_index);
                     }
                 }

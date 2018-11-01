@@ -29,6 +29,7 @@ enum class Verbosity;
 class LabelReduction {
     // Options for label reduction
     std::vector<int> transition_system_order;
+    bool lr_on_atomic_fts;
     bool lr_before_shrinking;
     bool lr_before_merging;
     /*
@@ -85,6 +86,9 @@ public:
         FactoredTransitionSystem &fts,
         Verbosity verbosity) const;
     void dump_options() const;
+    bool reduce_atomic_fts() const {
+        return lr_on_atomic_fts;
+    }
     bool reduce_before_shrinking() const {
         return lr_before_shrinking;
     }

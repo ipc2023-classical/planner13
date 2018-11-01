@@ -34,6 +34,15 @@ extern std::pair<int, int> compute_shrink_sizes(
     int max_states_before_merge,
     int max_states_after_merge);
 
+// Exposed for atomic shrinking as used by M&S transformations for FTS search.
+extern bool shrink_factor(
+    FactoredTransitionSystem &fts,
+    int index,
+    int new_size,
+    int shrink_threshold_before_merge,
+    const ShrinkStrategy &shrink_strategy,
+    Verbosity verbosit);
+
 /*
   This function first determines if any of the two factors at indices index1
   and index2 must be shrunk according to the given size limits max_states and
