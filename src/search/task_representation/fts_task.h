@@ -56,8 +56,6 @@ public:
 
     int get_num_labels() const;
 
-    std::string get_fact_name(const FactPair & fact) const;
-
     bool is_goal_state (const GlobalState & state) const;
 
     const std::vector<int> & get_label_preconditions(int label) const;

@@ -39,10 +39,6 @@ int FTSTask::get_min_operator_cost() const {
     return labels->get_min_operator_cost();
 }
 
-std::string FTSTask::get_fact_name(const FactPair & fp) const {
-    return "fact" + std::to_string(fp.var) + "-" + std::to_string(fp.value);
-}
-
 bool FTSTask::is_goal_state(const GlobalState & state) const {
     // TODO: this is duplicate with SearchTask. Use SearchTask everywhere?
     for (size_t i = 0; i < transition_systems.size(); ++i) {
