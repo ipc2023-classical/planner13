@@ -6,6 +6,7 @@
 #include "utils/logging.h"
 
 #include "task_representation/sas_task.h"
+
 #include "task_transformation/task_transformation_method.h"
 
 #include <iostream>
@@ -46,7 +47,11 @@ int main(int argc, const char **argv) {
     }
 
     utils::Timer transform_timer;
-    assert(transformer);
+    if (!transformer) {
+        cerr << "Please use the option --transform to specify how to "
+                "transform the SAS+ task into an FTS task." << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
 
     cout << "Transform task... " << endl;
     auto transformation = transformer->transform_task(*g_sas_task());
