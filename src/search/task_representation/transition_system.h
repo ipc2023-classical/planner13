@@ -188,6 +188,7 @@ public:
     void apply_label_reduction(
         const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         bool only_equivalent_labels);
+    void renumber_labels(std::vector<std::pair<int, int>> &label_mapping);
 
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,

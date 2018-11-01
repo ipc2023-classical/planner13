@@ -70,6 +70,21 @@ void LabelEquivalenceRelation::apply_label_mapping(
     }
 }
 
+void LabelEquivalenceRelation::renumber_labels(vector<pair<int, int>> &label_mapping) {
+    vector<pair<LabelGroupID, LabelIter>> label_to_positions_copy(label_to_positions);
+    vector<pair<LabelGroupID, LabelIter>>().swap(label_to_positions);
+    label_to_positions.resize(label_mapping.size());
+    for (const pair<int, int> &old_and_new_label : label_mapping) {
+        int old_label_no = old_and_new_label.first;
+        int new_label_no = old_and_new_label.second;
+        LabelGroupID group_id = label_to_positions_copy[old_label_no].first;
+        LabelIter label_it = label_to_positions_copy[old_label_no].second;
+        grouped_labels[group_id].erase(label_it);
+        LabelIter new_label_it = grouped_labels[group_id].insert(new_label_no);
+        label_to_positions[new_label_no] = make_pair(group_id, new_label_it);
+    }
+}
+
 void LabelEquivalenceRelation::move_group_into_group(
     LabelGroupID from_group_id, LabelGroupID to_group_id) {
     assert(!is_empty_group(from_group_id));

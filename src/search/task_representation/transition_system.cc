@@ -407,6 +407,12 @@ void TransitionSystem::apply_label_reduction(
     assert(are_transitions_sorted_unique());
 }
 
+void TransitionSystem::renumber_labels(vector<pair<int, int>> &label_mapping) {
+    // We can leave label group IDs (and thus wehre their transitions are)
+    // intact and only need to change the label numbers in label groups.
+    label_equivalence_relation->renumber_labels(label_mapping);
+}
+
 string TransitionSystem::tag() const {
     string desc(get_description());
     desc[0] = toupper(desc[0]);

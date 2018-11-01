@@ -9,6 +9,8 @@
 #include "../task_representation/sas_task.h"
 #include "../task_representation/transition_system.h"
 
+#include "../utils/logging.h"
+
 #include "../plugin.h"
 
 using namespace std;
@@ -25,8 +27,8 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     FactoredTransitionSystem fts =
         mas_algorithm.build_factored_transition_system(sas_task);
 
-    cout << "Extracting transition systems and labels..." << endl;
-    // TODO: "Renumber" factors
+    // "Renumber" factors consecutively. (Actually, nothing to do except
+    // storing them consecutively since factor indices are not stored anywhere.)
     int num_factors = fts.get_num_active_entries();
     cout << "Number of remaining factors: " << num_factors << endl;
     vector<unique_ptr<task_representation::TransitionSystem>>
@@ -37,19 +39,28 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
             transition_systems.push_back(fts.extract_transition_system(ts_index));
         }
     }
+    cout << "Done renumbering factors." << endl;
 
-    // TODO: "Renumber" labels; need to use label reduction for this because
-    // otherwise the labels are not renumbered in the transition systems
+    // Renumber labels consecutively
     unique_ptr<Labels> labels = fts.extract_labels();
     int num_labels = labels->get_num_active_entries();
     cout << "Number of remaining labels: " << num_labels << endl;
     vector<unique_ptr<task_representation::Label>> active_labels;
+    vector<pair<int, int>> label_mapping;
     active_labels.reserve(num_labels);
+    label_mapping.reserve(num_labels);
     for (int label_no = 0; label_no < labels->get_size(); ++label_no) {
         if (labels->is_current_label(label_no)) {
             active_labels.push_back(labels->extract_label(label_no));
+            int new_label_no = label_mapping.size();
+            label_mapping.emplace_back(label_no, new_label_no);
         }
     }
+    cout << "Renumbering labels: " << label_mapping << endl;
+    for (unique_ptr<TransitionSystem> &ts : transition_systems) {
+        ts->renumber_labels(label_mapping);
+    }
+    cout << "Done renumbering labels." << endl;
 
     cout << "Collection information on plan reconstruction..." << endl;
     shared_ptr<task_representation::FTSTask> fts_task =
