@@ -1,8 +1,7 @@
 #include "variable_order_finder.h"
 
 #include "../task_representation/fact.h"
-
-#include "../globals.h"
+#include "../task_representation/sas_task.h"
 
 #include "../utils/system.h"
 

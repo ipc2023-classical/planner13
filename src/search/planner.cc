@@ -5,6 +5,7 @@
 #include "utils/timer.h"
 #include "utils/logging.h"
 
+#include "task_representation/sas_task.h"
 #include "task_transformation/task_transformation_method.h"
 
 #include <iostream>

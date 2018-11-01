@@ -3,6 +3,8 @@
 #include "globals.h"
 #include "option_parser.h"
 
+#include "../task_representation/sas_task.h"
+
 #include "utils/system.h"
 
 #include <cstdlib>

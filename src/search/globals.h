@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "task_representation/sas_task.h"
-
 class Axiom;
 class AxiomEvaluator;
 class GlobalOperator;
@@ -25,6 +23,7 @@ class SuccessorGenerator;
 namespace task_representation {
 struct FactPair;
 class FTSTask;
+class SASTask;
 }
 
 namespace task_transformation {

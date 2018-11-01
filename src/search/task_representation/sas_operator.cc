@@ -2,6 +2,8 @@
 
 #include "../globals.h"
 
+#include "../task_representation/sas_task.h"
+
 #include "../utils/collections.h"
 #include "../utils/system.h"
 
