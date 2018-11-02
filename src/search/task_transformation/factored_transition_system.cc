@@ -192,12 +192,16 @@ int FactoredTransitionSystem::merge(
 }
 
 unique_ptr<TransitionSystem> FactoredTransitionSystem::extract_transition_system(int index) {
-    assert(is_active(index));
+    // This assertion does not hold since we don't extract both transition
+    // system and merge-and-shrink representation at the same time.
+//    assert(is_active(index));
     return move(transition_systems[index]);
 }
 
 unique_ptr<MergeAndShrinkRepresentation> FactoredTransitionSystem::extract_mas_representation(int index) {
-    assert(is_active(index));
+    // This assertion does not hold since we don't extract both transition
+    // system and merge-and-shrink representation at the same time.
+//    assert(is_active(index));
     return move(mas_representations[index]);
 }
 
