@@ -1,11 +1,13 @@
 #include "label_reduction.h"
 
+#include "label_map.h"
 #include "factored_transition_system.h"
+#include "types.h"
+
 #include "../task_representation/label_equivalence_relation.h"
 #include "../task_representation/labels.h"
-#include "../task_representation/sas_task.h"
+#include "../task_representation/fts_task.h"
 #include "../task_representation/transition_system.h"
-#include "types.h"
 
 #include "../option_parser.h"
 #include "../plugin.h"
@@ -32,18 +34,19 @@ LabelReduction::LabelReduction(const Options &options)
       lr_before_merging(options.get<bool>("before_merging")),
       lr_method(LabelReductionMethod(options.get_enum("method"))),
       lr_system_order(LabelReductionSystemOrder(options.get_enum("system_order"))),
-      rng(utils::parse_rng_from_options(options)) {
+      rng(utils::parse_rng_from_options(options)),
+      label_map(nullptr) {
 }
 
 bool LabelReduction::initialized() const {
     return !transition_system_order.empty();
 }
 
-void LabelReduction::initialize(const SASTask &sas_task) {
+void LabelReduction::initialize(const FTSTask &fts_task) {
     assert(!initialized());
 
     // Compute the transition system order.
-    size_t max_transition_system_count = sas_task.get_num_variables()  * 2 - 1;
+    size_t max_transition_system_count = fts_task.get_size() * 2 - 1;
     transition_system_order.reserve(max_transition_system_count);
     if (lr_system_order == REGULAR
         || lr_system_order == RANDOM) {
@@ -57,6 +60,12 @@ void LabelReduction::initialize(const SASTask &sas_task) {
         for (size_t i = 0; i < max_transition_system_count; ++i)
             transition_system_order.push_back(max_transition_system_count - 1 - i);
     }
+
+    label_map = utils::make_unique_ptr<LabelMap>(fts_task.get_size());
+}
+
+unique_ptr<LabelMap> LabelReduction::extract_label_map() {
+    return move(label_map);
 }
 
 void LabelReduction::compute_label_mapping(
@@ -68,6 +77,7 @@ void LabelReduction::compute_label_mapping(
     int next_new_label_no = labels.get_size();
     int num_labels = 0;
     int num_labels_after_reduction = 0;
+    vector<int> old_to_new_labels(labels.get_size(), -1);
     for (auto group_it = relation->begin();
          group_it != relation->end(); ++group_it) {
         const equivalence_relation::Block &block = *group_it;
@@ -88,6 +98,9 @@ void LabelReduction::compute_label_mapping(
             const vector<int> &label_nos = it->second;
             if (label_nos.size() > 1) {
                 label_mapping.push_back(make_pair(next_new_label_no, label_nos));
+                for (int old_label_no : label_nos) {
+                    old_to_new_labels[old_label_no] = next_new_label_no;
+                }
                 ++next_new_label_no;
             }
             if (!label_nos.empty()) {
@@ -102,6 +115,8 @@ void LabelReduction::compute_label_mapping(
              << num_labels_after_reduction << " after reduction"
              << endl;
     }
+
+    label_map->update(old_to_new_labels);
 }
 
 equivalence_relation::EquivalenceRelation

@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace task_representation {
-class SASTask;
+class FTSTask;
 }
 
 using namespace task_representation;
@@ -36,7 +36,7 @@ class VariableOrderFinder {
 
     void select_next(int position, int var_no);
 public:
-    VariableOrderFinder(const SASTask &sas_task,
+    VariableOrderFinder(const FTSTask &fts_task,
                         VariableOrderType variable_order_type);
     ~VariableOrderFinder() = default;
     bool done() const;

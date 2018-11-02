@@ -1,7 +1,7 @@
 #include "variable_order_finder.h"
 
 #include "../task_representation/fact.h"
-#include "../task_representation/sas_task.h"
+#include "../task_representation/fts_task.h"
 
 #include "../utils/system.h"
 
@@ -16,10 +16,10 @@ using utils::ExitCode;
 
 
 namespace task_transformation {
-VariableOrderFinder::VariableOrderFinder(const SASTask &sas_task,
+VariableOrderFinder::VariableOrderFinder(const FTSTask &fts_task,
                                          VariableOrderType variable_order_type)
     : variable_order_type(variable_order_type) {
-    int var_count = sas_task.get_num_variables();
+    int var_count = fts_task.get_size();
     if (variable_order_type == REVERSE_LEVEL) {
         for (int i = 0; i < var_count; ++i)
             remaining_vars.push_back(i);
@@ -41,9 +41,8 @@ VariableOrderFinder::VariableOrderFinder(const SASTask &sas_task,
 
 //    is_causal_predecessor.resize(var_count, false);
     is_goal_variable.resize(var_count, false);
-    for (int i = 0;  i < sas_task.get_num_goals(); ++i) {
-        FactPair goal_fact = sas_task.get_goal_fact(i);
-        is_goal_variable[goal_fact.var] = true;
+    for (int goal_var : fts_task.get_goal_variables()) {
+        is_goal_variable[goal_var] = true;
     }
 }
 

@@ -1,7 +1,7 @@
 #include "merge_scoring_function_total_order.h"
 
 #include "factored_transition_system.h"
-#include "../task_representation/sas_task.h"
+#include "../task_representation/fts_task.h"
 #include "../task_representation/transition_system.h"
 
 #include "../options/option_parser.h"
@@ -57,9 +57,9 @@ vector<double> MergeScoringFunctionTotalOrder::compute_scores(
     return scores;
 }
 
-void MergeScoringFunctionTotalOrder::initialize(const SASTask &sas_task) {
+void MergeScoringFunctionTotalOrder::initialize(const FTSTask &fts_task) {
     initialized = true;
-    int num_variables = sas_task.get_num_variables();
+    int num_variables = fts_task.get_size();
     int max_transition_system_count = num_variables * 2 - 1;
     vector<int> transition_system_order;
     transition_system_order.reserve(max_transition_system_count);

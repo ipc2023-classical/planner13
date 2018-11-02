@@ -13,7 +13,7 @@ class Timer;
 }
 
 namespace task_representation {
-class SASTask;
+class FTSTask;
 class TransitionSystem;
 }
 
@@ -21,6 +21,7 @@ using namespace task_representation;
 
 namespace task_transformation {
 class FactoredTransitionSystem;
+class LabelMap;
 class LabelReduction;
 class MergeAndShrinkRepresentation;
 class MergeStrategyFactory;
@@ -56,7 +57,7 @@ class MergeAndShrinkAlgorithm {
     void statistics(int maximum_intermediate_size) const;
     void main_loop(
         FactoredTransitionSystem &fts,
-        const SASTask &sas_task,
+        const FTSTask &fts_task,
         const utils::Timer &timer);
 
     void report_peak_memory_delta(bool final = false) const;
@@ -64,7 +65,8 @@ public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;
     void warn_on_unusual_options() const;
-    FactoredTransitionSystem build_factored_transition_system(const SASTask &sas_task);
+    FactoredTransitionSystem build_factored_transition_system(const FTSTask &fts_task);
+    std::unique_ptr<LabelMap> extract_label_map();
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

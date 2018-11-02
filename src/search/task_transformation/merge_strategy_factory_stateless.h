@@ -18,7 +18,7 @@ public:
     explicit MergeStrategyFactoryStateless(options::Options &options);
     virtual ~MergeStrategyFactoryStateless() override = default;
     virtual std::unique_ptr<MergeStrategy> compute_merge_strategy(
-        const SASTask &sas_task,
+        const FTSTask &fts_taskk,
         const FactoredTransitionSystem &fts) override;
     virtual bool requires_init_distances() const override;
     virtual bool requires_goal_distances() const override;

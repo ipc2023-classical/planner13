@@ -41,7 +41,7 @@ public:
     virtual std::vector<double> compute_scores(
         const FactoredTransitionSystem &fts,
         const std::vector<std::pair<int, int>> &merge_candidates) override;
-    virtual void initialize(const SASTask &sas_task) override;
+    virtual void initialize(const FTSTask &fts_task) override;
     static void add_options_to_parser(options::OptionParser &parser);
 
     virtual bool requires_init_distances() const override {

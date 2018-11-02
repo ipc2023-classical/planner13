@@ -31,7 +31,7 @@ public:
     virtual std::pair<int, int> select_merge(
         const FactoredTransitionSystem &fts,
         const std::vector<int> &indices_subset = std::vector<int>()) const override;
-    virtual void initialize(const SASTask &sas_task) override;
+    virtual void initialize(const FTSTask &fts_task) override;
     virtual bool requires_init_distances() const override;
     virtual bool requires_goal_distances() const override;
 };

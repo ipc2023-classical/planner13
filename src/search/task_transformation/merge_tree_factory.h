@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace task_representation {
-class SASTask;
+class FTSTask;
 }
 
 using namespace task_representation;
@@ -36,11 +36,11 @@ public:
     void dump_options() const;
     // Compute a merge tree for the given entire task.
     virtual std::unique_ptr<MergeTree> compute_merge_tree(
-        const SASTask &sas_task) = 0;
+        const FTSTask &fts_task) = 0;
     /* Compute a merge tree for the given current factored transition,
        system, possibly for a subset of indices. */
     virtual std::unique_ptr<MergeTree> compute_merge_tree(
-        const SASTask &sas_task,
+        const FTSTask &fts_task,
         const FactoredTransitionSystem &fts,
         const std::vector<int> &indices_subset);
     virtual bool requires_init_distances() const = 0;

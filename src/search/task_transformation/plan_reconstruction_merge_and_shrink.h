@@ -3,6 +3,10 @@
 
 #include "plan_reconstruction.h"
 
+namespace task_representation {
+class FTSTask;
+}
+
 namespace task_transformation {
 class LabelMap;
 class MergeAndShrinkRepresentation;
@@ -11,7 +15,7 @@ class PlanReconstructionMergeAndShrink : public PlanReconstruction {
     // We do plan reconstruction by performing a search on the predecessor task. We allow two type of transitions:
     // 1) Transitions with a label l that maps to the next label in the plan and whose target maps to the next abstract state in the plan
     // 2) Transitions with a tau label whose target maps to the same abstract state in the plan. 
-    //std::shared_ptr<task_representation::FTSTask> predecessor_task;
+    std::shared_ptr<task_representation::FTSTask> predecessor_task;
 
     // We need the merge and shrink representation, which for evety state in the
     // predecessor task, it obtains the state in the task where the plan was found.    
@@ -25,7 +29,7 @@ class PlanReconstructionMergeAndShrink : public PlanReconstruction {
     //std::vector<int> tau_labels;
 public:
     PlanReconstructionMergeAndShrink(
-//        std::shared_ptr<task_representation::FTSTask> predecessor_task,
+        const std::shared_ptr<task_representation::FTSTask> &predecessor_task,
         std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> &&merge_and_shrink_representations,
         std::unique_ptr<LabelMap> label_map/*,
         std::vector<int> tau_labels*/);

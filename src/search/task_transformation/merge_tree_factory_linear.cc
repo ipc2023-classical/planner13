@@ -2,7 +2,7 @@
 
 #include "factored_transition_system.h"
 #include "merge_tree.h"
-#include "../task_representation/sas_task.h"
+#include "../task_representation/fts_task.h"
 #include "../task_representation/transition_system.h"
 
 #include "../options/option_parser.h"
@@ -24,8 +24,8 @@ MergeTreeFactoryLinear::MergeTreeFactoryLinear(const options::Options &options)
                               options.get_enum("variable_order"))) {
 }
 
-unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const SASTask &sas_task) {
-    VariableOrderFinder vof(sas_task, variable_order_type);
+unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const FTSTask &fts_task) {
+    VariableOrderFinder vof(fts_task, variable_order_type);
     MergeTreeNode *root = new MergeTreeNode(vof.next());
     while (!vof.done()) {
         MergeTreeNode *right_child = new MergeTreeNode(vof.next());
@@ -35,7 +35,7 @@ unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const SASTask &
         root, rng, update_option);
 }
 
-unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const SASTask &sas_task,
+unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const FTSTask &fts_task,
     const FactoredTransitionSystem &fts,
     const vector<int> &indices_subset) {
     /*
@@ -43,7 +43,7 @@ unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const SASTask &
       that contain those variables. Also set all indices not contained in
       indices_subset to "used".
     */
-    int num_vars = sas_task.get_num_variables();
+    int num_vars = fts_task.get_size();
     int num_ts = fts.get_size();
     vector<int> var_to_ts_index(num_vars, -1);
     vector<bool> used_ts_indices(num_ts, true);
@@ -67,7 +67,7 @@ unique_ptr<MergeTree> MergeTreeFactoryLinear::compute_merge_tree(const SASTask &
      skipping all indices not in indices_subset, because these have been set
      to "used" above.
     */
-    VariableOrderFinder vof(sas_task, variable_order_type);
+    VariableOrderFinder vof(fts_task, variable_order_type);
 
     int next_var = vof.next();
     int ts_index = var_to_ts_index[next_var];

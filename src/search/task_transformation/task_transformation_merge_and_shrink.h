@@ -13,7 +13,7 @@ public:
     virtual ~TaskTransformationMergeAndShrink() = default;
     virtual std::pair<std::shared_ptr<task_representation::FTSTask>,
         std::shared_ptr<PlanReconstruction>> transform_task(
-            const task_representation::SASTask &sas_task) override;
+            const std::shared_ptr<task_representation::FTSTask> &fts_task) override;
 };
 }
 #endif

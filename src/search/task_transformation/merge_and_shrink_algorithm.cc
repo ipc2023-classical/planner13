@@ -3,6 +3,7 @@
 #include "distances.h"
 #include "factored_transition_system.h"
 #include "fts_factory.h"
+#include "label_map.h"
 #include "label_reduction.h"
 #include "merge_and_shrink_representation.h"
 #include "merge_strategy.h"
@@ -14,6 +15,7 @@
 #include "../options/option_parser.h"
 #include "../options/options.h"
 
+#include "../task_representation/fts_task.h"
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
 
@@ -182,7 +184,7 @@ void MergeAndShrinkAlgorithm::warn_on_unusual_options() const {
 
 void MergeAndShrinkAlgorithm::main_loop(
     FactoredTransitionSystem &fts,
-    const SASTask &sas_task,
+    const FTSTask &fts_task,
     const utils::Timer &timer) {
     int maximum_intermediate_size = 0;
     for (int i = 0; i < fts.get_size(); ++i) {
@@ -193,7 +195,7 @@ void MergeAndShrinkAlgorithm::main_loop(
     }
 
     unique_ptr<MergeStrategy> merge_strategy =
-        merge_strategy_factory->compute_merge_strategy(sas_task, fts);
+        merge_strategy_factory->compute_merge_strategy(fts_task, fts);
     merge_strategy_factory = nullptr;
 
     int iteration_counter = 0;
@@ -306,7 +308,7 @@ void MergeAndShrinkAlgorithm::main_loop(
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
-    const SASTask &sas_task) {
+    const FTSTask &fts_task) {
     if (starting_peak_memory) {
         cerr << "Calling build_factored_transition_system twice is not "
              << "supported!" << endl;
@@ -315,7 +317,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     starting_peak_memory = utils::get_peak_memory_in_kb();
 
     if (label_reduction) {
-        label_reduction->initialize(sas_task);
+        label_reduction->initialize(fts_task);
     }
 
     utils::Timer timer;
@@ -325,6 +327,21 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     warn_on_unusual_options();
     cout << endl;
 
+    std::unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(fts_task.get_labels());
+    int num_vars = fts_task.get_size();
+    assert(num_vars);
+    std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
+    transition_systems.reserve(num_vars * 2 - 1);
+    for (int index = 0; index < num_vars; ++index) {
+        transition_systems.push_back(
+            utils::make_unique_ptr<TransitionSystem>(fts_task.get_ts(index), *labels));
+    }
+
+    std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> mas_representations =
+        create_mas_representations(transition_systems);
+    std::vector<std::unique_ptr<Distances>> distances =
+        create_distances(transition_systems);
+
     const bool compute_init_distances =
         shrink_strategy->requires_init_distances() ||
         merge_strategy_factory->requires_init_distances();/* ||
@@ -333,20 +350,15 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         shrink_strategy->requires_goal_distances() ||
         merge_strategy_factory->requires_goal_distances();/* ||
         prune_irrelevant_states;*/
-    FactoredTransitionSystem fts =
-        create_factored_transition_system(
-            sas_task,
-            compute_init_distances,
-            compute_goal_distances,
-            verbosity);
-    if (verbosity >= Verbosity::NORMAL) {
-        print_time(timer, "after computation of atomic transition systems");
-    }
-    // TODO: think about if we can prune already while creating the atomic FTS.
-//    bool unsolvable = prune_fts(fts, timer);
-    if (verbosity >= Verbosity::NORMAL) {
-        cout << endl;
-    }
+
+    FactoredTransitionSystem fts(
+        move(labels),
+        move(transition_systems),
+        move(mas_representations),
+        move(distances),
+        compute_init_distances,
+        compute_goal_distances,
+        verbosity);
 
     // Label reduction of atomic FTS.
     if (label_reduction && label_reduction->reduce_atomic_fts()) {
@@ -379,13 +391,17 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 //    if (unsolvable) {
 //        cout << "Atomic FTS is unsolvable, stopping computation." << endl;
 //    } else {
-//        main_loop(fts, sas_task, timer);
+//        main_loop(fts, fts_task, timer);
 //    }
     const bool final = true;
     report_peak_memory_delta(final);
     cout << "Merge-and-shrink algorithm runtime: " << timer << endl;
     cout << endl;
     return fts;
+}
+
+unique_ptr<LabelMap> MergeAndShrinkAlgorithm::extract_label_map() {
+    return label_reduction->extract_label_map();
 }
 
 void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {

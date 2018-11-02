@@ -4,10 +4,6 @@
 #include <memory>
 #include <vector>
 
-namespace task_transformation {
-class LabelMap;
-}
-
 namespace task_representation {
 class SASTask;
 
@@ -21,6 +17,7 @@ public:
     explicit Label(int cost_)
         : cost(cost_) {
     }
+    Label(const Label &other) = default;
     ~Label() {}
     int get_cost() const {
         return cost;
@@ -36,16 +33,15 @@ class Labels {
     int max_size; // the maximum number of labels that can be created
     int num_active_entries; // the number of valid indices in labels
 //    std::vector<std::vector<int>> sas_op_indices_by_label;
-    std::unique_ptr<task_transformation::LabelMap> label_map;
 public:
     Labels(
         std::vector<std::unique_ptr<Label>> &&labels,
         int max_size);
 //        std::vector<std::vector<int>> &&sas_op_indices_by_label);
+    Labels(const Labels &other);
     ~Labels();
     void reduce_labels(const std::vector<int> &old_label_nos);
     std::unique_ptr<Label> extract_label(int label_no);
-    std::unique_ptr<task_transformation::LabelMap> extract_label_map();
     bool is_current_label(int label_no) const;
     int get_label_cost(int label_no) const;
     void dump_labels() const;

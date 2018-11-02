@@ -80,6 +80,15 @@ public:
       the public add_label_group method below.
     */
     explicit LabelEquivalenceRelation(const Labels &labels);
+    LabelEquivalenceRelation(const LabelEquivalenceRelation &other) = delete;
+    /*
+      NOTE: we need a custom copy constructor here because we need to fill
+      label_to_positions with correct LabelIter objects that point to the
+      copied LabelGroup objects rather than to those of the given
+      LabelEquivalenceRelation other.
+      NOTE: we also need it to add the copy of the labels object.
+    */
+    LabelEquivalenceRelation(const LabelEquivalenceRelation &other, const Labels &labels);
 
     /*
       The given label mappings (from label reduction) contain the new label
@@ -94,7 +103,8 @@ public:
     void apply_label_mapping(
         const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
-    void renumber_labels(std::vector<std::pair<int, int>> &label_mapping);
+    void renumber_labels(
+        const std::vector<int> &old_to_new_labels, int new_num_labels);
     // Moves all labels from one goup into the other
     void move_group_into_group(LabelGroupID from_group_id, LabelGroupID to_group_id);
     int add_label_group(const std::vector<int> &new_labels);

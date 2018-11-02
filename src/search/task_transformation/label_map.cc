@@ -13,11 +13,10 @@ LabelMap::LabelMap(int num_labels) {
 //    iota(original_labels.begin(), original_labels.end(), 0);
 }
 
-void LabelMap::update(int new_label_no, const vector<int> &old_label_nos) {
-    set<int> old_labels(old_label_nos.begin(), old_label_nos.end());
-    for (size_t old_label_no = 0; old_label_no < reduced_labels.size(); ++old_label_no) {
-        if (old_labels.count(reduced_labels[old_label_no])) {
-            reduced_labels[old_label_no] = new_label_no;
+void LabelMap::update(const vector<int> &old_to_new_labels) {
+    for (int &entry : reduced_labels) {
+        if (old_to_new_labels[entry] != -1) {
+            entry = old_to_new_labels[entry];
         }
     }
 }

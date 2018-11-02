@@ -17,7 +17,7 @@ public:
     virtual ~TaskTransformation() = default;
     virtual std::pair<std::shared_ptr<task_representation::FTSTask>,
         std::shared_ptr<PlanReconstruction>> transform_task(
-            const task_representation::SASTask &sas_task) = 0;
+            const std::shared_ptr<task_representation::FTSTask> &fts_task) = 0;
 };
 }
 #endif

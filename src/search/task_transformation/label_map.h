@@ -9,7 +9,7 @@ class LabelMap{
 //    std::vector<int> original_labels; // indexed by reduced label number
 public:
     explicit LabelMap(int num_labels);
-    void update(int new_label_no, const std::vector<int> &old_label_nos);
+    void update(const std::vector<int> &old_to_new_labels);
 
     int get_reduced_label(int old_label) const{
         return reduced_labels[old_label];

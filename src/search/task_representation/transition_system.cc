@@ -100,6 +100,18 @@ TransitionSystem::TransitionSystem(
     assert(are_transitions_sorted_unique());
 }
 
+TransitionSystem::TransitionSystem(const TransitionSystem &other, const Labels &labels)
+    : num_variables(other.num_variables),
+      incorporated_variables(other.incorporated_variables),
+      label_equivalence_relation(
+          utils::make_unique_ptr<LabelEquivalenceRelation>(
+              *other.label_equivalence_relation, labels)),
+      transitions_by_group_id(other.transitions_by_group_id),
+      num_states(other.num_states),
+      goal_states(other.goal_states),
+      init_state(other.init_state) {
+}
+
 TransitionSystem::~TransitionSystem() {
 }
 
@@ -407,10 +419,11 @@ void TransitionSystem::apply_label_reduction(
     assert(are_transitions_sorted_unique());
 }
 
-void TransitionSystem::renumber_labels(vector<pair<int, int>> &label_mapping) {
+void TransitionSystem::renumber_labels(
+    const vector<int> &old_to_new_labels, int new_num_labels) {
     // We can leave label group IDs (and thus wehre their transitions are)
     // intact and only need to change the label numbers in label groups.
-    label_equivalence_relation->renumber_labels(label_mapping);
+    label_equivalence_relation->renumber_labels(old_to_new_labels, new_num_labels);
 }
 
 string TransitionSystem::tag() const {

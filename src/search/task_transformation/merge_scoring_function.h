@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace task_representation {
-class SASTask;
+class FTSTask;
 }
 
 using namespace task_representation;
@@ -27,7 +27,7 @@ public:
     virtual bool requires_goal_distances() const = 0;
 
     // Overriding methods must set initialized to true.
-    virtual void initialize(const SASTask &) {
+    virtual void initialize(const FTSTask &) {
         initialized = true;
     }
 

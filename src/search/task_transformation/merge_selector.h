@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace task_representation {
-class SASTask;
+class FTSTask;
 }
 
 using namespace task_representation;
@@ -25,7 +25,7 @@ public:
     virtual std::pair<int, int> select_merge(
         const FactoredTransitionSystem &fts,
         const std::vector<int> &indices_subset = std::vector<int>()) const = 0;
-    virtual void initialize(const SASTask &sas_task) = 0;
+    virtual void initialize(const FTSTask &fts_task) = 0;
     void dump_options() const;
 
     virtual bool requires_init_distances() const {

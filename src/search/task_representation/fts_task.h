@@ -17,6 +17,7 @@ class FactoredTransitionSystem;
 namespace task_representation {
 struct FactPair;
 class Label;
+class Labels;
 class SASTask;
 class SearchTask;
 class TransitionSystem;
@@ -24,37 +25,35 @@ class TransitionSystem;
 
 class FTSTask {
     std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
-    std::vector<std::unique_ptr<Label>> labels;
+    std::unique_ptr<Labels> labels;
 
     mutable std::vector<std::vector<int>> label_preconditions;
 public:
     FTSTask(
         std::vector<std::unique_ptr<TransitionSystem>> &&transition_systems,
-        std::vector<std::unique_ptr<Label>> &&labels);
+        std::unique_ptr<Labels> labels);
     ~FTSTask();
     FTSTask(FTSTask &&other) = delete;
     FTSTask(const FTSTask &other) = delete;
     FTSTask &operator=(const FTSTask &) = delete;
 
+    int get_num_labels() const;
     int get_label_cost(int label) const;
     int get_min_operator_cost() const;
     bool is_goal_state (const GlobalState &state) const;
     const std::vector<int> &get_label_preconditions(int label) const;
+    std::vector<int> get_goal_variables() const;
 
     int get_size() const {
         return transition_systems.size();
-    }
-
-    int get_num_labels() const {
-        return labels.size();
     }
 
     const TransitionSystem &get_ts(int index) const {
         return *transition_systems[index];
     }
 
-    const Label &get_label(int label) const {
-        return *labels[label];
+    const Labels &get_labels() const {
+        return *labels;
     }
 };
 }

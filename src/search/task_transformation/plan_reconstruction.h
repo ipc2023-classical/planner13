@@ -7,7 +7,6 @@
 namespace task_representation {
     class LabelID;
     class State;
-    class FTSTask;
 }
 
 namespace task_transformation {

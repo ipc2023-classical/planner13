@@ -15,9 +15,9 @@ public:
     explicit MergeTreeFactoryLinear(const options::Options &options);
     virtual ~MergeTreeFactoryLinear() override = default;
     virtual std::unique_ptr<MergeTree> compute_merge_tree(
-        const SASTask &sas_task) override;
+        const FTSTask &fts_task) override;
     virtual std::unique_ptr<MergeTree> compute_merge_tree(
-        const SASTask &sas_task,
+        const FTSTask &fts_task,
         const FactoredTransitionSystem &fts,
         const std::vector<int> &indices_subset) override;
 

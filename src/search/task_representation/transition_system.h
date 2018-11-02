@@ -155,6 +155,8 @@ public:
         std::vector<bool> &&goal_states,
         int init_state,
         bool compute_label_equivalence_relation);
+    TransitionSystem(const TransitionSystem &other) = delete;
+    TransitionSystem(const TransitionSystem &other, const Labels &labels);
     ~TransitionSystem();
     /*
       Factory method to construct the merge of two transition systems.
@@ -188,7 +190,7 @@ public:
     void apply_label_reduction(
         const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         bool only_equivalent_labels);
-    void renumber_labels(std::vector<std::pair<int, int>> &label_mapping);
+    void renumber_labels(const std::vector<int> &old_to_new_labels, int new_num_labels);
 
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,

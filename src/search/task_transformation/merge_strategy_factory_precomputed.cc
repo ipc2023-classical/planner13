@@ -20,10 +20,10 @@ MergeStrategyFactoryPrecomputed::MergeStrategyFactoryPrecomputed(
 }
 
 unique_ptr<MergeStrategy> MergeStrategyFactoryPrecomputed::compute_merge_strategy(
-    const SASTask &sas_task,
+    const FTSTask &fts_task,
     const FactoredTransitionSystem &fts) {
     unique_ptr<MergeTree> merge_tree =
-        merge_tree_factory->compute_merge_tree(sas_task);
+        merge_tree_factory->compute_merge_tree(fts_task);
     return utils::make_unique_ptr<MergeStrategyPrecomputed>(fts, move(merge_tree));
 }
 

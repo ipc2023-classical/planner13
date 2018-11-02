@@ -15,32 +15,41 @@ using namespace task_transformation;
 namespace task_representation {
 FTSTask::FTSTask(
     vector<unique_ptr<TransitionSystem>> &&transition_systems,
-    vector<unique_ptr<Label>> &&labels)
+    unique_ptr<Labels> labels)
     : transition_systems(move(transition_systems)),
       labels(move(labels)) {
+    for (const auto &ts : transition_systems) {
+        assert(ts);
+    }
+    for (int label = 0; label < this->labels->get_size(); ++label) {
+        assert(this->labels->is_current_label(label));
+    }
 }
 
 FTSTask::~FTSTask() {
     for (auto &transition_system : transition_systems) {
         transition_system = nullptr;
     }
-    for (auto &label : labels) {
-        label = nullptr;
-    }
+    labels = nullptr;
+}
+
+int FTSTask::get_num_labels() const {
+    return labels->get_size();
 }
 
 int FTSTask::get_label_cost(int label) const {
-    return labels[label]->get_cost();
+    return labels->get_label_cost(label);
 }
 
 int FTSTask::get_min_operator_cost() const {
-    if (labels.empty()) {
+    if (!labels->get_size()) {
         return 0;
     }
-    assert(labels[0]);
-    int minimum_cost = labels[0]->get_cost();
-    for (const auto & label : labels) {
-        minimum_cost = std::min(minimum_cost, label->get_cost());
+    assert(labels->is_current_label(0));
+    int minimum_cost = labels->get_label_cost(0);
+    for (int label = 0; label < labels->get_size(); ++label) {
+        assert(labels->is_current_label(label));
+        minimum_cost = std::min(minimum_cost, labels->get_label_cost(label));
     }
     return minimum_cost;
 }
@@ -71,5 +80,16 @@ const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
     
     assert(label >= 0 && label < static_cast<int>(label_preconditions.size()));
     return label_preconditions[label];
+}
+
+vector<int> FTSTask::get_goal_variables() const {
+    vector<int> goal_variables;
+    for (size_t var = 0; var < transition_systems.size(); ++var) {
+        const TransitionSystem &ts = *transition_systems[var];
+        if (ts.is_goal_relevant()) {
+            goal_variables.push_back(var);
+        }
+    }
+    return goal_variables;
 }
 }

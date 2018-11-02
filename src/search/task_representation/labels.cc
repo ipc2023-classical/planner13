@@ -1,7 +1,5 @@
 #include "labels.h"
 
-#include "../task_transformation/label_map.h"
-
 #include "../utils/collections.h"
 #include "../utils/memory.h"
 
@@ -21,8 +19,18 @@ Labels::Labels(
       max_size(max_size),
       num_active_entries(this->labels.size()) {
 //      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
-    label_map = utils::make_unique_ptr<task_transformation::LabelMap>(
-        this->labels.size());
+}
+
+Labels::Labels(const Labels &other)
+    : max_size(other.max_size), num_active_entries(other.num_active_entries) {
+    labels.reserve(other.labels.size());
+    for (const unique_ptr<Label> &label : other.labels) {
+        if (label) {
+            labels.push_back(utils::make_unique_ptr<Label>(label->get_cost()));
+        } else {
+            labels.push_back(nullptr);
+        }
+    }
 }
 
 // Due to the LabelMap pointer
@@ -41,17 +49,11 @@ void Labels::reduce_labels(const vector<int> &old_label_nos) {
     }
     labels.push_back(utils::make_unique_ptr<Label>(new_label_cost));
     num_active_entries -= (old_label_nos.size() - 1);
-    int new_label_no = labels.size() - 1;
-    label_map->update(new_label_no, old_label_nos);
 }
 
 unique_ptr<Label> Labels::extract_label(int label_no) {
     assert(is_current_label(label_no));
     return move(labels[label_no]);
-}
-
-unique_ptr<task_transformation::LabelMap> Labels::extract_label_map() {
-    return move(label_map);
 }
 
 bool Labels::is_current_label(int label_no) const {

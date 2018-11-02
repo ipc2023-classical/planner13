@@ -5,8 +5,12 @@
 #include "utils/timer.h"
 #include "utils/logging.h"
 
+#include "task_representation/fts_task.h"
+#include "task_representation/labels.h"
 #include "task_representation/sas_task.h"
+#include "task_representation/transition_system.h"
 
+#include "task_transformation/fts_factory.h"
 #include "task_transformation/task_transformation.h"
 
 #include <iostream>
@@ -14,7 +18,8 @@
 using namespace std;
 using utils::ExitCode;
 
-using task_transformation::TaskTransformation;
+using namespace task_representation;
+using namespace task_transformation;
 
 int main(int argc, const char **argv) {
     utils::register_event_handlers();
@@ -26,6 +31,10 @@ int main(int argc, const char **argv) {
 
     if (static_cast<string>(argv[1]) != "--help") {
         g_sas_task()->read_from_file(cin);
+        auto labels_and_transition_systems = create_labels_and_transition_systems(*g_sas_task());
+        g_main_task = make_shared<FTSTask>(
+            move(labels_and_transition_systems.second),
+            move(labels_and_transition_systems.first));
         g_log << "Main task constructed" << endl;
     }
     
@@ -47,17 +56,15 @@ int main(int argc, const char **argv) {
     }
 
     utils::Timer transform_timer;
-    if (!transformer) {
-        cerr << "Please use the option --transform to specify how to "
-                "transform the SAS+ task into an FTS task." << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
+    if (transformer) {
+        cout << "Transform task... " << endl;
+        auto transformation = transformer->transform_task(g_main_task);
+        g_main_task = transformation.first;
+        g_plan_reconstruction = transformation.second;
+        //TODO is_unit_cost = g_main_task->is_unit_cost();
+    } else {
+        cout << "No further transformation of atomic FTS." << endl;
     }
-
-    cout << "Transform task... " << endl;
-    auto transformation = transformer->transform_task(*g_sas_task());
-    g_main_task = transformation.first;
-    g_plan_reconstruction = transformation.second;
-    //TODO is_unit_cost = g_main_task->is_unit_cost();
     g_log << "Transform time: " << transform_timer << endl;
 
     shared_ptr<SearchEngine> engine;

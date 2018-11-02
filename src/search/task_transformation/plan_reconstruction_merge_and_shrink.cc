@@ -7,9 +7,11 @@ using namespace std;
 
 namespace task_transformation {
 PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
+    const shared_ptr<task_representation::FTSTask> &predecessor_task,
     vector<unique_ptr<MergeAndShrinkRepresentation>> &&merge_and_shrink_representations,
     unique_ptr<LabelMap> label_map)
-    : merge_and_shrink_representations(move(merge_and_shrink_representations)),
+    : predecessor_task(predecessor_task),
+      merge_and_shrink_representations(move(merge_and_shrink_representations)),
       label_map(move(label_map)) {
 }
 

@@ -24,10 +24,10 @@ TaskTransformationMergeAndShrink::TaskTransformationMergeAndShrink(
 
 pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     TaskTransformationMergeAndShrink::transform_task(
-        const task_representation::SASTask &sas_task) {
+        const shared_ptr<task_representation::FTSTask> &fts_task) {
     MergeAndShrinkAlgorithm mas_algorithm(options);
     FactoredTransitionSystem fts =
-        mas_algorithm.build_factored_transition_system(sas_task);
+        mas_algorithm.build_factored_transition_system(*fts_task);
 
     // "Renumber" factors consecutively. (Actually, nothing to do except
     // storing them consecutively since factor indices are not stored anywhere.)
@@ -48,37 +48,39 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
 
     // Renumber labels consecutively
     unique_ptr<Labels> labels = fts.extract_labels();
-    int num_labels = labels->get_num_active_entries();
-    cout << "Number of remaining labels: " << num_labels << endl;
+    int new_num_labels = labels->get_num_active_entries();
+    cout << "Number of remaining labels: " << new_num_labels << endl;
     vector<unique_ptr<task_representation::Label>> active_labels;
-    vector<pair<int, int>> label_mapping;
-    active_labels.reserve(num_labels);
-    label_mapping.reserve(num_labels);
+    vector<int> old_to_new_labels(labels->get_size(), -1);
+    active_labels.reserve(new_num_labels);
     for (int label_no = 0; label_no < labels->get_size(); ++label_no) {
         if (labels->is_current_label(label_no)) {
+            int new_label_no = active_labels.size();
             active_labels.push_back(labels->extract_label(label_no));
-            int new_label_no = label_mapping.size();
-            label_mapping.emplace_back(label_no, new_label_no);
+            old_to_new_labels[label_no] = new_label_no;
         }
     }
-    cout << "Renumbering labels: " << label_mapping << endl;
+    cout << "Renumbering labels: " << old_to_new_labels << endl;
     for (unique_ptr<TransitionSystem> &ts : transition_systems) {
-        ts->renumber_labels(label_mapping);
+        ts->renumber_labels(old_to_new_labels, new_num_labels);
     }
-    unique_ptr<LabelMap> label_map = labels->extract_label_map();
-    for (const pair<int, int> &new_and_old_label : label_mapping) {
-        label_map->update(new_and_old_label.first, vector<int>{new_and_old_label.second});
-    }
+    unique_ptr<LabelMap> label_map = mas_algorithm.extract_label_map();
+    label_map->update(old_to_new_labels);
+    // TODO: if we every wanted to continue using new_labels and apply further
+    // label reductions, we should pass a larger number as the "max_size" than
+    // the number of current labels.
+    unique_ptr<Labels> new_labels = utils::make_unique_ptr<Labels>(
+        move(active_labels), active_labels.size());
     cout << "Done renumbering labels." << endl;
 
     cout << "Collection information on plan reconstruction..." << endl;
-    shared_ptr<task_representation::FTSTask> fts_task =
+    shared_ptr<task_representation::FTSTask> transformed_fts_task =
         make_shared<task_representation::FTSTask>(
-            move(transition_systems), move(active_labels));
+            move(transition_systems), move(new_labels));
     shared_ptr<PlanReconstructionMergeAndShrink> plan_reconstruction =
         make_shared<PlanReconstructionMergeAndShrink>(
-            move(mas_representations), move(label_map));
-    return make_pair(fts_task, plan_reconstruction);
+            fts_task, move(mas_representations), move(label_map));
+    return make_pair(transformed_fts_task, plan_reconstruction);
 }
 
 static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {
