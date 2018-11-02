@@ -13,6 +13,7 @@ namespace task_representation {
 namespace task_transformation {
 class PlanReconstruction {
 public:
+    virtual ~PlanReconstruction() = default;
     // Given a sequence of actions that is a plan for the successor task, retrieve a plan
     // for the predecessor task. Directly modifies the contents of plan and traversed_states
     virtual void reconstruct_plan(std::vector<task_representation::LabelID> & plan,
@@ -20,48 +21,17 @@ public:
 };
 
 class PlanReconstructionSequence : public PlanReconstruction {
-    std::vector<std::unique_ptr<PlanReconstruction> > plan_reconstruction;
-
+    std::vector<std::unique_ptr<PlanReconstruction>> plan_reconstructions;
 public:
+    explicit PlanReconstructionSequence(
+        std::vector<std::unique_ptr<PlanReconstruction>> &&plan_reconstructions);
+    virtual ~PlanReconstructionSequence() override;
     virtual void reconstruct_plan(std::vector<task_representation::LabelID> & plan,
-        std::vector<task_representation::State> & traversed_states) const {
-        for (const auto & pr : plan_reconstruction) {
+        std::vector<task_representation::State> & traversed_states) const override {
+        for (const auto & pr : plan_reconstructions) {
             pr->reconstruct_plan(plan, traversed_states);
         }
     }
 };
-
-
-
-class PlanReconstructionStep : public PlanReconstruction {
-    // We do plan reconstruction by performing a search on the predecessor task. We allow two type of transitions:
-    // 1) Transitions with a label l that maps to the next label in the plan and whose target maps to the next abstract state in the plan
-    // 2) Transitions with a tau label whose target maps to the same abstract state in the plan. 
-    //std::shared_ptr<task_representation::FTSTask> predecessor_task;
-
-    // We need the merge and shrink representation, which for evety state in the
-    // predecessor task, it obtains the state in the task where the plan was found.    
-    //std::vector<MergeAndShrinkRepresentation> merge_and_shrink_representation;
-
-    // We need a LabelMap from labels in the predecessor_task to labels in the task where
-    // the plan was found.
-    //LabelMap label_map;    
-
-    // This is the set of tau_labels, that we can use. 
-    //std::vector<int> tau_labels;
-
-
-public:
-
-    /* PlanReconstructionStep (std::shared_ptr<task_representation::FTSTask> predecessor_task, */
-    /*                 std::vector<MergeAndShrinkRepresentation> merge_and_shrink_representation, */
-    /*                 LabelMap label_map, */
-    /*                 std::vector<int> tau_labels); */
-    
-    virtual void reconstruct_plan (std::vector<task_representation::LabelID> & plan,
-                   std::vector<task_representation::State> & traversed_states) const;
-
-};
-
 }
 #endif
