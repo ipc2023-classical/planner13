@@ -4,7 +4,7 @@
 #include "label_map.h"
 #include "merge_and_shrink_algorithm.h"
 #include "merge_and_shrink_representation.h"
-#include "plan_reconstruction.h"
+#include "plan_reconstruction_merge_and_shrink.h"
 
 #include "../task_representation/fts_task.h"
 #include "../task_representation/labels.h"
@@ -73,10 +73,11 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
 
     cout << "Collection information on plan reconstruction..." << endl;
     shared_ptr<task_representation::FTSTask> fts_task =
-        make_shared<task_representation::FTSTask>(move(transition_systems), move(active_labels));
-    shared_ptr<PlanReconstruction> plan_reconstruction = nullptr;
-    // TODO: get plan reconstruction from fts and add the final "renumbering"
-    // of factors and labels to it.
+        make_shared<task_representation::FTSTask>(
+            move(transition_systems), move(active_labels));
+    shared_ptr<PlanReconstructionMergeAndShrink> plan_reconstruction =
+        make_shared<PlanReconstructionMergeAndShrink>(
+            move(mas_representations), move(label_map));
     return make_pair(fts_task, plan_reconstruction);
 }
 
