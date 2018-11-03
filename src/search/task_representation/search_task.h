@@ -4,8 +4,10 @@
 #include "fact.h"
 #include "types.h"
 
+#include "fts_operators.h"
 #include "../global_state.h"
 #include "../operator_id.h"
+
 
 #include <memory>
 #include <set>
@@ -18,7 +20,6 @@ namespace int_packer {
 }
 
 namespace task_representation {
-class FTSOperator;
 class FTSTask;
 class State;
 class Transition;
@@ -163,10 +164,15 @@ public:
         const GlobalState &state,
         std::vector<OperatorID> &applicable_ops) const;
 
+
     bool is_applicable(const GlobalState & state, OperatorID op) const;
 
     int num_variables() const {
         return initial_state.size();
+    }
+    
+    int num_operators() const {
+        return operators.size();
     }
 
     const std::vector<int> &get_initial_state_data() const {

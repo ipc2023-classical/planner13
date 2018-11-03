@@ -20,6 +20,7 @@ class Options;
 
 namespace task_representation {
 class State;
+class SearchTask;
 }
 
 
@@ -63,6 +64,8 @@ protected:
 
     // Hold a reference to the task implementation and pass it to objects that need it.
     const std::shared_ptr<task_representation::FTSTask> task;
+    const std::shared_ptr<task_representation::SearchTask> search_task;
+	
 
     enum {DEAD_END = -1, NO_VALUE = -2};
 

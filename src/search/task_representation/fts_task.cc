@@ -5,7 +5,7 @@
 #include "transition_system.h"
 
 #include "../global_state.h"
-
+#include "search_task.h"
 #include <cassert>
 
 using namespace std;
@@ -18,12 +18,15 @@ FTSTask::FTSTask(
     unique_ptr<Labels> labels)
     : transition_systems(move(transition_systems)),
       labels(move(labels)) {
+
+#ifndef NDEBUG
     for (const auto &ts : transition_systems) {
         assert(ts);
-    }
+}
     for (int label = 0; label < this->labels->get_size(); ++label) {
         assert(this->labels->is_current_label(label));
     }
+#endif
 }
 
 FTSTask::~FTSTask() {
@@ -91,5 +94,14 @@ vector<int> FTSTask::get_goal_variables() const {
         }
     }
     return goal_variables;
+}
+
+
+
+shared_ptr<SearchTask> FTSTask::get_search_task() const {
+    if(!search_task){
+	search_task = make_shared<SearchTask> (*this);
+    }
+    return search_task;
 }
 }

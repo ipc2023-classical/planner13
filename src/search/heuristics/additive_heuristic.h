@@ -13,8 +13,10 @@ class State;
 namespace additive_heuristic {
 using relaxation_heuristic::Proposition;
 using relaxation_heuristic::UnaryOperator;
+using task_representation::State;
 
 class AdditiveHeuristic : public relaxation_heuristic::RelaxationHeuristic {
+
     /* Costs larger than MAX_COST_VALUE are clamped to max_value. The
        precise value (100M) is a bit of a hack, since other parts of
        the code don't reliably check against overflow as of this
@@ -63,20 +65,6 @@ protected:
 public:
     explicit AdditiveHeuristic(const options::Options &options);
     ~AdditiveHeuristic();
-
-    /*
-      TODO: The two methods below are temporarily needed for the CEGAR
-      heuristic. In the long run it might be better to split the
-      computation from the heuristic class. Then the CEGAR code could
-      use the computation object instead of the heuristic.
-    */
-    void compute_heuristic_for_cegar(const State &state);
-
-    int get_cost_for_cegar(int var, int value) const {
-        assert(utils::in_bounds(var, propositions));
-        assert(utils::in_bounds(value, propositions[var]));
-        return propositions[var][value].cost;
-    }
 };
 }
 

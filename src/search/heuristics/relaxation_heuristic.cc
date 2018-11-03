@@ -18,30 +18,53 @@
 
 using namespace std;
 
+using task_representation::LabelID;
+using task_representation::FTSTask;
+using task_representation::FactPair;
+
 namespace relaxation_heuristic {
 
+
+    void insert_outside_condition(LabelID l, const FTSTask * task,
+				  std::map<std::vector<Proposition *>, LabelID> & result,
+				  const std::vector<Proposition * > & new_outside_condition){
+
+	auto pos = result.lower_bound(new_outside_condition);
+
+	if(pos != result.end() && !(result.key_comp()(new_outside_condition, pos->first))) {
+	    // key already exists, update if the new label has lower cost
+	    if (task->get_label_cost(pos->second)  > task->get_label_cost(l)) {
+		pos->second = l;
+	    }
+	} else {
+	    result.insert(pos, std::map<std::vector<Proposition *>, LabelID>::value_type(new_outside_condition, l));
+	}	
+    }
     //Auxiliary function to compute all combinations of preconditions. 
-    void insert_all_combinations_recursive (const std::vector<std::vector<Proposition * > > & psets,
-                                  std::vector<Proposition * > & new_combination,
-                                  std::set<std::vector<Proposition *> > & result) {
+    void insert_all_combinations_recursive (LabelID l, const FTSTask * task, 
+					    const std::vector<std::vector<Proposition * > > & psets,
+					    std::vector<Proposition * > & new_combination,
+					    std::map<std::vector<Proposition *>, LabelID> & result) {
 
         const auto &  pset = psets[new_combination.size()];
         for (Proposition * p : pset) {
             new_combination.push_back(p);
             if(new_combination.size() == psets.size()) {
-                result.insert(new_combination);
-            } else {
-                insert_all_combinations_recursive(psets, new_combination, result);
+		insert_outside_condition(l, task, result, new_combination);
+	    } else {
+                insert_all_combinations_recursive(l, task, psets, new_combination, result);
             }
             new_combination.pop_back();
         }        
     }
     
-    void insert_all_combinations (const std::vector<std::vector<Proposition * > > & psets,
-                                  std::set<std::vector<Proposition *> > & result) {
-        std::vector<Proposition * > new_combination;
-        new_combination.reserve(psets.size());
-        insert_all_combinations_recursive(psets, new_combination, result);
+    void insert_all_combinations (LabelID l, FTSTask * task,
+				  const std::vector<std::vector<Proposition * > > & psets,
+                                  std::map<std::vector<Proposition *> , LabelID> & result) {
+	assert(!psets.empty()) ;
+	std::vector<Proposition * > new_combination;
+	new_combination.reserve(psets.size());
+	insert_all_combinations_recursive(l, task, psets, new_combination, result);    
     }
 
     
@@ -108,7 +131,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
             for (const auto & s : set_of_states) {
                 precondition.push_back(&(propositions[s]));
             }
-            unary_operators.push_back(UnaryOperator(precondition, aux_prop, -1, 0));
+            unary_operators.push_back(UnaryOperator(precondition, aux_prop, RelaxedPlanStep(), 0));
         }
         
         // Build goal propositions.
@@ -126,7 +149,6 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
     // of labels by the auxiliary propositions
     for (int lts_id = 0; lts_id < task->get_size(); ++lts_id){
         const auto & ts = task->get_ts(lts_id);
-        int op_no = 0; //TODO: Set op_no to get preferred operators
         // Build propositions for each label group in each transition system if it has relevant transitions
         for (const task_representation::GroupAndTransitions & gat : ts) {
             std::map<int, vector<int> > sources_by_target;
@@ -136,46 +158,64 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 		}
             }
             
-            std::set<std::vector<Proposition *> > outside_conditions;
-            for(int label_no : gat.label_group) {
-                task_representation::LabelID l(label_no);
+	    std::map<std::vector<Proposition *> , LabelID>  outside_conditions;
+            for(int l : gat.label_group) {
                 std::vector<std::vector<Proposition * > > pre_per_ts;
                 const auto & pre_transition_systems = task->get_label_preconditions(l);
-                for (int pre_ts : pre_transition_systems) {
-                    const auto & pre = task->get_ts(pre_ts).get_label_precondition(l);
-                    if (auxiliary_propositions_per_var[pre_ts].count(pre)){
-                        pre_per_ts.push_back(vector<Proposition *> ());
-                        pre_per_ts.back().push_back(auxiliary_propositions_per_var[pre_ts].at(pre));
-                    } else {
-                        pre_per_ts.push_back(vector<Proposition *> ());
-                        pre_per_ts.back().reserve(pre.size());
-                        for (int s : pre) {
-                            pre_per_ts.back().push_back(&(propositions_per_var[pre_ts][s]));
-                        }
-                    }
 
-                }
+		if (pre_transition_systems.empty() ||
+		    (pre_transition_systems.size() == 1 && pre_transition_systems[0] == lts_id)) {
+		    insert_outside_condition(LabelID(l), task.get(), outside_conditions, std::vector<Proposition *>());
+		} else {
+		    for (int pre_ts : pre_transition_systems) {
+			if (pre_ts == lts_id) {
+			    continue;
+			}
+			const auto & pre = task->get_ts(pre_ts).get_label_precondition(LabelID(l));
+			if (auxiliary_propositions_per_var[pre_ts].count(pre)){
+			    pre_per_ts.push_back(vector<Proposition *> ());
+			    pre_per_ts.back().push_back(auxiliary_propositions_per_var[pre_ts].at(pre));
+			} else {
+			    pre_per_ts.push_back(vector<Proposition *> ());
+			    pre_per_ts.back().reserve(pre.size());
+			    for (int s : pre) {
+				pre_per_ts.back().push_back(&(propositions_per_var[pre_ts][s]));
+			    }
+			}
+		    }
                 
-                insert_all_combinations(pre_per_ts, outside_conditions); 
+		    insert_all_combinations(LabelID(l), task.get(), pre_per_ts, outside_conditions);
+		}
             }
             
             for (const auto & item  : sources_by_target) {
                 int target = item.first;
                 const vector<int> & sources = item.second;
                 for (const auto & outside_condition : outside_conditions) {
-                    if ((int)(sources.size()) == ts.get_size() ) {
-                        unary_operators.push_back(UnaryOperator(outside_condition,
+		    RelaxedPlanStep rs_step (outside_condition.second, FactPair(lts_id, target));
+                    if ((int)(sources.size()) == ts.get_size() - 1 ) {
+                        unary_operators.push_back(UnaryOperator(outside_condition.first,
                                                                 &(propositions_per_var[lts_id][target]),
-                                                                op_no, gat.label_group.get_cost()));
+                                                                rs_step,
+								task->get_label_cost(outside_condition.second)));
+			// for (OperatorID op_id : rs_step.get_operator_ids()) {
+			//     unary_operators_per_operator_id[op_id].push_back(&(unary_operators.back()));
+			// }
                     } else {
-                        auto pre = outside_condition; //copy 
+                        auto pre = outside_condition.first; //copy
                         pre.push_back(nullptr); // add dummy
                         for (int src : sources) {
+			    assert (src != target);
                             //set dummy 
                             pre[pre.size() -1] = &(propositions_per_var[lts_id][src]);
                             unary_operators.push_back(UnaryOperator(pre,
                                                                     &(propositions_per_var[lts_id][target]),
-                                                                    op_no, gat.label_group.get_cost()));
+                                                                    rs_step,
+								    task->get_label_cost(outside_condition.second)));
+
+			    // for (OperatorID op_id : rs_step.get_operator_ids()) {
+			    // 	unary_operators_per_operator_id[op_id].push_back(&(unary_operators.back()));
+			    // }
                         }
                     }
                 }
@@ -203,31 +243,6 @@ bool RelaxationHeuristic::dead_ends_are_reliable() const {
     //return !has_axioms();
     return true;
 }
-
-// void RelaxationHeuristic::build_unary_operators(int label) {
-//     int base_cost = op.get_cost();
-//     vector<Proposition *> precondition_props; 
-    
-//     for (FactProxy precondition : op.get_preconditions()) {
-//         precondition_props.push_back(get_proposition(precondition));
-//     }
-
-//     for (size_t i = 0; i < task->get_size(); ++i){
-//         const auto & ts = task->get_ts(i);
-//         ts.get_transitions_label();
-
-//     }
-    
-//     for (EffectProxy effect : op.get_effects()) {
-//         Proposition *effect_prop = get_proposition(effect.get_fact());
-//         EffectConditionsProxy eff_conds = effect.get_conditions();
-//         for (FactProxy eff_cond : eff_conds) {
-//             precondition_props.push_back(get_proposition(eff_cond));
-//         }
-//         unary_operators.push_back(UnaryOperator(precondition_props, effect_prop, op_no, base_cost));
-//         precondition_props.erase(precondition_props.end() - eff_conds.size(), precondition_props.end());
-//     }
-// }
 
 void RelaxationHeuristic::simplify() {
     // Remove duplicate or dominated unary operators.
@@ -313,9 +328,9 @@ void RelaxationHeuristic::simplify() {
 
     sort(unary_operators.begin(), unary_operators.end(),
          [&] (const UnaryOperator &o1, const UnaryOperator &o2) {
-            if (o1.operator_no != o2.operator_no)
-                return o1.operator_no < o2.operator_no;
-            if (o1.effect != o2.effect)
+	     if (o1.rp_step.label != o2.rp_step.label)
+		 return o1.rp_step.label < o2.rp_step.label;
+	     if (o1.effect != o2.effect)
                 return o1.effect->id < o2.effect->id;
             if (o1.base_cost != o2.base_cost)
                 return o1.base_cost < o2.base_cost;

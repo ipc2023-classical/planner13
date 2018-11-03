@@ -2,19 +2,29 @@
 #define HEURISTICS_RELAXATION_HEURISTIC_H
 
 #include "../heuristic.h"
+#include "../task_representation/fact.h"
 
 #include <vector>
 
-class FactProxy;
 class GlobalState;
-class OperatorProxy;
 
 namespace relaxation_heuristic {
 struct Proposition;
 struct UnaryOperator;
 
+struct RelaxedPlanStep {
+    int label;
+    task_representation::FactPair effect;
+
+RelaxedPlanStep() : label(-1), effect(-1, -1) {
+}
+    RelaxedPlanStep (int l, task_representation::FactPair effect_) :
+    label (l), effect(effect_) {
+    }
+};
+
 struct UnaryOperator {
-    int operator_no; // -1 for axioms; index into g_operators otherwise
+    RelaxedPlanStep rp_step;
     std::vector<Proposition *> precondition;
     Proposition *effect;
     int base_cost;
@@ -23,9 +33,8 @@ struct UnaryOperator {
     int cost; // Used for h^max cost or h^add cost;
               // includes operator cost (base_cost)
     UnaryOperator(const std::vector<Proposition *> &pre, Proposition *eff,
-                  int operator_no_, int base)
-        : operator_no(operator_no_), precondition(pre), effect(eff),
-          base_cost(base) {}
+                  RelaxedPlanStep step, int base)
+    : rp_step(step), precondition(pre), effect(eff), base_cost(base) {}
 };
 
 struct Proposition {
@@ -47,12 +56,10 @@ struct Proposition {
 };
 
 class RelaxationHeuristic : public Heuristic {
-    void build_unary_operators(const OperatorProxy &op, int operator_no);
     void simplify();
 protected:
     std::vector<UnaryOperator> unary_operators;
     std::vector<std::vector<Proposition>> propositions_per_var;
-
 
     std::vector<Proposition *> goal_propositions;
 
@@ -69,3 +76,4 @@ public:
 }
 
 #endif
+

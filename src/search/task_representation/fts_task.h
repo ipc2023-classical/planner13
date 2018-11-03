@@ -28,6 +28,7 @@ class FTSTask {
     std::unique_ptr<Labels> labels;
 
     mutable std::vector<std::vector<int>> label_preconditions;
+    mutable std::shared_ptr<SearchTask> search_task;
 public:
     FTSTask(
         std::vector<std::unique_ptr<TransitionSystem>> &&transition_systems,
@@ -55,6 +56,8 @@ public:
     const Labels &get_labels() const {
         return *labels;
     }
+
+    std::shared_ptr<SearchTask> get_search_task() const;
 };
 }
 
