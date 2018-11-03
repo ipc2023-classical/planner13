@@ -127,11 +127,13 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
             Proposition * aux_prop = &(propositions.back());
             auxiliary_propositions_per_var[lts_id][set_of_states] = aux_prop;
 
-            vector<Proposition *> precondition;
+            
             for (const auto & s : set_of_states) {
+		vector<Proposition *> precondition;
                 precondition.push_back(&(propositions[s]));
+		unary_operators.push_back(UnaryOperator(precondition, aux_prop, RelaxedPlanStep(), 0));
             }
-            unary_operators.push_back(UnaryOperator(precondition, aux_prop, RelaxedPlanStep(), 0));
+            
         }
         
         // Build goal propositions.
