@@ -67,6 +67,12 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
         }
         if (!found_match) {
             cout << "Error: no match found in plan reconstruction" << endl;
+            cout << "Trying to find a match with abstract label: " << label << endl;
+            cout << "Available original labels:" << endl;
+            for (OperatorID op : applicable_ops)  {
+                LabelID original_label = search_task->get_label (op);
+                cout << "  " << original_label << " reduced to " << label_map->get_reduced_label(original_label) << endl;
+            }
             utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
         }
 
