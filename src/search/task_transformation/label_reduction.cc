@@ -61,7 +61,7 @@ void LabelReduction::initialize(const FTSTask &fts_task) {
             transition_system_order.push_back(max_transition_system_count - 1 - i);
     }
 
-    label_map = utils::make_unique_ptr<LabelMap>(fts_task.get_size());
+    label_map = utils::make_unique_ptr<LabelMap>(fts_task.get_num_labels());
 }
 
 unique_ptr<LabelMap> LabelReduction::extract_label_map() {

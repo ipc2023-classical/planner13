@@ -26,8 +26,7 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
     bool PlanReconstructionMergeAndShrink::match_states(const GlobalState & original_state,
                                                  const GlobalState & abstract_state) const {
         for(size_t i = 0; i < merge_and_shrink_representations.size(); ++i) {
-            int value = original_state[0];
-            //int value = merge_and_shrink_representations[i]->get_value(original_state);
+            int value = merge_and_shrink_representations[i]->get_value(original_state);
             if (value != abstract_state[i])  {
                 return false;
             }
@@ -81,20 +80,20 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
 void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     const std::vector<int> & label_path = plan.get_labels ();
     const std::vector<GlobalState> & traversed_states = plan.get_traversed_states ();
-
+    assert(label_path.size() + 1 == traversed_states.size());
     std::vector<int> new_label_path;
     std::vector<GlobalState> new_traversed_states;
 
     GlobalState predecessor = traversed_states[0];
     new_traversed_states.push_back(state_registry.get_initial_state());
     for(size_t step = 0; step < label_path.size(); ++step) {
-        cout << "Step "  << step << " out of " << label_path.size() << endl;
         int label = label_path[step];
+        assert(step + 1 < traversed_states.size());
         const GlobalState & target = traversed_states[step+1];
         reconstruct_step(label, target, new_label_path, new_traversed_states);
     }
     
-
+    plan.set_plan(new_traversed_states, new_label_path);
 }
 
 

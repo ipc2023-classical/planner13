@@ -129,7 +129,7 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
     std::vector<GlobalState> states;
     std::vector<int> operators;
     states.push_back(goal_state);
-    assert(path.empty());
+    assert(plan.empty());
     for (;;) {
         const SearchNodeInfo &info = search_node_infos[states.back()];
         if (info.creating_operator == -1) {

@@ -72,6 +72,7 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     unique_ptr<Labels> new_labels = utils::make_unique_ptr<Labels>(
         move(active_labels), active_labels.size());
     cout << "Done renumbering labels." << endl;
+    //label_map->dump();
 
     cout << "Collection information on plan reconstruction..." << endl;
     shared_ptr<task_representation::FTSTask> transformed_fts_task =

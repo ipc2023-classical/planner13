@@ -24,7 +24,11 @@ public:
     
     ~Plan() = default;
 
-    void set_plan(std::vector<GlobalState> states, std::vector<int> operators);
+    bool empty() const {
+        return !solved;
+    }
+
+    void set_plan(const std::vector<GlobalState> & states, const std::vector<int> & operators);
 
     const std::vector<int> & get_labels ()const {
         return labels;
