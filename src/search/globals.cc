@@ -15,7 +15,6 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <limits>
 #include <set>
 #include <sstream>
@@ -37,8 +36,7 @@ int calculate_plan_cost(const vector<int> &plan) {
     return plan_cost;
 }
 
-void save_plan(const vector<int> &plan,
-               bool generates_multiple_plan_files) {
+std::string get_next_plan_name(bool generates_multiple_plan_files) {
     // TODO: Refactor: this is only used by the SearchEngine classes
     //       and hence should maybe be moved into the SearchEngine.
     ostringstream filename;
@@ -49,18 +47,9 @@ void save_plan(const vector<int> &plan,
     } else {
         assert(plan_number == 1);
     }
-    ofstream outfile(filename.str());
-    for (size_t i = 0; i < plan.size(); ++i) {
-        cout << g_sas_task()->get_operator_name(plan[i]) << " (" << g_sas_task()->get_operator_cost(plan[i]) << ")" << endl;
-        outfile << "(" << g_sas_task()->get_operator_name(plan[i]) << ")" << endl;
-    }
-    int plan_cost = calculate_plan_cost(plan);
-    outfile << "; cost = " << plan_cost << " ("
-            << (g_sas_task()->is_unit_cost() ? "unit cost" : "general cost") << ")" << endl;
-    outfile.close();
-    cout << "Plan length: " << plan.size() << " step(s)." << endl;
-    cout << "Plan cost: " << plan_cost << endl;
     ++g_num_previously_generated_plans;
+
+    return filename.str();
 }
 
 // AxiomEvaluator *g_axiom_evaluator;

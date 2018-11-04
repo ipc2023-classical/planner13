@@ -9,7 +9,7 @@
 #include <vector>
 
 class GlobalState;
-
+class Plan;
 
 class SearchNode {
     const StateRegistry &state_registry;
@@ -55,7 +55,7 @@ public:
     SearchSpace(StateRegistry &state_registry, OperatorCost cost_type);
 
     SearchNode get_node(const GlobalState &state);
-    void trace_path(const GlobalState &goal_state, std::vector<int> &path) const;
+    void trace_path(const GlobalState &goal_state, Plan &path) const;
 
     void dump() const;
     void print_statistics() const;

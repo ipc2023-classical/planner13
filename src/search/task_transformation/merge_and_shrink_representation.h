@@ -7,7 +7,7 @@
 namespace task_representation {
 class State;
 }
-
+class GlobalState;
 using namespace task_representation;
 
 namespace task_transformation {
@@ -27,6 +27,7 @@ public:
     // Return the abstract state or the goal distance, depending on whether
     // set_distances has been used or not.
     virtual int get_value(const State &state) const = 0;
+    virtual int get_value(const GlobalState &state) const = 0;
     virtual void apply_abstraction_to_lookup_table(
         const std::vector<int> &abstraction_mapping) = 0;
     virtual void dump() const = 0;
@@ -45,6 +46,7 @@ public:
     virtual void apply_abstraction_to_lookup_table(
         const std::vector<int> &abstraction_mapping) override;
     virtual int get_value(const State &state) const override;
+    virtual int get_value(const GlobalState &state) const override;
     virtual void dump() const override;
 };
 
@@ -63,6 +65,7 @@ public:
     virtual void apply_abstraction_to_lookup_table(
         const std::vector<int> &abstraction_mapping) override;
     virtual int get_value(const State &state) const override;
+    virtual int get_value(const GlobalState &state) const override;
     virtual void dump() const override;
 };
 }

@@ -1,6 +1,7 @@
 #include "sas_task.h"
 
 #include <iostream>
+#include <fstream>
 #include <limits>
 
 #include "sas_operator.h"
@@ -388,5 +389,21 @@ void SASTask::check_fact(int var, int val) const {
         cerr << "Invalid value for variable " << var << ": " << val << endl;
         utils::exit_with(utils::ExitCode::INPUT_ERROR);
     }
+}
+
+    
+void SASTask::save_plan(const vector<int> & plan, const std::string & filename) const {
+    std::ofstream outfile(filename);
+    int plan_cost = 0;
+    for (size_t i = 0; i < plan.size(); ++i) {
+        plan_cost += get_operator_cost(plan[i]);
+        cout << get_operator_name(plan[i]) << " (" << get_operator_cost(plan[i]) << ")" << endl;
+        outfile << "(" << get_operator_name(plan[i]) << ")" << endl;
+    }
+    outfile << "; cost = " << plan_cost << " ("
+            << (is_unit_cost() ? "unit cost" : "general cost") << ")" << endl;
+    outfile.close();
+    cout << "Plan length: " << plan.size() << " step(s)." << endl;
+    cout << "Plan cost: " << plan_cost << endl;
 }
 }

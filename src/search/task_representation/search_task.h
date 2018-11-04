@@ -193,10 +193,11 @@ public:
     }
 
     void dump_op(OperatorID op) const;
+
+    LabelID get_label(OperatorID op) const {
+        return operators[op.get_index()].get_label();
+    }
 };
 
-extern std::shared_ptr<SearchTask> get_search_task(
-    const std::shared_ptr<FTSTask> &fts_task);
 }
-
 #endif

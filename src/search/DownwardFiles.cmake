@@ -47,7 +47,6 @@ fast_downward_plugin(
     HELP "Core source files"
     SOURCES
         planner
-
         evaluation_context
         evaluation_result
         evaluator
@@ -62,6 +61,7 @@ fast_downward_plugin(
         option_parser
         option_parser_util
         per_state_information
+        plan
         plugin
         pruning_method
         search_engine

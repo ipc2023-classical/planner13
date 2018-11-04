@@ -25,7 +25,7 @@ class PruningMethod;
 
 SearchEngine::SearchEngine(const Options &opts)
     : status(IN_PROGRESS),
-      solution_found(false),
+      plan(g_main_task.get()),
       state_registry(g_main_task->get_search_task()),
       search_space(state_registry,
                    static_cast<OperatorCost>(opts.get_enum("cost_type"))),
@@ -55,14 +55,8 @@ SearchStatus SearchEngine::get_status() const {
     return status;
 }
 
-const SearchEngine::Plan &SearchEngine::get_plan() const {
-    assert(solution_found);
+const Plan &SearchEngine::get_plan() const {
     return plan;
-}
-
-void SearchEngine::set_plan(const Plan &p) {
-    solution_found = true;
-    plan = p;
 }
 
 void SearchEngine::search() {
@@ -84,17 +78,10 @@ void SearchEngine::search() {
 bool SearchEngine::check_goal_and_set_plan(const GlobalState &state) {
     if (task->is_goal_state(state)) {
         cout << "Solution found!" << endl;
-        Plan plan;
         search_space.trace_path(state, plan);
-        set_plan(plan);
         return true;
     }
     return false;
-}
-
-void SearchEngine::save_plan_if_necessary() const {
-    if (found_solution())
-        save_plan(get_plan());
 }
 
 int SearchEngine::get_adjusted_cost(int cost) const {

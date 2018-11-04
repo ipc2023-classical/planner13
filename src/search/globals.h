@@ -40,8 +40,7 @@ bool test_goal(const GlobalState &state);
   Set generates_multiple_plan_files to true if the planner can find more than
   one plan and should number the plans as FILENAME.1, ..., FILENAME.n.
 */
-void save_plan(const std::vector<int> &plan,
-               bool generates_multiple_plan_files = false);
+std::string get_next_plan_name(bool generates_multiple_plan_files = false);
 int calculate_plan_cost(const std::vector<const GlobalOperator *> &plan);
 
 void read_everything(std::istream &in);

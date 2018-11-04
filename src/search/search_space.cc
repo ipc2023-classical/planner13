@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include "search_node_info.h"
+#include "plan.h"
 
 using namespace std;
 
@@ -123,22 +124,27 @@ SearchNode SearchSpace::get_node(const GlobalState &state) {
 }
 
 void SearchSpace::trace_path(const GlobalState &goal_state,
-                             vector<int> &path) const {
-    GlobalState current_state = goal_state;
+                             Plan &plan) const {
+
+    std::vector<GlobalState> states;
+    std::vector<int> operators;
+    states.push_back(goal_state);
     assert(path.empty());
     for (;;) {
-        const SearchNodeInfo &info = search_node_infos[current_state];
+        const SearchNodeInfo &info = search_node_infos[states.back()];
         if (info.creating_operator == -1) {
             assert(info.parent_state_id == StateID::no_state);
             break;
         }
-        // assert(utils::in_bounds(info.creating_operator, g_operators));
-        // const GlobalOperator *op = &g_operators[info.creating_operator];
-        //path.push_back(op);
-	path.push_back(info.creating_operator);
-        current_state = state_registry.lookup_state(info.parent_state_id);
+
+        operators.push_back(info.creating_operator);
+        states.push_back(state_registry.lookup_state(info.parent_state_id));
     }
-    reverse(path.begin(), path.end());
+    reverse(operators.begin(), operators.end());
+    reverse(states.begin(), states.end());
+
+    plan.set_plan(states, operators);
+    
 }
 
 void SearchSpace::dump() const {

@@ -136,6 +136,9 @@ public:
     void verify_no_axioms_no_conditional_effects() const;
     void verify_no_conditional_effects() const ;
     void verify_no_axioms() const;
+
+    void save_plan(const std::vector<int> & plan, const std::string & filename) const;
+    
 };
 }
 

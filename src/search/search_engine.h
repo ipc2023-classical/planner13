@@ -7,6 +7,7 @@
 #include "search_statistics.h"
 #include "state_registry.h"
 #include "operator_id.h"
+#include "plan.h"
 
 #include <vector>
 
@@ -30,8 +31,6 @@ class SuccessorGenerator;
 }
 
 class SearchEngine {
-public:
-    typedef std::vector<int> Plan;
 private:
     SearchStatus status;
     bool solution_found;
@@ -50,7 +49,6 @@ protected:
     virtual void initialize() {}
     virtual SearchStatus step() = 0;
 
-    void set_plan(const Plan &plan);
     bool check_goal_and_set_plan(const GlobalState &state);
 
     int get_adjusted_cost(int cost) const;
@@ -59,7 +57,7 @@ public:
     SearchEngine(const options::Options &opts);
     virtual ~SearchEngine();
     virtual void print_statistics() const;
-    virtual void save_plan_if_necessary() const;
+
     bool found_solution() const;
     SearchStatus get_status() const;
     const Plan &get_plan() const;

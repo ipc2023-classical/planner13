@@ -12,6 +12,7 @@
 
 #include "task_transformation/fts_factory.h"
 #include "task_transformation/task_transformation.h"
+#include "task_transformation/plan_reconstruction.h"
 
 #include <iostream>
 
@@ -89,10 +90,20 @@ int main(int argc, const char **argv) {
     engine->search();
     search_timer.stop();
     utils::g_timer.stop();
-
-    engine->save_plan_if_necessary();
+    
+    Plan plan = engine->get_plan();
     engine->print_statistics();
     cout << "Search time: " << search_timer << endl;
+    
+
+    if (transformer) {
+        search_timer.reset();
+        g_plan_reconstruction->reconstruct_plan(plan);
+        cout << "Plan reconstruction time: " << search_timer << endl;
+    }
+
+    g_sas_task()->save_plan(plan.get_labels(),get_next_plan_name());
+    
     cout << "Total time: " << utils::g_timer << endl;
 
     if (engine->found_solution()) {
