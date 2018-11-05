@@ -432,7 +432,7 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
     parser.add_option<int>(
         "num_states_to_terminate_main_loop",
         "Number of states that, once reached after merging, terminates "
-        "the merge-and-shrink algorithm."
+        "the merge-and-shrink algorithm.",
         "infinity");
 
     // Label reduction option.
