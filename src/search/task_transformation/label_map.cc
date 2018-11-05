@@ -10,11 +10,6 @@ namespace task_transformation {
 LabelMap::LabelMap(int num_labels) {
     reduced_labels.resize(num_labels);
     iota(reduced_labels.begin(), reduced_labels.end(), 0);
-    for (int i = 0; i < num_labels; ++i) {
-        reduced_labels[i] = i;
-    }
-//    original_labels.resize(num_labels);
-//    iota(original_labels.begin(), original_labels.end(), 0);
 }
 
 void LabelMap::update(const vector<int> &old_to_new_labels) {
