@@ -109,9 +109,10 @@ def get_experiment_name():
     Derived from the absolute filename of the main script, e.g.
     "/ham/spam/eggs.py" => "spam-eggs"."""
     script = os.path.abspath(get_script())
-    script_dir = os.path.basename(os.path.dirname(script))
+    #script_dir = os.path.basename(os.path.dirname(script))
     script_base = os.path.splitext(os.path.basename(script))[0]
-    return "%s-%s" % (script_dir, script_base)
+    #return "%s-%s" % (script_dir, script_base)
+    return script_base
 
 
 def get_data_dir():
@@ -295,11 +296,12 @@ class IssueExperiment(FastDownwardExperiment):
 
         """
         kwargs.setdefault("attributes", self.DEFAULT_TABLE_ATTRIBUTES)
+        name = kwargs.get("name") or "report-absolute"
         report = AbsoluteReport(**kwargs)
         outfile = os.path.join(
             self.eval_dir,
             get_experiment_name() + "." + report.output_format)
-        self.add_report(report, outfile=outfile)
+        self.add_report(report, outfile=outfile, name=name)
         self.add_step(
             'publish-absolute-report', subprocess.call, ['publish', outfile])
 

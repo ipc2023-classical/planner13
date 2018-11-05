@@ -34,8 +34,7 @@ LabelReduction::LabelReduction(const Options &options)
       lr_before_merging(options.get<bool>("before_merging")),
       lr_method(LabelReductionMethod(options.get_enum("method"))),
       lr_system_order(LabelReductionSystemOrder(options.get_enum("system_order"))),
-      rng(utils::parse_rng_from_options(options)),
-      label_map(nullptr) {
+      rng(utils::parse_rng_from_options(options)) {
 }
 
 bool LabelReduction::initialized() const {
@@ -60,17 +59,12 @@ void LabelReduction::initialize(const FTSTask &fts_task) {
         for (size_t i = 0; i < max_transition_system_count; ++i)
             transition_system_order.push_back(max_transition_system_count - 1 - i);
     }
-
-    label_map = utils::make_unique_ptr<LabelMap>(fts_task.get_num_labels());
-}
-
-unique_ptr<LabelMap> LabelReduction::extract_label_map() {
-    return move(label_map);
 }
 
 void LabelReduction::compute_label_mapping(
     const equivalence_relation::EquivalenceRelation *relation,
     const FactoredTransitionSystem &fts,
+    LabelMap &label_map,
     vector<pair<int, vector<int>>> &label_mapping,
     Verbosity verbosity) const {
     const Labels &labels = fts.get_labels();
@@ -116,7 +110,7 @@ void LabelReduction::compute_label_mapping(
              << endl;
     }
 
-    label_map->update(old_to_new_labels);
+    label_map.update(old_to_new_labels);
 }
 
 equivalence_relation::EquivalenceRelation
@@ -158,6 +152,7 @@ equivalence_relation::EquivalenceRelation
 bool LabelReduction::reduce(
     const pair<int, int> &next_merge,
     FactoredTransitionSystem &fts,
+    LabelMap &label_map,
     Verbosity verbosity) const {
     assert(initialized());
     assert(reduce_before_shrinking() || reduce_before_merging());
@@ -179,7 +174,7 @@ bool LabelReduction::reduce(
         equivalence_relation::EquivalenceRelation *relation =
             compute_combinable_equivalence_relation(next_merge.first, fts);
         vector<pair<int, vector<int>>> label_mapping;
-        compute_label_mapping(relation, fts, label_mapping, verbosity);
+        compute_label_mapping(relation, fts, label_map, label_mapping, verbosity);
         if (!label_mapping.empty()) {
             fts.apply_label_mapping(label_mapping, next_merge.first);
             reduced = true;
@@ -191,7 +186,7 @@ bool LabelReduction::reduce(
         relation = compute_combinable_equivalence_relation(
             next_merge.second,
             fts);
-        compute_label_mapping(relation, fts, label_mapping, verbosity);
+        compute_label_mapping(relation, fts, label_map, label_mapping, verbosity);
         if (!label_mapping.empty()) {
             fts.apply_label_mapping(label_mapping, next_merge.second);
             reduced = true;
@@ -239,7 +234,7 @@ bool LabelReduction::reduce(
         if (fts.is_active(ts_index)) {
             equivalence_relation::EquivalenceRelation *relation =
                 compute_combinable_equivalence_relation(ts_index, fts);
-            compute_label_mapping(relation, fts, label_mapping, verbosity);
+            compute_label_mapping(relation, fts, label_map, label_mapping, verbosity);
             delete relation;
         }
 

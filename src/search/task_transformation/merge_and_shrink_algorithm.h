@@ -50,6 +50,7 @@ class MergeAndShrinkAlgorithm {
     const int num_transitions_to_abort;
     const int num_transitions_to_exclude;
 
+    std::unique_ptr<task_transformation::LabelMap> label_map;
     long starting_peak_memory;
 
     bool ran_out_of_time(const utils::Timer &timer) const;

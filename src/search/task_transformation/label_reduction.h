@@ -65,14 +65,13 @@ class LabelReduction {
     LabelReductionSystemOrder lr_system_order;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
 
-    std::unique_ptr<task_transformation::LabelMap> label_map;
-
     bool initialized() const;
     /* Apply the given label equivalence relation to the set of labels and
        compute the resulting label mapping. */
     void compute_label_mapping(
         const equivalence_relation::EquivalenceRelation *relation,
         const FactoredTransitionSystem &fts,
+        LabelMap &label_map,
         std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         Verbosity verbosity) const;
     equivalence_relation::EquivalenceRelation
@@ -82,10 +81,10 @@ class LabelReduction {
 public:
     explicit LabelReduction(const options::Options &options);
     void initialize(const task_representation::FTSTask &fts_task);
-    std::unique_ptr<LabelMap> extract_label_map();
     bool reduce(
         const std::pair<int, int> &next_merge,
         FactoredTransitionSystem &fts,
+        LabelMap &label_map,
         Verbosity verbosity) const;
     void dump_options() const;
     bool reduce_atomic_fts() const {

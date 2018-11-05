@@ -57,6 +57,7 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
     max_time(opts.get<double>("max_time")),
     num_transitions_to_abort(opts.get<int>("num_transitions_to_abort")),
     num_transitions_to_exclude(opts.get<int>("num_transitions_to_exclude")),
+    label_map(nullptr),
     starting_peak_memory(0) {
     assert(num_states_to_trigger_shrinking > 0);
     assert(max_states > 0);
@@ -288,7 +289,7 @@ void MergeAndShrinkAlgorithm::main_loop(
 
         // Label reduction (before merging)
         if (label_reduction && label_reduction->reduce_before_merging()) {
-            bool reduced = label_reduction->reduce(merge_indices, fts, verbosity);
+            bool reduced = label_reduction->reduce(merge_indices, fts, *label_map, verbosity);
             if (verbosity >= Verbosity::NORMAL && reduced) {
                 print_time(timer, "after label reduction");
             }
@@ -354,7 +355,7 @@ void MergeAndShrinkAlgorithm::main_loop(
 
         // Label reduction (before shrinking)
         if (label_reduction && label_reduction->reduce_before_shrinking()) {
-            bool reduced = label_reduction->reduce(merge_indices, fts, verbosity);
+            bool reduced = label_reduction->reduce(merge_indices, fts, *label_map, verbosity);
             if (verbosity >= Verbosity::NORMAL && reduced) {
                 print_time(timer, "after label reduction");
             }
@@ -424,8 +425,7 @@ void MergeAndShrinkAlgorithm::main_loop(
     cout << "Maximum intermediate abstraction size: "
          << maximum_intermediate_size << endl;
     shrink_strategy = nullptr;
-    // NOTE: we cannot destruct label reduction yet because we need the label map
-//    label_reduction = nullptr;
+    label_reduction = nullptr;
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
@@ -435,6 +435,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
              << "supported!" << endl;
         utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
     }
+    label_map = utils::make_unique_ptr<LabelMap>(fts_task.get_num_labels());
     starting_peak_memory = utils::get_peak_memory_in_kb();
 
     if (label_reduction) {
@@ -493,7 +494,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 
     // Label reduction of atomic FTS.
     if (label_reduction && label_reduction->reduce_atomic_fts()) {
-        bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
+        bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, *label_map, verbosity);
         if (verbosity >= Verbosity::NORMAL && reduced) {
             print_time(timer, "after label reduction of atomic FTS");
         }
@@ -537,7 +538,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 }
 
 unique_ptr<LabelMap> MergeAndShrinkAlgorithm::extract_label_map() {
-    return label_reduction->extract_label_map();
+    return move(label_map);
 }
 
 void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
