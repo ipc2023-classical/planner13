@@ -87,7 +87,6 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
 static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {
     add_merge_and_shrink_algorithm_options_to_parser(parser);
     options::Options opts = parser.parse();
-    handle_shrink_limit_options_defaults(opts);
     if (parser.dry_run())
         return nullptr;
     else

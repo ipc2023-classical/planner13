@@ -34,36 +34,18 @@ extern std::pair<int, int> compute_shrink_sizes(
     int max_states_before_merge,
     int max_states_after_merge);
 
-// Exposed for atomic shrinking as used by M&S transformations for FTS search.
+/*
+  This function first determines if the current size of the factor is larger
+  than the number of states to trigger shrinking. If so, it will "shrink" the
+  factor, imposing its current size as the allowed maxmimum size in order to
+  not force and information-lossy shrinking.
+*/
 extern bool shrink_factor(
     FactoredTransitionSystem &fts,
     int index,
-    int new_size,
-    int shrink_threshold_before_merge,
     const ShrinkStrategy &shrink_strategy,
-    Verbosity verbosit);
-
-/*
-  This function first determines if any of the two factors at indices index1
-  and index2 must be shrunk according to the given size limits max_states and
-  max_states_before_merge, using the function compute_shrink_sizes (see above).
-  If not, then the function further checks if any of the two factors has a
-  size larger than shrink_treshold_before_merge, in which case shrinking is
-  still triggered.
-
-  If shrinking is triggered, apply the abstraction to the two factors
-  within the factored transition system. Return true iff at least one of the
-  factors was shrunk.
-*/
-extern bool shrink_before_merge_step(
-    FactoredTransitionSystem &fts,
-    int index1,
-    int index2,
-    int max_states,
-    int max_states_before_merge,
-    int shrink_threshold_before_merge,
-    const ShrinkStrategy &shrink_strategy,
-    Verbosity verbosity);
+    Verbosity verbosit,
+    int num_states_to_trigger_shrinking);
 
 /*
   Prune unreachable and/or irrelevant states of the factor at index. This
