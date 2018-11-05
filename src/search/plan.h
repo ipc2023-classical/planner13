@@ -9,6 +9,7 @@
 namespace task_representation {
     class FTSTask;
 }
+class OperatorID;
 
 class Plan {
 
@@ -28,7 +29,9 @@ public:
         return !solved;
     }
 
-    void set_plan(const std::vector<GlobalState> & states, const std::vector<int> & operators);
+    void set_plan(const std::vector<GlobalState> & states, const std::vector<int> & labels);
+    void set_plan_operators(const std::vector<GlobalState> & states,
+                            const std::vector<OperatorID> & operators);
 
     const std::vector<int> & get_labels ()const {
         return labels;

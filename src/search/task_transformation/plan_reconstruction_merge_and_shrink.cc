@@ -3,6 +3,7 @@
 #include "label_map.h"
 #include "merge_and_shrink_representation.h"
 #include "../task_representation/fts_task.h"
+#include "../task_representation/sas_task.h"
 #include "../task_representation/search_task.h"
 #include "../operator_id.h"
 #include "../utils/system.h"
@@ -58,6 +59,7 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
                 auto result_state = state_registry.get_successor_state(initial_state, op);
                 if (match_states(result_state, target)) {
                     found_match = true;
+                    //cout << g_sas_task()->get_operator_name(original_label);
                     new_label_path.push_back(original_label);
                     new_traversed_states.push_back(result_state);
                     break;
@@ -67,6 +69,11 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
         if (!found_match) {
             cout << "Error: no match found in plan reconstruction" << endl;
             cout << "Trying to find a match with abstract label: " << label << endl;
+            for(int i = 0; i < g_sas_task()->get_num_operators(); ++i) {
+                if (label_map->get_reduced_label(i) == label) {
+                    cout <<  g_sas_task()->get_operator_name(i) << endl;
+                }
+            }
             cout << "Available original labels:" << endl;
             for (OperatorID op : applicable_ops)  {
                 LabelID original_label = search_task->get_label (op);
@@ -87,6 +94,7 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     GlobalState predecessor = traversed_states[0];
     new_traversed_states.push_back(state_registry.get_initial_state());
     for(size_t step = 0; step < label_path.size(); ++step) {
+        //cout << "Step: " << step << endl;
         int label = label_path[step];
         assert(step + 1 < traversed_states.size());
         const GlobalState & target = traversed_states[step+1];

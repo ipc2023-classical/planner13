@@ -127,7 +127,7 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
                              Plan &plan) const {
 
     std::vector<GlobalState> states;
-    std::vector<int> operators;
+    std::vector<OperatorID> operators;
     states.push_back(goal_state);
     assert(plan.empty());
     for (;;) {
@@ -137,13 +137,13 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
             break;
         }
 
-        operators.push_back(info.creating_operator);
+        operators.push_back(OperatorID(info.creating_operator));
         states.push_back(state_registry.lookup_state(info.parent_state_id));
     }
     reverse(operators.begin(), operators.end());
     reverse(states.begin(), states.end());
 
-    plan.set_plan(states, operators);
+    plan.set_plan_operators(states, operators);
     
 }
 
