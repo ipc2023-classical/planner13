@@ -1,6 +1,7 @@
 #ifndef TASK_TRANSFORMATION_MERGE_STRATEGY_H
 #define TASK_TRANSFORMATION_MERGE_STRATEGY_H
 
+#include <vector>
 #include <utility>
 
 namespace task_transformation {
@@ -44,7 +45,8 @@ protected:
 public:
     explicit MergeStrategy(const FactoredTransitionSystem &fts);
     virtual ~MergeStrategy() = default;
-    virtual std::pair<int, int> get_next() = 0;
+    virtual std::pair<int, int> get_next(
+        const std::vector<int> &allowed_indices = std::vector<int>()) = 0;
 };
 }
 

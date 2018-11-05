@@ -127,8 +127,8 @@ void FactoredTransitionSystem::assert_index_valid(int index) const {
 
 bool FactoredTransitionSystem::is_component_valid(int index) const {
     assert(is_active(index));
-    return distances[index]->are_distances_computed()
-           && transition_systems[index]->are_transitions_sorted_unique();
+    return /*distances[index]->are_distances_computed()
+           && */transition_systems[index]->are_transitions_sorted_unique();
 }
 
 void FactoredTransitionSystem::assert_all_components_valid() const {

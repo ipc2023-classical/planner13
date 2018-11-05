@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -47,14 +48,22 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
     shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy", nullptr)),
     shrink_atomic_fts(opts.get<bool>("shrink_atomic_fts")),
     num_states_to_trigger_shrinking(opts.get<int>("num_states_to_trigger_shrinking")),
-    num_states_to_terminate_main_loop(opts.get<int>("num_states_to_terminate_main_loop")),
+    max_states(opts.get<int>("max_states")),
     label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
 //    prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
 //    prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
     verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
+    run_main_loop(opts.get<bool>("run_main_loop")),
+    max_time(opts.get<double>("max_time")),
+    num_transitions_to_abort(opts.get<int>("num_transitions_to_abort")),
+    num_transitions_to_exclude(opts.get<int>("num_transitions_to_exclude")),
     starting_peak_memory(0) {
     assert(num_states_to_trigger_shrinking > 0);
-    assert(num_states_to_terminate_main_loop > 0);
+    assert(max_states > 0);
+    if (run_main_loop && (!shrink_strategy || !merge_strategy_factory)) {
+        cerr << "Running the main loop requires a shrink and a merge strategy" << endl;
+        utils::exit_with(utils::ExitCode::INPUT_ERROR);
+    }
 }
 
 void MergeAndShrinkAlgorithm::report_peak_memory_delta(bool final) const {
@@ -78,8 +87,8 @@ void MergeAndShrinkAlgorithm::dump_options() const {
     cout << "Options related to size limits and shrinking: " << endl;
     cout << "Number of states to trigger shrinking: "
          << num_states_to_trigger_shrinking << endl;
-    cout << "Number of states to terminate the main loop if reached: "
-         << num_states_to_terminate_main_loop << endl;
+    cout << "Maximum number of states, otherwise merge is forbidden: "
+         << max_states << endl;
     cout << endl;
 
     if (shrink_strategy) {
@@ -125,6 +134,9 @@ void MergeAndShrinkAlgorithm::warn_on_unusual_options() const {
             "does not pay off for most configurations!"
              << endl << dashes << endl;
     } else {
+        if (!shrink_strategy) {
+            return;
+        }
         if (label_reduction->reduce_before_shrinking() &&
             (shrink_strategy->get_name() == "f-preserving"
              || shrink_strategy->get_name() == "random")) {
@@ -148,6 +160,46 @@ void MergeAndShrinkAlgorithm::warn_on_unusual_options() const {
 //            "drastically reduce the performance of merge-and-shrink!"
 //             << endl << dashes << endl;
 //    }
+}
+
+bool MergeAndShrinkAlgorithm::ran_out_of_time(
+    const utils::Timer &timer) const {
+    if (timer() > max_time) {
+        if (verbosity >= Verbosity::NORMAL) {
+            cout << "Ran out of time, stopping computation." << endl;
+            cout << endl;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool MergeAndShrinkAlgorithm::too_many_transitions(const FactoredTransitionSystem &fts, int index) const {
+    int num_transitions = fts.get_ts(index).compute_total_transitions();
+    if (num_transitions > num_transitions_to_abort) {
+        if (verbosity >= Verbosity::NORMAL) {
+            cout << "Factor has too many transitions, stopping computation."
+                 << endl;
+            cout << endl;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool MergeAndShrinkAlgorithm::too_many_transitions(const FactoredTransitionSystem &fts) const {
+    for (int index = 0; index < fts.get_size(); ++index) {
+        if (fts.is_active(index)) {
+            if (too_many_transitions(fts, index)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool MergeAndShrinkAlgorithm::exclude_if_too_many_transitions() const {
+    return num_transitions_to_exclude != INF;
 }
 
 //bool MergeAndShrinkAlgorithm::prune_fts(
@@ -196,9 +248,18 @@ void MergeAndShrinkAlgorithm::main_loop(
     merge_strategy_factory = nullptr;
 
     int iteration_counter = 0;
+    set<int> allowed_indices;
     while (fts.get_num_active_entries() > 1) {
         // Choose next transition systems to merge
-        pair<int, int> merge_indices = merge_strategy->get_next();
+        vector<int> vec_allowed_indices;;
+        if (exclude_if_too_many_transitions()) {
+            vec_allowed_indices = vector<int>(
+                allowed_indices.begin(), allowed_indices.end());
+        }
+        pair<int, int> merge_indices = merge_strategy->get_next(vec_allowed_indices);
+        if (ran_out_of_time(timer)) {
+            break;
+        }
         int merge_index1 = merge_indices.first;
         int merge_index2 = merge_indices.second;
         assert(merge_index1 != merge_index2);
@@ -212,13 +273,18 @@ void MergeAndShrinkAlgorithm::main_loop(
             print_time(timer, "after computation of next merge");
         }
 
-        // Label reduction (before shrinking)
-        if (label_reduction && label_reduction->reduce_before_shrinking()) {
-            bool reduced = label_reduction->reduce(merge_indices, fts, verbosity);
-            if (verbosity >= Verbosity::NORMAL && reduced) {
-                print_time(timer, "after label reduction");
-            }
+        if (ran_out_of_time(timer)) {
+            break;
         }
+
+        // TODO: forbid too large merges!
+//        int merged_size = fts.get_ts(merge_index1).get_size() * fts.get_ts(merge_index2).get_size();
+//        if (merged_size > max_states) {
+//            if (verbosity >= Verbosity::NORMAL) {
+//                cout << "Product would be too large, skipping merge" << endl;
+//                continue;
+//            }
+//        }
 
         // Label reduction (before merging)
         if (label_reduction && label_reduction->reduce_before_merging()) {
@@ -226,6 +292,10 @@ void MergeAndShrinkAlgorithm::main_loop(
             if (verbosity >= Verbosity::NORMAL && reduced) {
                 print_time(timer, "after label reduction");
             }
+        }
+
+        if (ran_out_of_time(timer)) {
+            break;
         }
 
         // Merging
@@ -240,6 +310,12 @@ void MergeAndShrinkAlgorithm::main_loop(
                 fts.statistics(merged_index);
             }
             print_time(timer, "after merging");
+        }
+
+        // We do not check for num transitions here but only after shrinking
+        // to allow recovering a too large product.
+        if (ran_out_of_time(timer)) {
+            break;
         }
 
         // Pruning
@@ -266,9 +342,25 @@ void MergeAndShrinkAlgorithm::main_loop(
         */
         if (!fts.is_factor_solvable(merged_index)) {
             if (verbosity >= Verbosity::NORMAL) {
-                cout << "Abstract problem is unsolvable, stopping "
-                    "computation. " << endl << endl;
+                cout << "Abstract problem is unsolvable, exiting" << endl;
+                utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
             }
+            break;
+        }
+
+        if (ran_out_of_time(timer)) {
+            break;
+        }
+
+        // Label reduction (before shrinking)
+        if (label_reduction && label_reduction->reduce_before_shrinking()) {
+            bool reduced = label_reduction->reduce(merge_indices, fts, verbosity);
+            if (verbosity >= Verbosity::NORMAL && reduced) {
+                print_time(timer, "after label reduction");
+            }
+        }
+
+        if (ran_out_of_time(timer)) {
             break;
         }
 
@@ -283,6 +375,34 @@ void MergeAndShrinkAlgorithm::main_loop(
             print_time(timer, "after shrinking");
         }
 
+        if (exclude_if_too_many_transitions()) {
+            allowed_indices.erase(merge_index1);
+            allowed_indices.erase(merge_index2);
+            int num_trans = fts.get_ts(merged_index).compute_total_transitions();
+            if (num_trans <= num_transitions_to_exclude) {
+                allowed_indices.insert(merged_index);
+            } else {
+                if (verbosity >= Verbosity::NORMAL) {
+                    cout << fts.get_ts(merged_index).tag()
+                         << "too many number of transitions, excluding "
+                            "from further consideration." << endl;
+                }
+            }
+            if (allowed_indices.size() <= 1) {
+                if (verbosity >= Verbosity::NORMAL) {
+                    cout << "Not enough factors remaining with a low enough "
+                            "number of transitions, stopping computation."
+                         << endl;
+                    cout << endl;
+                }
+                break;
+            }
+        }
+
+        if (ran_out_of_time(timer) || too_many_transitions(fts, merged_index)) {
+            break;
+        }
+
         // End-of-iteration output.
         if (verbosity >= Verbosity::VERBOSE) {
             report_peak_memory_delta();
@@ -291,7 +411,7 @@ void MergeAndShrinkAlgorithm::main_loop(
             cout << endl;
         }
 
-        if (fts.get_ts(merged_index).get_size() > num_states_to_terminate_main_loop) {
+        if (fts.get_ts(merged_index).get_size() > max_states) {
             cout << "Merged factor is too large even after shrinking, "
                     "stopping the merge-and-shrink algorithm." << endl;
             break;
@@ -304,7 +424,8 @@ void MergeAndShrinkAlgorithm::main_loop(
     cout << "Maximum intermediate abstraction size: "
          << maximum_intermediate_size << endl;
     shrink_strategy = nullptr;
-    label_reduction = nullptr;
+    // NOTE: we cannot destruct label reduction yet because we need the label map
+//    label_reduction = nullptr;
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
@@ -342,14 +463,16 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     std::vector<std::unique_ptr<Distances>> distances =
         create_distances(transition_systems);
 
-    const bool compute_init_distances =
-        shrink_strategy->requires_init_distances() ||
-        merge_strategy_factory->requires_init_distances();/* ||
-        prune_unreachable_states;*/
-    const bool compute_goal_distances =
-        shrink_strategy->requires_goal_distances() ||
-        merge_strategy_factory->requires_goal_distances();/* ||
-        prune_irrelevant_states;*/
+    bool compute_init_distances = false;
+    if ((shrink_strategy && shrink_strategy->requires_init_distances()) ||
+            (merge_strategy_factory && merge_strategy_factory->requires_init_distances())) {
+        compute_init_distances = true;
+    }
+    bool compute_goal_distances = false;
+    if ((shrink_strategy && shrink_strategy->requires_goal_distances()) ||
+            (merge_strategy_factory && merge_strategy_factory->requires_goal_distances())) {
+        compute_goal_distances = true;
+    }
 
     FactoredTransitionSystem fts(
         move(labels),
@@ -360,12 +483,24 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         compute_goal_distances,
         verbosity);
 
+    for (int index : fts) {
+        assert(fts.is_active(index));
+        if (!fts.is_factor_solvable(index)) {
+            cout << "Atomic FTS is unsolvable, exiting" << endl;
+            utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
+        }
+    }
+
     // Label reduction of atomic FTS.
     if (label_reduction && label_reduction->reduce_atomic_fts()) {
         bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
         if (verbosity >= Verbosity::NORMAL && reduced) {
             print_time(timer, "after label reduction of atomic FTS");
         }
+    }
+
+    if (ran_out_of_time(timer)) {
+        return fts;
     }
 
     if (shrink_strategy && shrink_atomic_fts) {
@@ -386,12 +521,14 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         }
     }
 
-    // TODO: enable main loop and use suitable limits.
-//    if (unsolvable) {
-//        cout << "Atomic FTS is unsolvable, stopping computation." << endl;
-//    } else {
-//        main_loop(fts, fts_task, timer);
-//    }
+    if (ran_out_of_time(timer)) {
+        return fts;
+    }
+
+    if (run_main_loop) {
+        assert(shrink_strategy && merge_strategy_factory);
+        main_loop(fts, fts_task, timer);
+    }
     const bool final = true;
     report_peak_memory_delta(final);
     cout << "Merge-and-shrink algorithm runtime: " << timer << endl;
@@ -430,9 +567,10 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "Number of states to trigger shrinking.",
         "1");
     parser.add_option<int>(
-        "num_states_to_terminate_main_loop",
-        "Number of states that, once reached after merging, terminates "
-        "the merge-and-shrink algorithm.",
+        "max_states",
+        "Number of states that is not allowed to be surpassed by merging. "
+        "If a merge would surpuass it, the merge is forbidden from that "
+        "point on.",
         "infinity");
 
     // Label reduction option.
@@ -474,5 +612,30 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "Option to specify the level of verbosity.",
         "verbose",
         verbosity_level_docs);
+
+    parser.add_option<bool>(
+        "run_main_loop",
+        "Run the main loop of the algorithm.",
+        "true");
+    parser.add_option<double>(
+        "max_time",
+        "A limit in seconds on the computation time of the algorithm.",
+        "infinity",
+        Bounds("0.0", "infinity"));
+    parser.add_option<int>(
+        "num_transitions_to_abort",
+        "A limit on the number of transitions of any factor during the "
+        "computation. Once this limit is reached, the algorithm terminates, "
+        "leaving the chosen partial_mas_method to compute a heuristic from the "
+        "set of remaining factors.",
+        "infinity",
+        Bounds("0", "infinity"));
+    parser.add_option<int>(
+        "num_transitions_to_exclude",
+        "A limit on the number of transitions of any factor during the "
+        "computation. Once a factor reaches this limit, it is excluded from "
+        "further considerations of the algorithm.",
+        "infinity",
+        Bounds("0", "infinity"));
 }
 }

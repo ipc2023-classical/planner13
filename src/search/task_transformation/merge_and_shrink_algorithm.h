@@ -35,7 +35,7 @@ class MergeAndShrinkAlgorithm {
     std::shared_ptr<ShrinkStrategy> shrink_strategy;
     bool shrink_atomic_fts;
     int num_states_to_trigger_shrinking;
-    int num_states_to_terminate_main_loop;
+    int max_states;
     std::shared_ptr<LabelReduction> label_reduction;
 
     // Options for pruning
@@ -43,8 +43,19 @@ class MergeAndShrinkAlgorithm {
 //    const bool prune_irrelevant_states;
 
     const Verbosity verbosity;
+
+    const bool run_main_loop;
+    // Options related to computing partial abstractions
+    const double max_time;
+    const int num_transitions_to_abort;
+    const int num_transitions_to_exclude;
+
     long starting_peak_memory;
 
+    bool ran_out_of_time(const utils::Timer &timer) const;
+    bool too_many_transitions(const FactoredTransitionSystem &fts, int index) const;
+    bool too_many_transitions(const FactoredTransitionSystem &fts) const;
+    bool exclude_if_too_many_transitions() const;
     // Return true iff fts has been detected to be unsolvable.
 //    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
     void statistics(int maximum_intermediate_size) const;

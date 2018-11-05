@@ -143,7 +143,6 @@ private:
     }
 
     // Statistics and output
-    int compute_total_transitions() const;
     std::string get_description() const;
 public:
     TransitionSystem(
@@ -218,6 +217,7 @@ public:
       sorted (by source, by target) and there are no duplicates.
     */
     bool are_transitions_sorted_unique() const;
+    int compute_total_transitions() const;
 
     bool is_solvable(const Distances &distances) const;
     void dump_dot_graph() const;
