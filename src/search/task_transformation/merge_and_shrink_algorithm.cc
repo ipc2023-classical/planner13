@@ -46,17 +46,15 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
         opts.get<shared_ptr<MergeStrategyFactory>>("merge_strategy", nullptr)),
     shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy", nullptr)),
     shrink_atomic_fts(opts.get<bool>("shrink_atomic_fts")),
+    num_states_to_trigger_shrinking(opts.get<int>("num_states_to_trigger_shrinking")),
+    num_states_to_terminate_main_loop(opts.get<int>("num_states_to_terminate_main_loop")),
     label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
-    max_states(opts.get<int>("max_states")),
-    max_states_before_merge(opts.get<int>("max_states_before_merge")),
-    shrink_threshold_before_merge(opts.get<int>("threshold_before_merge")),
 //    prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
 //    prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
     verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
     starting_peak_memory(0) {
-    assert(max_states_before_merge > 0);
-    assert(max_states >= max_states_before_merge);
-    assert(shrink_threshold_before_merge <= max_states_before_merge);
+    assert(num_states_to_trigger_shrinking > 0);
+    assert(num_states_to_terminate_main_loop > 0);
 }
 
 void MergeAndShrinkAlgorithm::report_peak_memory_delta(bool final) const {
@@ -78,11 +76,10 @@ void MergeAndShrinkAlgorithm::dump_options() const {
     }
 
     cout << "Options related to size limits and shrinking: " << endl;
-    cout << "Transition system size limit: " << max_states << endl
-         << "Transition system size limit right before merge: "
-         << max_states_before_merge << endl;
-    cout << "Threshold to trigger shrinking right before merge: "
-         << shrink_threshold_before_merge << endl;
+    cout << "Number of states to trigger shrinking: "
+         << num_states_to_trigger_shrinking << endl;
+    cout << "Number of states to terminate the main loop if reached: "
+         << num_states_to_terminate_main_loop << endl;
     cout << endl;
 
     if (shrink_strategy) {
@@ -223,20 +220,6 @@ void MergeAndShrinkAlgorithm::main_loop(
             }
         }
 
-        // Shrinking
-        bool shrunk = shrink_before_merge_step(
-            fts,
-            merge_index1,
-            merge_index2,
-            max_states,
-            max_states_before_merge,
-            shrink_threshold_before_merge,
-            *shrink_strategy,
-            verbosity);
-        if (verbosity >= Verbosity::NORMAL && shrunk) {
-            print_time(timer, "after shrinking");
-        }
-
         // Label reduction (before merging)
         if (label_reduction && label_reduction->reduce_before_merging()) {
             bool reduced = label_reduction->reduce(merge_indices, fts, verbosity);
@@ -289,12 +272,29 @@ void MergeAndShrinkAlgorithm::main_loop(
             break;
         }
 
+        // Shrinking
+        bool shrunk = shrink_factor(
+            fts,
+            merged_index,
+            *shrink_strategy,
+            verbosity,
+            num_states_to_trigger_shrinking);
+        if (verbosity >= Verbosity::NORMAL && shrunk) {
+            print_time(timer, "after shrinking");
+        }
+
         // End-of-iteration output.
         if (verbosity >= Verbosity::VERBOSE) {
             report_peak_memory_delta();
         }
         if (verbosity >= Verbosity::NORMAL) {
             cout << endl;
+        }
+
+        if (fts.get_ts(merged_index).get_size() > num_states_to_terminate_main_loop) {
+            cout << "Merged factor is too large even after shrinking, "
+                    "stopping the merge-and-shrink algorithm." << endl;
+            break;
         }
 
         ++iteration_counter;
@@ -374,10 +374,9 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             bool shrunk = shrink_factor(
                 fts,
                 ts_index,
-                max_states,
-                shrink_threshold_before_merge,
                 *shrink_strategy,
-                verbosity);
+                verbosity,
+                num_states_to_trigger_shrinking);
             if (verbosity >= Verbosity::VERBOSE && shrunk) {
                 fts.statistics(ts_index);
             }
@@ -426,6 +425,15 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "shrink_atomic_fts",
         "Shrink the atomic factored transition system.",
         "false");
+    parser.add_option<int>(
+        "num_states_to_trigger_shrinking",
+        "Number of states to trigger shrinking.",
+        "1");
+    parser.add_option<int>(
+        "num_states_to_terminate_main_loop",
+        "Number of states that, once reached after merging, terminates "
+        "the merge-and-shrink algorithm."
+        "infinity");
 
     // Label reduction option.
     parser.add_option<shared_ptr<LabelReduction>>(
@@ -445,8 +453,6 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
 //        "If true, prune abstract states from which no goal state can be "
 //        "reached.",
 //        "true");
-
-    add_transition_system_size_limit_options_to_parser(parser);
 
     vector<string> verbosity_levels;
     vector<string> verbosity_level_docs;
@@ -468,83 +474,5 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "Option to specify the level of verbosity.",
         "verbose",
         verbosity_level_docs);
-}
-
-void add_transition_system_size_limit_options_to_parser(OptionParser &parser) {
-    parser.add_option<int>(
-        "max_states",
-        "maximum transition system size allowed at any time point.",
-        "-1",
-        Bounds("-1", "infinity"));
-    parser.add_option<int>(
-        "max_states_before_merge",
-        "maximum transition system size allowed for two transition systems "
-        "before being merged to form the synchronized product.",
-        "-1",
-        Bounds("-1", "infinity"));
-    parser.add_option<int>(
-        "threshold_before_merge",
-        "If a transition system, before being merged, surpasses this soft "
-        "transition system size limit, the shrink strategy is called to "
-        "possibly shrink the transition system.",
-        "-1",
-        Bounds("-1", "infinity"));
-}
-
-void handle_shrink_limit_options_defaults(Options &opts) {
-    int max_states = opts.get<int>("max_states");
-    int max_states_before_merge = opts.get<int>("max_states_before_merge");
-    int threshold = opts.get<int>("threshold_before_merge");
-
-    // If none of the two state limits has been set: set default limit.
-    if (max_states == -1 && max_states_before_merge == -1) {
-        max_states = 50000;
-    }
-
-    // If exactly one of the max_states options has been set, set the other
-    // so that it imposes no further limits.
-    if (max_states_before_merge == -1) {
-        max_states_before_merge = max_states;
-    } else if (max_states == -1) {
-        int n = max_states_before_merge;
-        if (utils::is_product_within_limit(n, n, INF)) {
-            max_states = n * n;
-        } else {
-            max_states = INF;
-        }
-    }
-
-    if (max_states_before_merge > max_states) {
-        cout << "warning: max_states_before_merge exceeds max_states, "
-             << "correcting." << endl;
-        max_states_before_merge = max_states;
-    }
-
-    if (max_states < 1) {
-        cerr << "error: transition system size must be at least 1" << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
-    }
-
-    if (max_states_before_merge < 1) {
-        cerr << "error: transition system size before merge must be at least 1"
-             << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
-    }
-
-    if (threshold == -1) {
-        threshold = max_states;
-    }
-    if (threshold < 1) {
-        cerr << "error: threshold must be at least 1" << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
-    }
-    if (threshold > max_states) {
-        cout << "warning: threshold exceeds max_states, correcting" << endl;
-        threshold = max_states;
-    }
-
-    opts.set<int>("max_states", max_states);
-    opts.set<int>("max_states_before_merge", max_states_before_merge);
-    opts.set<int>("threshold_before_merge", threshold);
 }
 }
