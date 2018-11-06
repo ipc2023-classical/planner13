@@ -244,6 +244,10 @@ public:
 
     const std::vector<int> & get_goal_states() const;
 
+    const std::vector<bool> & get_is_goal() const {
+        return goal_states;
+    }
+
     bool is_goal_relevant() const {
         return get_goal_states().size() < (size_t)num_states;
     }

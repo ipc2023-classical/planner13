@@ -80,9 +80,8 @@ bool shrink_factor(
                  << num_states_to_trigger_shrinking << endl;
         }
 
-        const Distances &distances = fts.get_distances(index);
         StateEquivalenceRelation equivalence_relation =
-            shrink_strategy.compute_equivalence_relation(ts, distances, num_states);
+            shrink_strategy.compute_equivalence_relation(fts, index, num_states);
         // TODO: We currently violate this; see issue250
         //assert(equivalence_relation.size() <= target_size);
         return fts.apply_abstraction(index, equivalence_relation, verbosity);

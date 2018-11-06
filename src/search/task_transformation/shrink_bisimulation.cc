@@ -237,10 +237,15 @@ void ShrinkBisimulation::compute_signatures(
     ::sort(signatures.begin(), signatures.end());
 }
 
+    
 StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
-    const TransitionSystem &ts,
-    const Distances &distances,
-    int target_size) const {
+        const FactoredTransitionSystem &fts,
+        int index,
+        int target_size) const {
+    const TransitionSystem &ts = fts.get_ts(index);
+    const Distances &distances = fts.get_distances(index);
+
+
     int num_states = ts.get_size();
 
     vector<int> state_to_group(num_states);
