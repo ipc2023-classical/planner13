@@ -104,4 +104,11 @@ shared_ptr<SearchTask> FTSTask::get_search_task() const {
     }
     return search_task;
 }
+
+
+void FTSTask::dump() const {
+    for (const auto & ts: transition_systems) {
+        ts->dump_labels_and_transitions();
+    }
+}
 }

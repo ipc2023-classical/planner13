@@ -58,6 +58,8 @@ public:
     }
 
     std::shared_ptr<SearchTask> get_search_task() const;
+
+    void dump() const; 
 };
 }
 
