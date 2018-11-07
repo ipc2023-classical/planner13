@@ -20,7 +20,7 @@ FTSTask::FTSTask(
       labels(move(labels)) {
 
 #ifndef NDEBUG
-    for (const auto &ts : transition_systems) {
+    for (const auto &ts : this->transition_systems) {
         assert(ts);
 }
     for (int label = 0; label < this->labels->get_size(); ++label) {
