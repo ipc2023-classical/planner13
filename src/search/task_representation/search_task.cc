@@ -57,12 +57,10 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
     state_packer(move(compute_state_packer(fts_task))),
 //    axiom_evaluator (fts_task),
     min_operator_cost (fts_task.get_min_operator_cost()) {
-    cout << "Building search task wrapper for FTS task..." << endl;
-
     size_t num_variables = fts_task.get_size();
     int num_labels = fts_task.get_num_labels();
-    cout << "Num variables " << num_variables << endl;
-    cout << "Num labels " << num_labels << endl;
+    cout << "Building search task wrapper for FTS task with " << num_variables
+         << " variables and " << num_labels << " labels..." <<  endl;
     activated_labels_by_var_by_state.resize(num_variables);
     for (size_t var = 0; var < num_variables; ++var) {
         const TransitionSystem & ts = fts_task.get_ts(var);
@@ -134,11 +132,12 @@ void SearchTask::multiply_out_non_deterministic_labels(
     const vector<int> &non_det_ts = label_to_info[label_id].relevant_non_deterministic_transition_systems;
     if (ts_index == static_cast<int>(non_det_ts.size())) {
         OperatorID op_id(operators.size());
-        cout << "for ts " << ts_index << " and label " << label_id << ", creating FTSOperator " << op_id << " with effects ";
-        for (const auto &fact : effects) {
-            cout << fact.var << ":=" << fact.value << ", ";
-        }
-        cout << endl;
+//        cout << "For var " << non_det_ts[ts_index] << " and label " << label_id
+//             << ", creating FTSOperator " << op_id << " with effects ";
+//        for (const auto &fact : effects) {
+//            cout << fact.var << ":=" << fact.value << ", ";
+//        }
+//        cout << endl;
         operators.emplace_back(op_id, label_id, fts_task.get_label_cost(label_id), effects);
         label_to_info[label_id].fts_operators.push_back(op_id);
         return;
@@ -158,23 +157,17 @@ void SearchTask::create_fts_operators() {
     label_to_info.resize(num_labels);
     // Set of targets (no duplicates) of transitions indexed by labels and by
     // the indices of the non-deterministic transition systems of that label.
-    cout << "create_fts_operators:" << endl;
-    // the following two are indexed by indices of label_to_info[label_id].relevant_non_deterministic_transition_systems
     vector<vector<vector<int>>> targets_by_label_by_ts_index(num_labels);
+    // Map from targets to possible sources for that target, indexed as targets_by_label_by_ts_index.
     vector<vector<unordered_map<int, vector<int>>>> target_to_sources_by_label_by_ts_index(num_labels);
     for (size_t var = 0; var < num_variables; ++var) {
-        cout << "var " << var << endl;
         const TransitionSystem & ts = fts_task.get_ts(var);
-        ts.dump_labels_and_transitions();
         for (const GroupAndTransitions &gat : ts) {
-            cout << "some group: ";
             const LabelGroup &label_group = gat.label_group;
             const vector<Transition> &transitions = gat.transitions;
             if (is_label_group_relevant(ts.get_size(), transitions)) {
-                cout << "relevant and ";
                 bool deterministic = are_transitions_deterministic(transitions);
                 if (deterministic) {
-                    cout << "deterministic";
                     unordered_map<int, int> src_to_target;
                     for (const Transition &t : transitions) {
                         assert(!src_to_target.count(t.src));
@@ -185,29 +178,19 @@ void SearchTask::create_fts_operators() {
                         label_to_info[label_id].src_to_target_by_ts_index.push_back(src_to_target);
                     }
                 } else {
-                    cout << "non-deterministic: ";
                     set<int> targets;
                     unordered_map<int, vector<int>> target_to_sources;
                     for (const Transition &t : transitions) {
                         targets.insert(t.target);
                         target_to_sources[t.target].push_back(t.src);
                     }
-                    cout << "targets: " << targets << ", sources to targets: ";
-                    for (const auto &t_to_s : target_to_sources) {
-                        cout << t_to_s.first << "->" << t_to_s.second << ", ";
-                    }
-                    cout << "labels: ";
                     for (int label_id : label_group) {
                         label_to_info[label_id].relevant_non_deterministic_transition_systems.push_back(var);
                         targets_by_label_by_ts_index[label_id].emplace_back(targets.begin(), targets.end());
                         target_to_sources_by_label_by_ts_index[label_id].push_back(target_to_sources);
-                        cout << label_id << ", ";
                     }
                 }
-            } else {
-                cout << "irrelevant";
             }
-            cout << endl;
         }
     }
 
@@ -222,16 +205,14 @@ void SearchTask::create_fts_operators() {
       true if the corresponding FTSOperator of the label with the right effect
       is applicable.
     */
-    cout << "creating ftsoperators and applicability data structure" << endl;
     for (LabelID label_id(0); label_id < num_labels; ++label_id) {
-        cout << "label " << label_id << endl;
+        // Multiply out FTSOperators for labels with relevant non-deterministic
+        // transition systems.
         vector<FactPair> effects;
         multiply_out_non_deterministic_labels(label_id, targets_by_label_by_ts_index[label_id], 0, effects);
 
         const vector<int> &relevant_non_det_ts = label_to_info[label_id].relevant_non_deterministic_transition_systems;
         const vector<OperatorID> &fts_operators = label_to_info[label_id].fts_operators;
-        cout << "fts operators of the label: " << fts_operators << endl;
-
         vector<vector<boost::dynamic_bitset<>>> &applicable_fts_ops_by_ts_index_by_state =
             label_to_info[label_id].applicable_ops_by_ts_index_by_state;
         applicable_fts_ops_by_ts_index_by_state.resize(relevant_non_det_ts.size());
@@ -242,33 +223,29 @@ void SearchTask::create_fts_operators() {
             applicable_fts_ops_by_ts_index_by_state[ts_index].resize(
                 ts.get_size(), boost::dynamic_bitset<>(fts_operators.size(), false));
 
-            // ...and over all induced fts operators...
-            cout << "relevant non-deterministic ts " << var << endl;
+            // ...and over all fts operators induced by the label...
             for (size_t op_index = 0; op_index < fts_operators.size(); ++op_index) {
                 OperatorID fts_op_id = fts_operators[op_index];
-                cout << "FTSOperator " << fts_op_id << ": ";
                 const FTSOperator &op = operators[fts_op_id.get_index()];
                 assert(label_id == op.get_label());
                 const vector<FactPair> &effects = op.get_effects();
-                // ... and find the effect relevant to the variable to set the
-                // sources (= states) as those where the operator is applicable.
+                /*
+                  ... and find the effect (= target state) relevant to the
+                  variable and set the operator to be applicable in the source
+                  states relevant to the target state.
+                */
                 for (const auto &var_val : effects) {
-                    if (var_val.var == var) {
+                    if (var_val.var == var) { // triggeres exactly once
                         int target = var_val.value;
-                        cout << "effect " << target << ", sources: ";
                         const vector<int> &sources = target_to_sources_by_label_by_ts_index[label_id][ts_index][target];
                         for (int source : sources) {
-                            cout << source << ", ";
                             assert(activated_labels_by_var_by_state[var][source].test(label_id));
                             applicable_fts_ops_by_ts_index_by_state[ts_index][source].set(op_index);
                         }
-                        cout << endl;
                     }
                 }
             }
-            cout << endl;
         }
-        cout << "done with label" << endl;
     }
 }
 

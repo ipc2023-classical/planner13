@@ -68,8 +68,6 @@ int main(int argc, const char **argv) {
     }
     g_log << "Transform time: " << transform_timer << endl;
 
-    g_main_task->dump();
-    
     shared_ptr<SearchEngine> engine;
 
     // The command line is parsed twice: once in dry-run mode, to

@@ -26,16 +26,13 @@ void Plan::set_plan_operators(const std::vector<GlobalState> & states_,
     solved=true;
     assert(states.size() == labels.size() + 1);
 
-    cout << "Plan found" << endl;
-    states[0].dump_fdr();
-    for(size_t i = 0; i < operators.size(); ++i) {
-        cout << endl << " Operator " << operators[i].get_index() << " ";
-        task->get_search_task()->dump_op(operators[i]);
-        cout << endl;
-        states[i+1].dump_fdr();
-    }
-
-
-    
+//    cout << "Plan found" << endl;
+//    states[0].dump_fdr();
+//    for(size_t i = 0; i < operators.size(); ++i) {
+//        cout << endl << " Operator " << operators[i].get_index() << " ";
+//        task->get_search_task()->dump_op(operators[i]);
+//        cout << endl;
+//        states[i+1].dump_fdr();
+//    }
 }
 

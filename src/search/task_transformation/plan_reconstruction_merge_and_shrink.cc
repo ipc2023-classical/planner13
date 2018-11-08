@@ -74,7 +74,9 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
             cout << "Available original labels:" << endl;
             for (OperatorID op : applicable_ops)  {
                 LabelID original_label = search_task->get_label (op);
-                cout << "  " << g_sas_task()->get_operator_name(original_label) << " (" << original_label << ") reduced to " << label_map->get_reduced_label(original_label);
+                cout << "  " << g_sas_task()->get_operator_name(original_label)
+                     << " (" << original_label << ") reduced to "
+                     << label_map->get_reduced_label(original_label);
 
                 auto result_state = state_registry.get_successor_state(initial_state, op);
                 if (match_states(result_state, target)) {
@@ -94,11 +96,11 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     const std::vector<GlobalState> & traversed_states = plan.get_traversed_states ();
     assert(label_path.size() + 1 == traversed_states.size());
 
-    cout << "label path : ";
-    for (int l : label_path) {
-        cout << l << " ";
-    }
-    cout << endl;
+//    cout << "label path : ";
+//    for (int l : label_path) {
+//        cout << l << " ";
+//    }
+//    cout << endl;
     
     std::vector<int> new_label_path;
     std::vector<GlobalState> new_traversed_states;
