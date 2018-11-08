@@ -25,8 +25,8 @@ def main(revisions=None):
     configs = {
         IssueConfig('lazy-ff-atomic', ["--search", "lazy_greedy([ff()])"]),
         IssueConfig('lazy-ff-transform-atomic-labelreduction', ["--transform", "transform_merge_and_shrink(label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),run_main_loop=false)", "--search", "lazy_greedy([ff()])"]),
-        IssueConfig('lazy-ff-transform-atomic-bisim', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),run_main_loop=false)", "--search", "lazy_greedy([ff()])"]),
-        IssueConfig('lazy-ff-transform-atomic-bisim-labelreduction', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),run_main_loop=false)", "--search", "lazy_greedy([ff()])"]),
+        IssueConfig('lazy-ff-transform-atomic-bisim', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),shrink_atomic_fts=true,run_main_loop=false)", "--search", "lazy_greedy([ff()])"]),
+        IssueConfig('lazy-ff-transform-atomic-bisim-labelreduction', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false)", "--search", "lazy_greedy([ff()])"]),
     }
 
     exp = IssueExperiment(
