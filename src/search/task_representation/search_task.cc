@@ -159,7 +159,9 @@ void SearchTask::create_fts_operators() {
     // Set of targets (no duplicates) of transitions indexed by labels and by
     // the indices of the non-deterministic transition systems of that label.
     cout << "create_fts_operators:" << endl;
+    // the following two are indexed by indices of label_to_info[label_id].relevant_non_deterministic_transition_systems
     vector<vector<vector<int>>> targets_by_label_by_ts_index(num_labels);
+    vector<vector<unordered_map<int, vector<int>>>> target_to_sources_by_label_by_ts_index(num_labels);
     for (size_t var = 0; var < num_variables; ++var) {
         cout << "var " << var << endl;
         const TransitionSystem & ts = fts_task.get_ts(var);
@@ -185,13 +187,20 @@ void SearchTask::create_fts_operators() {
                 } else {
                     cout << "non-deterministic: ";
                     set<int> targets;
+                    unordered_map<int, vector<int>> target_to_sources;
                     for (const Transition &t : transitions) {
                         targets.insert(t.target);
+                        target_to_sources[t.target].push_back(t.src);
                     }
-                    cout << "targets: " << targets << ", labels: ";
+                    cout << "targets: " << targets << ", sources to targets: ";
+                    for (const auto &t_to_s : target_to_sources) {
+                        cout << t_to_s.first << "->" << t_to_s.second << ", ";
+                    }
+                    cout << "labels: ";
                     for (int label_id : label_group) {
                         label_to_info[label_id].relevant_non_deterministic_transition_systems.push_back(var);
                         targets_by_label_by_ts_index[label_id].emplace_back(targets.begin(), targets.end());
+                        target_to_sources_by_label_by_ts_index[label_id].push_back(target_to_sources);
                         cout << label_id << ", ";
                     }
                 }
@@ -210,7 +219,8 @@ void SearchTask::create_fts_operators() {
 
       Furthermore, for all relevant non-deterministic transition systems of
       a label, compute bitsets indexed by their states that have bits sets to
-      true if the corresponding FTSOperator of the label is applicable.
+      true if the corresponding FTSOperator of the label with the right effect
+      is applicable.
     */
     cout << "creating ftsoperators and applicability data structure" << endl;
     for (LabelID label_id(0); label_id < num_labels; ++label_id) {
@@ -225,27 +235,35 @@ void SearchTask::create_fts_operators() {
         vector<vector<boost::dynamic_bitset<>>> &applicable_fts_ops_by_ts_index_by_state =
             label_to_info[label_id].applicable_ops_by_ts_index_by_state;
         applicable_fts_ops_by_ts_index_by_state.resize(relevant_non_det_ts.size());
-        // Go over all relevant non-deterministc transition systems...
+        // Go over all relevant non-deterministc transition systems of the label...
         for (size_t ts_index = 0; ts_index < relevant_non_det_ts.size(); ++ ts_index) {
             int var = relevant_non_det_ts[ts_index];
             const TransitionSystem &ts = fts_task.get_ts(var);
             applicable_fts_ops_by_ts_index_by_state[ts_index].resize(
                 ts.get_size(), boost::dynamic_bitset<>(fts_operators.size(), false));
 
-            // ...and over all of its states...
-            const vector<boost::dynamic_bitset<>> &activated_labels_by_state =
-                    activated_labels_by_var_by_state[var];
-            cout << "relevant non-deterministic ts " << var << ", active states: ";
-            for (int value = 0; value < ts.get_size(); ++value) {
-                const boost::dynamic_bitset<> &activated_labels = activated_labels_by_state[value];
-                if (activated_labels.test(label_id)) {
-                    // ... and set all fts operators to be applicable iff the
-                    // label is activated in the state.
-                    for (size_t op_index = 0; op_index < fts_operators.size(); ++op_index) {
-                        assert(label_id == operators[fts_operators[op_index].get_index()].get_label());
-                        applicable_fts_ops_by_ts_index_by_state[ts_index][value].set(op_index);
+            // ...and over all induced fts operators...
+            cout << "relevant non-deterministic ts " << var << endl;
+            for (size_t op_index = 0; op_index < fts_operators.size(); ++op_index) {
+                OperatorID fts_op_id = fts_operators[op_index];
+                cout << "FTSOperator " << fts_op_id << ": ";
+                const FTSOperator &op = operators[fts_op_id.get_index()];
+                assert(label_id == op.get_label());
+                const vector<FactPair> &effects = op.get_effects();
+                // ... and find the effect relevant to the variable to set the
+                // sources (= states) as those where the operator is applicable.
+                for (const auto &var_val : effects) {
+                    if (var_val.var == var) {
+                        int target = var_val.value;
+                        cout << "effect " << target << ", sources: ";
+                        const vector<int> &sources = target_to_sources_by_label_by_ts_index[label_id][ts_index][target];
+                        for (int source : sources) {
+                            cout << source << ", ";
+                            assert(activated_labels_by_var_by_state[var][source].test(label_id));
+                            applicable_fts_ops_by_ts_index_by_state[ts_index][source].set(op_index);
+                        }
+                        cout << endl;
                     }
-                    cout << value << ", ";
                 }
             }
             cout << endl;
@@ -335,7 +353,7 @@ bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
         }
     }
     // TODO: This is not implemented yet
-    
+
     utils::exit_with(utils::ExitCode::UNSUPPORTED);
     return true;
 }
