@@ -90,25 +90,24 @@ int main(int argc, const char **argv) {
     engine->search();
     search_timer.stop();
     utils::g_timer.stop();
-    
-    Plan plan = engine->get_plan();
+
     engine->print_statistics();
     cout << "Search time: " << search_timer << endl;
-    
-
-    if (transformer) {
-        search_timer.reset();
-        g_plan_reconstruction->reconstruct_plan(plan);
-        cout << "Plan reconstruction time: " << search_timer << endl;
-    }
-
-    g_sas_task()->save_plan(plan.get_labels(),get_next_plan_name());
-    
-    cout << "Total time: " << utils::g_timer << endl;
 
     if (engine->found_solution()) {
+        Plan plan = engine->get_plan();
+
+        if (transformer) {
+            search_timer.reset();
+            g_plan_reconstruction->reconstruct_plan(plan);
+            cout << "Plan reconstruction time: " << search_timer << endl;
+        }
+
+        g_sas_task()->save_plan(plan.get_labels(),get_next_plan_name());
+        cout << "Total time: " << utils::g_timer << endl;
         utils::exit_with(ExitCode::PLAN_FOUND);
     } else {
+        cout << "Total time: " << utils::g_timer << endl;
         utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
     }
 }
