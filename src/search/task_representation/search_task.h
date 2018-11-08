@@ -192,6 +192,7 @@ public:
         return min_operator_cost;
     }
 
+    // Expensive method due to looking up which Operators match reduced labels.
     void dump_op(OperatorID op) const;
 
     LabelID get_label(OperatorID op) const {
