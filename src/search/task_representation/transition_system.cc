@@ -583,9 +583,44 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
         }
 
         return relevant_label_groups;
-    
     }
 
+
+    
+    bool TransitionSystem::is_selfloop_everywhere(LabelID label) const {
+        if (selfloop_everywhere_label_groups.empty()) {
+            
+            selfloop_everywhere_label_groups.resize(label_equivalence_relation->get_size(), false);
+            for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
+                if (!label_equivalence_relation->is_empty_group(group_id)) {
+                    int num_self_loops = 0;
+                    for(const auto & tr : transitions_by_group_id[group_id]) {
+                        if (tr.src == tr.target) {
+                            num_self_loops ++;
+                        }
+                    }
+                    if (num_self_loops == get_size()) {
+                        selfloop_everywhere_label_groups[group_id] = true;
+                    } 
+                }
+            }
+
+            // cout << endl << endl << endl;
+            // dump_labels_and_transitions();
+            // for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
+            //     cout << selfloop_everywhere_label_groups[group_id] << " ";
+            // }
+            // cout << endl << endl << endl;
+
+        }
+
+        LabelGroupID label_group = label_equivalence_relation->get_group_id(label);
+        return selfloop_everywhere_label_groups[label_group];
+    }
+
+    const LabelGroup & TransitionSystem::get_label_group(LabelGroupID group_id) const {
+        return label_equivalence_relation->get_group(group_id);
+    }
 
 
 

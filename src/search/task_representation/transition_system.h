@@ -131,6 +131,9 @@ private:
 
     //List of label groups that have a non-self-loop transition
     mutable std::vector<LabelGroupID> relevant_label_groups;
+
+    //List of label groups that have a selfloop transition in every state
+    mutable std::vector<bool> selfloop_everywhere_label_groups;
   
     /*
       Check if two or more labels are locally equivalent to each other, and
@@ -259,6 +262,9 @@ public:
     bool has_precondition_on (LabelID label) const {
         return get_label_precondition(label).size() < (size_t)num_states;
     }
+
+    const LabelGroup &get_label_group(LabelGroupID group_id) const;
+    bool is_selfloop_everywhere(LabelID label) const;
 };
 }
 

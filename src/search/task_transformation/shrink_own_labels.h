@@ -13,6 +13,7 @@ namespace task_transformation {
     
     class ShrinkOwnLabels : public ShrinkStrategy {
         const bool perform_sg_shrinking;
+        const bool preserve_optimality;
 
         bool is_own_label (const FactoredTransitionSystem & fts, int label, int ts) const;
 
@@ -25,6 +26,14 @@ namespace task_transformation {
             const FactoredTransitionSystem &fts,
             int index,
             int target_size) const override;
+
+        
+        virtual bool requires_init_distances() const {
+            return false;
+        }
+        virtual bool requires_goal_distances() const {
+            return false;
+        }
 
 
 

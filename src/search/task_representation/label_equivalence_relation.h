@@ -112,7 +112,7 @@ public:
     bool is_empty_group(LabelGroupID group_id) const {
         return grouped_labels[group_id].empty();
     }
-
+    
     LabelGroupID get_group_id(int label_no) const {
         return label_to_positions[label_no].first;
     }

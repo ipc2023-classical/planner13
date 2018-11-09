@@ -10,18 +10,20 @@
 #include "../option_parser.h"
 #include "../plugin.h"
 
+#include "../algorithms/sccs.h"
+
 #include <cassert>
 #include <iostream>
 #include <algorithm>
 
 using namespace std;
 
-
 namespace task_transformation {
 
 ShrinkOwnLabels::ShrinkOwnLabels(const Options &opts) : 
     ShrinkStrategy(), 
-    perform_sg_shrinking (opts.get<bool>("goal_shrinking"))  {
+    perform_sg_shrinking (opts.get<bool>("goal_shrinking")) ,
+    preserve_optimality (opts.get<bool>("preserve_optimality")) {
 }
 
 
@@ -38,24 +40,6 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
 }
 
     
-bool ShrinkOwnLabels::is_own_label (const FactoredTransitionSystem & fts, 
-                                    int label, int ts) const{
-    int num_transition_systems = fts.get_size();
-    for (int i = 0; i < num_transition_systems ; ++i) {
-        if (fts.get_ts(transition_systems[i]) {
-	    if (i == ts){
-		if (!fts.transition_systems[i]->is_relevant_label(label)){
-		    return false;
-		}
-	    } else {
-		if (fts.transition_systems[i]->is_relevant_label(label)){
-		    return false;
-		}
-	    }
-	}
-    }
-    return true;
-}
 
    
 StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
@@ -102,24 +86,26 @@ StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
 
     int num_states = ts.get_size();
     std::vector<bool> is_goal (ts.get_is_goal());
-    
-    /* this is a rather memory-inefficient way of implementing
-       Tarjan's algorithm, but it's the best I got for now */
+    cout << "Applying OwnLabel shrinking to ts: " << index << endl;
+                                                              
+    /* this is a rather memory-inefficient way of implementing Tarjan's algorithm, but
+       it's the best I got for now */
     vector<vector<int> > adjacency_matrix(num_states);
     for (const auto & gt : ts) {
-
 	bool is_own = std::any_of(gt.label_group.begin(), gt.label_group.end(),
 				  [&](int label) {
-				      return TSUtils::is_own_label(fts, label, index)  && 
-				      fts.get_labels().get_label_cost(label) == 0;
+				      return fts.is_tau_label(index, LabelID(label)) &&
+                                      (!preserve_optimality ||
+                                       fts.get_labels().get_label_cost(label) == 0);
 			       });
 	if(is_own) {
 	    for (const auto & trans : gt.transitions) {
 		adjacency_matrix[trans.src].push_back(trans.target);
-		//cout << trans.src << " -> " << trans.target << endl;
+		// cout << trans.src << " -> " << trans.target << endl;
 	    }
 	}
     }
+    
     /* PETER: Can we do better than this, i.e., prevent the sorting? */
     /* remove duplicates in adjacency matrix */
     for (int i = 0; i < num_states; i++) {
@@ -130,28 +116,27 @@ StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
 
     /* perform Tarjan's algorithm for finding SCCs */
     StateEquivalenceRelation final_sccs;
-    SCC::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
+    sccs::SCC::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
 
-/*    cout << "===========================================" << endl;
-      for (int i = 0; i < num_states; i++) {
-      cout << "edges from " << i << " to";
-      for (size_t j = 0; j < adjacency_matrix[i].size(); j++)
-      cout << " " << adjacency_matrix[i][j];
-      cout << endl;
-      }
-      cout << "found SCCs:" << endl;
-      for (auto & scc : final_sccs){
-	  cout << std::count_if(begin(scc), end(scc), [](int){ return true; }) << ": " ;
-	  for (int val : scc)  cout << val << " ";
-	  cout << endl;
-      }
-      cout << "===========================================" << endl;*/
-
+   // cout << "===========================================" << endl;
+   //    for (int i = 0; i < num_states; i++) {
+   //    cout << "edges from " << i << " to";
+   //    for (size_t j = 0; j < adjacency_matrix[i].size(); j++)
+   //    cout << " " << adjacency_matrix[i][j];
+   //    cout << endl;
+   //    }
+   //    cout << "found SCCs:" << endl;
+   //    for (auto & scc : final_sccs){
+   //        cout << std::count_if(begin(scc), end(scc), [](int){ return true; }) << ": " ;
+   //        for (int val : scc)  cout << val << " ";
+   //        cout << endl;
+   //    }
+   //    cout << "===========================================" << endl;
     /* free some memory */
     vector<vector<int> > ().swap(adjacency_matrix);
 
     int new_size = final_sccs.size();
-    if (perform_sg_shrinking && TSUtils::is_only_goal_relevant(fts, index)) {
+    if (perform_sg_shrinking && fts.is_only_goal_relevant(index)) {
         /* now bring those groups together that follow the second rule */
         cout << "also using second rule of own-label shrinking" << endl;
         int goal_scc = -1;
@@ -209,6 +194,10 @@ static shared_ptr<ShrinkStrategy> _parse(OptionParser &parser) {
 			    "   (b) all goal variables are in abstraction and"
 			    "   (c) there is an own-label path from s to g",
                             "true");
+    
+    parser.add_option<bool>("preserve_optimality",
+                            "Only consider tau transitions with 0-cost actions so that the reduction is optimallity preserving",
+                            "false");
 
     Options opts = parser.parse();
 
