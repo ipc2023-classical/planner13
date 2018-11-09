@@ -71,6 +71,7 @@ def main(revisions=None):
             attributes=attributes,
         ),
         outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-regular-vs-fts.html'),
+    )
 
     exp.add_report(
         ComparativeReport(
