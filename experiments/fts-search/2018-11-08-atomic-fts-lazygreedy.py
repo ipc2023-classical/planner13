@@ -70,7 +70,19 @@ def main(revisions=None):
             format='html',
             attributes=attributes,
         ),
-        outfile = os.path.join(exp.eval_dir, get_experiment_name() + 'regular-vs-fts.html'),
+        outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-regular-vs-fts.html'),
+
+    exp.add_report(
+        ComparativeReport(
+            algorithm_pairs=[
+                ('{}-lazy-ff-atomic'.format(REVISION), '{}-lazy-ff-transform-atomic-labelreduction'.format(REVISION)),
+                ('{}-lazy-ff-atomic'.format(REVISION), '{}-lazy-ff-transform-atomic-bisim'.format(REVISION)),
+                ('{}-lazy-ff-atomic'.format(REVISION), '{}-lazy-ff-transform-atomic-bisim-labelreduction'.format(REVISION)),
+            ],
+            format='html',
+            attributes=attributes,
+        ),
+        outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-atomic-vs-transform.html'),
     )
 
     exp.run_steps()

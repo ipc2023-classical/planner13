@@ -84,7 +84,23 @@ def main(revisions=None):
             format='html',
             attributes=attributes,
         ),
-        outfile = os.path.join(exp.eval_dir, get_experiment_name() + 'regular-vs-fts.html'),
+        outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-regular-vs-fts.html'),
+    )
+
+    exp.add_report(
+        ComparativeReport(
+            algorithm_pairs=[
+                ('{}-astar-blind-atomic'.format(REVISION), '{}-astar-blind-transform-atomic-labelreduction'.format(REVISION)),
+                ('{}-astar-blind-atomic'.format(REVISION), '{}-astar-blind-transform-atomic-bisim'.format(REVISION)),
+                ('{}-astar-blind-atomic'.format(REVISION), '{}-astar-blind-transform-atomic-bisim-labelreduction'.format(REVISION)),
+                ('{}-astar-hmax-atomic'.format(REVISION), '{}-astar-hmax-transform-atomic-labelreduction'.format(REVISION)),
+                ('{}-astar-hmax-atomic'.format(REVISION), '{}-astar-hmax-transform-atomic-bisim'.format(REVISION)),
+                ('{}-astar-hmax-atomic'.format(REVISION), '{}-astar-hmax-transform-atomic-bisim-labelreduction'.format(REVISION)),
+            ],
+            format='html',
+            attributes=attributes,
+        ),
+        outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-atomic-vs-transform.html'),
     )
 
     exp.run_steps()
