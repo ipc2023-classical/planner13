@@ -39,8 +39,8 @@ class MergeAndShrinkAlgorithm {
     std::shared_ptr<LabelReduction> label_reduction;
 
     // Options for pruning
-//    const bool prune_unreachable_states;
-//    const bool prune_irrelevant_states;
+    const bool prune_unreachable_states;
+    const bool prune_irrelevant_states;
 
     const Verbosity verbosity;
 
@@ -58,7 +58,7 @@ class MergeAndShrinkAlgorithm {
     bool too_many_transitions(const FactoredTransitionSystem &fts) const;
     bool exclude_if_too_many_transitions() const;
     // Return true iff fts has been detected to be unsolvable.
-//    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
+   bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
     void statistics(int maximum_intermediate_size) const;
     void main_loop(
         FactoredTransitionSystem &fts,

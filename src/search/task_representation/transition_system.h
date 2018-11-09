@@ -255,7 +255,6 @@ public:
     bool has_precondition_on (LabelID label) const {
         return get_label_precondition(label).size() < (size_t)num_states;
     }
-        
 };
 }
 
