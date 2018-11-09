@@ -54,12 +54,12 @@ extern bool shrink_factor(
 
   TODO: maybe this functionality belongs to a new class PruneStrategy.
 */
-//extern bool prune_step(
-//    FactoredTransitionSystem &fts,
-//    int index,
-//    bool prune_unreachable_states,
-//    bool prune_irrelevant_states,
-//    Verbosity verbosity);
+extern bool prune_step(
+   FactoredTransitionSystem &fts,
+   int index,
+   bool prune_unreachable_states,
+   bool prune_irrelevant_states,
+   Verbosity verbosity);
 
 /*
   Compute the abstraction mapping based on the given state equivalence

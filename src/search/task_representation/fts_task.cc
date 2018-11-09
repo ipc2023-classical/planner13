@@ -13,21 +13,26 @@ using namespace task_transformation;
 
 
 namespace task_representation {
-FTSTask::FTSTask(
-    vector<unique_ptr<TransitionSystem>> &&transition_systems,
-    unique_ptr<Labels> labels)
-    : transition_systems(move(transition_systems)),
-      labels(move(labels)) {
+    FTSTask::FTSTask(
+        vector<unique_ptr<TransitionSystem>> &&transition_systems_,
+        unique_ptr<Labels> labels)
+        : transition_systems(move(transition_systems_)),
+          labels(move(labels)) {
 
 #ifndef NDEBUG
-    for (const auto &ts : transition_systems) {
-        assert(ts);
-}
-    for (int label = 0; label < this->labels->get_size(); ++label) {
-        assert(this->labels->is_current_label(label));
-    }
+        for (int label = 0; label < this->labels->get_size(); ++label) {
+            assert(this->labels->is_current_label(label));
+        }
+
+        for (const auto &ts : this->transition_systems) {
+            assert(ts);
+            assert(ts->get_size() > 1);
+            for (const auto &tr: *ts) { //assert that there are no dead labels
+                assert(!tr.transitions.empty());
+            }
+        }
 #endif
-}
+    }
 
 FTSTask::~FTSTask() {
     for (auto &transition_system : transition_systems) {
@@ -103,5 +108,12 @@ shared_ptr<SearchTask> FTSTask::get_search_task() const {
 	search_task = make_shared<SearchTask> (*this);
     }
     return search_task;
+}
+
+
+void FTSTask::dump() const {
+    for (const auto & ts: transition_systems) {
+        ts->dump_labels_and_transitions();
+    }
 }
 }

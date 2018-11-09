@@ -232,4 +232,15 @@ bool FactoredTransitionSystem::is_active(int index) const {
     assert_index_valid(index);
     return transition_systems[index] != nullptr;
 }
+  
+
+void FactoredTransitionSystem::remove_irrelevant_transition_systems() {
+    for (size_t index = 0; index < transition_systems.size(); ++index) {
+        if (transition_systems[index] && transition_systems[index]->get_size() <= 1) {
+            transition_systems[index] = nullptr;
+            distances[index] = nullptr;
+            mas_representations[index] = nullptr;
+        }
+    }
+}
 }

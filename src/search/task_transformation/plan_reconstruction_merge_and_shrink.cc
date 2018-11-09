@@ -38,8 +38,6 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
     
     bool PlanReconstructionMergeAndShrink::match_labels(int original_label,
                                                         int abstract_label) const {
-        // cout << "cmp " << label_map->get_reduced_label(original_label)
-        //      << " "  << abstract_label << endl;
         return label_map->get_reduced_label(original_label) == abstract_label;
     }
 
@@ -54,12 +52,11 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
         bool found_match = false;
         for (OperatorID op : applicable_ops)  {
             LabelID original_label = search_task->get_label (op);
-            
             if (match_labels(original_label, label)) {
                 auto result_state = state_registry.get_successor_state(initial_state, op);
                 if (match_states(result_state, target)) {
                     found_match = true;
-                    //cout << g_sas_task()->get_operator_name(original_label);
+                    //cout << g_sas_task()->get_operator_name(original_label) << endl;
                     new_label_path.push_back(original_label);
                     new_traversed_states.push_back(result_state);
                     break;
@@ -77,7 +74,17 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
             cout << "Available original labels:" << endl;
             for (OperatorID op : applicable_ops)  {
                 LabelID original_label = search_task->get_label (op);
-                cout << "  " << original_label << " reduced to " << label_map->get_reduced_label(original_label) << endl;
+                cout << "  " << g_sas_task()->get_operator_name(original_label)
+                     << " (" << original_label << ") reduced to "
+                     << label_map->get_reduced_label(original_label);
+
+                auto result_state = state_registry.get_successor_state(initial_state, op);
+                if (match_states(result_state, target)) {
+                    cout << "   state matches!" << endl;
+                }else{
+                    cout << endl;
+                }
+
             }
             utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
         }
@@ -88,6 +95,13 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     const std::vector<int> & label_path = plan.get_labels ();
     const std::vector<GlobalState> & traversed_states = plan.get_traversed_states ();
     assert(label_path.size() + 1 == traversed_states.size());
+
+//    cout << "label path : ";
+//    for (int l : label_path) {
+//        cout << l << " ";
+//    }
+//    cout << endl;
+    
     std::vector<int> new_label_path;
     std::vector<GlobalState> new_traversed_states;
 

@@ -50,8 +50,8 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
     num_states_to_trigger_shrinking(opts.get<int>("num_states_to_trigger_shrinking")),
     max_states(opts.get<int>("max_states")),
     label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
-//    prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
-//    prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
+    prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
+    prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
     verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
     run_main_loop(opts.get<bool>("run_main_loop")),
     max_time(opts.get<double>("max_time")),
@@ -155,12 +155,12 @@ void MergeAndShrinkAlgorithm::warn_on_unusual_options() const {
         }
     }
 
-//    if (!prune_unreachable_states || !prune_irrelevant_states) {
-//        cout << dashes << endl
-//             << "WARNING! Pruning is (partially) turned off!\nThis may "
-//            "drastically reduce the performance of merge-and-shrink!"
-//             << endl << dashes << endl;
-//    }
+   if (!prune_unreachable_states || !prune_irrelevant_states) {
+       cout << dashes << endl
+            << "WARNING! Pruning is (partially) turned off!\nThis may "
+           "drastically reduce the performance of merge-and-shrink!"
+            << endl << dashes << endl;
+   }
 }
 
 bool MergeAndShrinkAlgorithm::ran_out_of_time(
@@ -203,34 +203,34 @@ bool MergeAndShrinkAlgorithm::exclude_if_too_many_transitions() const {
     return num_transitions_to_exclude != INF;
 }
 
-//bool MergeAndShrinkAlgorithm::prune_fts(
-//    FactoredTransitionSystem &fts, const utils::Timer &timer) const {
-//    /*
-//      Prune all factors according to the chosen options. Stop early if one
-//      factor is unsolvable. Return true iff unsolvable.
-//    */
-//    bool pruned = false;
-//    bool unsolvable = false;
-//    for (int index = 0; index < fts.get_size(); ++index) {
-//        if (prune_unreachable_states || prune_irrelevant_states) {
-//            bool pruned_factor = prune_step(
-//                fts,
-//                index,
-//                prune_unreachable_states,
-//                prune_irrelevant_states,
-//                verbosity);
-//            pruned = pruned || pruned_factor;
-//        }
-//        if (!fts.is_factor_solvable(index)) {
-//            unsolvable = true;
-//            break;
-//        }
-//    }
-//    if (verbosity >= Verbosity::NORMAL && pruned) {
-//        print_time(timer, "after pruning atomic factors");
-//    }
-//    return unsolvable;
-//}
+bool MergeAndShrinkAlgorithm::prune_fts(
+   FactoredTransitionSystem &fts, const utils::Timer &timer) const {
+   /*
+     Prune all factors according to the chosen options. Stop early if one
+     factor is unsolvable. Return true iff unsolvable.
+   */
+   bool pruned = false;
+   bool unsolvable = false;
+   for (int index = 0; index < fts.get_size(); ++index) {
+       if (prune_unreachable_states || prune_irrelevant_states) {
+           bool pruned_factor = prune_step(
+               fts,
+               index,
+               prune_unreachable_states,
+               prune_irrelevant_states,
+               verbosity);
+           pruned = pruned || pruned_factor;
+       }
+       if (!fts.is_factor_solvable(index)) {
+           unsolvable = true;
+           break;
+       }
+   }
+   if (verbosity >= Verbosity::NORMAL && pruned) {
+       print_time(timer, "after pruning atomic factors");
+   }
+   return unsolvable;
+}
 
 void MergeAndShrinkAlgorithm::main_loop(
     FactoredTransitionSystem &fts,
@@ -320,20 +320,23 @@ void MergeAndShrinkAlgorithm::main_loop(
         }
 
         // Pruning
-//        if (prune_unreachable_states || prune_irrelevant_states) {
-//            bool pruned = prune_step(
-//                fts,
-//                merged_index,
-//                prune_unreachable_states,
-//                prune_irrelevant_states,
-//                verbosity);
-//            if (verbosity >= Verbosity::NORMAL && pruned) {
-//                if (verbosity >= Verbosity::VERBOSE) {
-//                    fts.statistics(merged_index);
-//                }
-//                print_time(timer, "after pruning");
-//            }
-//        }
+       if (prune_unreachable_states || prune_irrelevant_states) {
+           bool pruned = prune_step(
+               fts,
+               merged_index,
+               prune_unreachable_states,
+               prune_irrelevant_states,
+               verbosity);
+           if (verbosity >= Verbosity::NORMAL && pruned) {
+               if (verbosity >= Verbosity::VERBOSE) {
+                   fts.statistics(merged_index);
+               }
+               print_time(timer, "after pruning");
+           }
+       }
+
+       fts.remove_irrelevant_transition_systems();
+       
 
         /*
           NOTE: both the shrink strategy classes and the construction
@@ -522,6 +525,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         }
     }
 
+    fts.remove_irrelevant_transition_systems();
+
     if (ran_out_of_time(timer)) {
         return fts;
     }
@@ -583,15 +588,15 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         OptionParser::NONE);
 
     // Pruning options.
-//    parser.add_option<bool>(
-//        "prune_unreachable_states",
-//        "If true, prune abstract states unreachable from the initial state.",
-//        "true");
-//    parser.add_option<bool>(
-//        "prune_irrelevant_states",
-//        "If true, prune abstract states from which no goal state can be "
-//        "reached.",
-//        "true");
+   parser.add_option<bool>(
+       "prune_unreachable_states",
+       "If true, prune abstract states unreachable from the initial state.",
+       "true");
+   parser.add_option<bool>(
+       "prune_irrelevant_states",
+       "If true, prune abstract states from which no goal state can be "
+       "reached.",
+       "true");
 
     vector<string> verbosity_levels;
     vector<string> verbosity_level_docs;

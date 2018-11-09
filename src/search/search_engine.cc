@@ -25,6 +25,7 @@ class PruningMethod;
 
 SearchEngine::SearchEngine(const Options &opts)
     : status(IN_PROGRESS),
+      solution_found(false),
       plan(g_main_task.get()),
       state_registry(g_main_task->get_search_task()),
       search_space(state_registry,
@@ -79,6 +80,7 @@ bool SearchEngine::check_goal_and_set_plan(const GlobalState &state) {
     if (task->is_goal_state(state)) {
         cout << "Solution found!" << endl;
         search_space.trace_path(state, plan);
+        solution_found = true;
         return true;
     }
     return false;
