@@ -110,6 +110,7 @@ fast_downward_plugin(
         task_transformation/merge_scoring_function
         task_transformation/merge_scoring_function_dfp
         task_transformation/merge_scoring_function_goal_relevance
+        task_transformation/merge_scoring_function_product_size
         task_transformation/merge_scoring_function_single_random
         task_transformation/merge_scoring_function_total_order
         task_transformation/merge_selector

@@ -265,6 +265,10 @@ void MergeAndShrinkAlgorithm::main_loop(
         }
         int merge_index1 = merge_indices.first;
         int merge_index2 = merge_indices.second;
+        if (merge_index1 == -1 && merge_index2 == -1) {
+            cout << "Stopping main loop" << endl;
+            break;
+        }
         assert(merge_index1 != merge_index2);
         if (verbosity >= Verbosity::NORMAL) {
             cout << "Next pair of indices: ("

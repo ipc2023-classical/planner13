@@ -54,6 +54,10 @@ pair<int, int> MergeSelectorScoreBasedFiltering::select_merge(
          merge_scoring_functions) {
         vector<double> scores = scoring_function->compute_scores(
             fts, merge_candidates);
+        if (scores.empty()) {
+            cout << "All merge candidate have been rejected" << endl;
+            return make_pair(-1, -1);
+        }
         merge_candidates = get_remaining_candidates(merge_candidates, scores);
         if (merge_candidates.size() == 1) {
             break;
