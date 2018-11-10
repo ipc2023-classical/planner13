@@ -238,9 +238,11 @@ void MergeAndShrinkAlgorithm::main_loop(
     const utils::Timer &timer) {
     int maximum_intermediate_size = 0;
     for (int i = 0; i < fts.get_size(); ++i) {
-        int size = fts.get_ts(i).get_size();
-        if (size > maximum_intermediate_size) {
-            maximum_intermediate_size = size;
+        if (fts.is_active(i)) {
+            int size = fts.get_ts(i).get_size();
+            if (size > maximum_intermediate_size) {
+                maximum_intermediate_size = size;
+            }
         }
     }
 
@@ -335,7 +337,7 @@ void MergeAndShrinkAlgorithm::main_loop(
            }
        }
 
-       fts.remove_irrelevant_transition_systems();
+       fts.remove_irrelevant_transition_systems(verbosity);
        
 
         /*
@@ -467,16 +469,15 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     std::vector<std::unique_ptr<Distances>> distances =
         create_distances(transition_systems);
 
-    bool compute_init_distances = false;
-    if ((shrink_strategy && shrink_strategy->requires_init_distances()) ||
-            (merge_strategy_factory && merge_strategy_factory->requires_init_distances())) {
-        compute_init_distances = true;
-    }
-    bool compute_goal_distances = false;
-    if ((shrink_strategy && shrink_strategy->requires_goal_distances()) ||
-            (merge_strategy_factory && merge_strategy_factory->requires_goal_distances())) {
-        compute_goal_distances = true;
-    }
+
+    const bool compute_init_distances =
+        shrink_strategy->requires_init_distances() ||
+        merge_strategy_factory->requires_init_distances() ||
+        prune_unreachable_states;
+    const bool compute_goal_distances =
+        shrink_strategy->requires_goal_distances() ||
+        merge_strategy_factory->requires_goal_distances() ||
+        prune_irrelevant_states;
 
     FactoredTransitionSystem fts(
         move(labels),
@@ -487,12 +488,10 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         compute_goal_distances,
         verbosity);
 
-    for (int index : fts) {
-        assert(fts.is_active(index));
-        if (!fts.is_factor_solvable(index)) {
-            cout << "Atomic FTS is unsolvable, exiting" << endl;
-            utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
-        }
+    bool unsolvable = prune_fts(fts, timer);
+    if (unsolvable) {
+        cout << "Atomic FTS is unsolvable, exiting" << endl;
+        utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
     }
 
     // Label reduction of atomic FTS.
@@ -525,7 +524,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         }
     }
 
-    fts.remove_irrelevant_transition_systems();
+    fts.remove_irrelevant_transition_systems(verbosity);
 
     if (ran_out_of_time(timer)) {
         return fts;

@@ -171,8 +171,7 @@ public:
 
     bool is_active(int index) const;
 
-    void remove_irrelevant_transition_systems();
-
+    void remove_irrelevant_transition_systems(Verbosity verbosity);
 };
 }
 

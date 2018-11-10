@@ -234,12 +234,16 @@ bool FactoredTransitionSystem::is_active(int index) const {
 }
   
 
-void FactoredTransitionSystem::remove_irrelevant_transition_systems() {
+void FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity verbosity) {
     for (size_t index = 0; index < transition_systems.size(); ++index) {
         if (transition_systems[index] && transition_systems[index]->get_size() <= 1) {
             transition_systems[index] = nullptr;
             distances[index] = nullptr;
             mas_representations[index] = nullptr;
+            --num_active_entries;
+            if (verbosity >= Verbosity::VERBOSE) {
+                cout << "removing irrelevant TS at index " << index << endl;
+            }
         }
     }
 }
