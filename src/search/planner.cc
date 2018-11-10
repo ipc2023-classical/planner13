@@ -68,6 +68,21 @@ int main(int argc, const char **argv) {
     }
     g_log << "Transform time: " << transform_timer << endl;
 
+    //g_main_task->dump();
+    if (g_main_task->trivially_solved()) {
+        cout << "Task solved without search" << endl;
+        utils::exit_with(ExitCode::PLAN_FOUND);
+        Plan plan (g_main_task.get());
+        if (transformer) {
+            utils::Timer reconstruct_timer;
+            g_plan_reconstruction->reconstruct_plan(plan);
+            cout << "Plan reconstruction time: " << reconstruct_timer << endl;
+        }
+        g_sas_task()->save_plan(plan.get_labels(),get_next_plan_name());
+        cout << "Total time: " << utils::g_timer << endl;
+        utils::exit_with(ExitCode::PLAN_FOUND);
+    }
+        
     shared_ptr<SearchEngine> engine;
 
     // The command line is parsed twice: once in dry-run mode, to
@@ -98,9 +113,9 @@ int main(int argc, const char **argv) {
         Plan plan = engine->get_plan();
 
         if (transformer) {
-            search_timer.reset();
+            utils::Timer reconstruct_timer;
             g_plan_reconstruction->reconstruct_plan(plan);
-            cout << "Plan reconstruction time: " << search_timer << endl;
+            cout << "Plan reconstruction time: " << reconstruct_timer << endl;
         }
 
         g_sas_task()->save_plan(plan.get_labels(),get_next_plan_name());

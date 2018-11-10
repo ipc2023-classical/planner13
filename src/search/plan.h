@@ -18,11 +18,7 @@ class Plan {
     std::vector<int> labels;
     std::vector<GlobalState> states;
 public:
-    Plan (const task_representation::FTSTask *task_) :
-    task(task_), solved(false) {
-
-    }
-    
+    Plan (const task_representation::FTSTask *task_);
     ~Plan() = default;
 
     bool empty() const {

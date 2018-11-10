@@ -71,6 +71,7 @@ bool shrink_factor(
       TODO: think about factoring out common logic of this function and the
       function copy_and_shrink_ts in merge_scoring_function_miasm_utils.cc.
     */
+    assert (fts.is_active(index));
     const TransitionSystem &ts = fts.get_ts(index);
     int num_states = ts.get_size();
     if (num_states > num_states_to_trigger_shrinking) {
@@ -80,9 +81,8 @@ bool shrink_factor(
                  << num_states_to_trigger_shrinking << endl;
         }
 
-        const Distances &distances = fts.get_distances(index);
         StateEquivalenceRelation equivalence_relation =
-            shrink_strategy.compute_equivalence_relation(ts, distances, num_states);
+            shrink_strategy.compute_equivalence_relation(fts, index, num_states);
         // TODO: We currently violate this; see issue250
         //assert(equivalence_relation.size() <= target_size);
         return fts.apply_abstraction(index, equivalence_relation, verbosity);

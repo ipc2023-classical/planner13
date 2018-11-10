@@ -4,6 +4,7 @@
 
 #include "../task_transformation/types.h"
 
+#include <set>
 #include <cassert>
 #include <iostream>
 
@@ -190,4 +191,41 @@ int LabelEquivalenceRelation::add_label_group(const vector<int> &new_labels) {
     }
     return new_group_id;
 }
+
+
+    std::vector<LabelGroupID>
+    LabelEquivalenceRelation::remove_labels (const std::vector<LabelID> & removed_labels) {
+        std::set<LabelGroupID> affected_group_ids;
+        std::vector<LabelGroupID> removed_groups;
+
+        // Remove old labels from group
+        for (int old_label_no : removed_labels) {
+            LabelIter label_it = label_to_positions[old_label_no].second;
+            LabelGroupID group = get_group_id(old_label_no);
+            affected_group_ids.insert(group);
+            grouped_labels[get_group_id(old_label_no)].erase(label_it);
+        }
+    
+
+        if (!affected_group_ids.empty()) {
+            for (LabelGroupID group_id : affected_group_ids) {
+                LabelGroup &label_group = grouped_labels[group_id];
+                // Setting cost to infinity for empty groups does not hurt.
+                label_group.set_cost(task_transformation::INF);
+
+                for (int label_no : label_group) {
+                    int cost = labels.get_label_cost(label_no);
+                    if (cost < label_group.get_cost()) {
+                        label_group.set_cost(cost);
+                    }
+                }
+                if (label_group.get_cost() == task_transformation::INF) {
+                    removed_groups.push_back(group_id);
+                }
+            }
+        }
+
+        return removed_groups;
+    }
+
 }

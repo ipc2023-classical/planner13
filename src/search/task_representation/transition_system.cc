@@ -438,6 +438,34 @@ void TransitionSystem::renumber_labels(
     label_equivalence_relation->renumber_labels(old_to_new_labels, new_num_labels);
 }
 
+
+bool TransitionSystem::remove_labels(const vector<LabelID> & labels) {
+    std::vector<LabelGroupID> empty_groups = label_equivalence_relation->remove_labels(labels);
+    bool relevant_label_group_removed = false;
+    for (LabelGroupID empty_group : empty_groups) {
+        transitions_by_group_id[empty_group].clear();
+
+        if (!label_group_precondition.empty()) {
+            label_group_precondition[empty_group].clear();
+        }
+
+        if(is_relevant_label_group(empty_group)) {
+            relevant_label_group_removed = true;
+            auto item = std::find(relevant_label_groups.begin(),
+                                  relevant_label_groups.end(), empty_group);
+            if (item != relevant_label_groups.end()) {
+                relevant_label_groups.erase(item);
+            }
+        }
+
+        if (!selfloop_everywhere_label_groups.empty()) {
+            selfloop_everywhere_label_groups[empty_group] = false;
+        }
+    }
+
+    return relevant_label_group_removed;
+}
+
 string TransitionSystem::tag() const {
     string desc(get_description());
     desc[0] = toupper(desc[0]);
@@ -583,21 +611,65 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
 
         if (relevant_label_groups.empty()) {
             for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
-                if (!label_equivalence_relation->is_empty_group(group_id)) {
-                    for(const auto & tr : transitions_by_group_id[group_id]) {
-                        if (tr.src != tr.target) {
-                            relevant_label_groups.push_back(group_id);
-                            break;
-                        }
-                    }
+                if (is_relevant_label_group(group_id)){
+                    relevant_label_groups.push_back(group_id);
                 }
+                
             }
         }
 
         return relevant_label_groups;
-    
     }
 
+    bool TransitionSystem::is_relevant_label (LabelID label) const {
+        return is_relevant_label_group(label_equivalence_relation->get_group_id(label));
+    }
+    bool TransitionSystem::is_relevant_label_group (LabelGroupID group_id) const {
+        if (!label_equivalence_relation->is_empty_group(group_id)) {
+            for(const auto & tr : transitions_by_group_id[group_id]) {
+                if (tr.src != tr.target) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
+    
+    bool TransitionSystem::is_selfloop_everywhere(LabelID label) const {
+        if (selfloop_everywhere_label_groups.empty()) {
+            
+            selfloop_everywhere_label_groups.resize(label_equivalence_relation->get_size(), false);
+            for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
+                if (!label_equivalence_relation->is_empty_group(group_id)) {
+                    int num_self_loops = 0;
+                    for(const auto & tr : transitions_by_group_id[group_id]) {
+                        if (tr.src == tr.target) {
+                            num_self_loops ++;
+                        }
+                    }
+                    if (num_self_loops == get_size()) {
+                        selfloop_everywhere_label_groups[group_id] = true;
+                    } 
+                }
+            }
+
+            // cout << endl << endl << endl;
+            // dump_labels_and_transitions();
+            // for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
+            //     cout << selfloop_everywhere_label_groups[group_id] << " ";
+            // }
+            // cout << endl << endl << endl;
+
+        }
+
+        LabelGroupID label_group = label_equivalence_relation->get_group_id(label);
+        return selfloop_everywhere_label_groups[label_group];
+    }
+
+    const LabelGroup & TransitionSystem::get_label_group(LabelGroupID group_id) const {
+        return label_equivalence_relation->get_group(group_id);
+    }
 
 
 

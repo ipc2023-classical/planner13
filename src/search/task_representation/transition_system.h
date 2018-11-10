@@ -131,6 +131,9 @@ private:
 
     //List of label groups that have a non-self-loop transition
     mutable std::vector<LabelGroupID> relevant_label_groups;
+
+    //List of label groups that have a selfloop transition in every state
+    mutable std::vector<bool> selfloop_everywhere_label_groups;
   
     /*
       Check if two or more labels are locally equivalent to each other, and
@@ -191,6 +194,8 @@ public:
         bool only_equivalent_labels);
     void renumber_labels(const std::vector<int> &old_to_new_labels, int new_num_labels);
 
+    bool remove_labels(const std::vector<LabelID> & labels);
+
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,
                                transitions_by_group_id,
@@ -244,17 +249,28 @@ public:
 
     const std::vector<int> & get_goal_states() const;
 
+    const std::vector<bool> & get_is_goal() const {
+        return goal_states;
+    }
+
     bool is_goal_relevant() const {
         return get_goal_states().size() < (size_t)num_states;
     }
     
     const std::vector<int> & get_label_precondition(LabelID label) const;
 
+    bool is_relevant_label (LabelID label) const;
+
+    bool is_relevant_label_group (LabelGroupID group_id) const;
+
     const std::vector<LabelGroupID> & get_relevant_label_groups() const;
 
     bool has_precondition_on (LabelID label) const {
         return get_label_precondition(label).size() < (size_t)num_states;
     }
+
+    const LabelGroup &get_label_group(LabelGroupID group_id) const;
+    bool is_selfloop_everywhere(LabelID label) const;
 };
 }
 

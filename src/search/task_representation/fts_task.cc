@@ -19,6 +19,7 @@ namespace task_representation {
         : transition_systems(move(transition_systems_)),
           labels(move(labels)) {
 
+        cout << "Constructing FTS Task: " << transition_systems.size() << endl;
 #ifndef NDEBUG
         for (int label = 0; label < this->labels->get_size(); ++label) {
             assert(this->labels->is_current_label(label));
@@ -117,4 +118,15 @@ void FTSTask::dump() const {
         ts->dump_labels_and_transitions();
     }
 }
+    
+    bool FTSTask::trivially_solved() const {
+        return transition_systems.size() == 0 ||
+            std::all_of (transition_systems.begin(),
+                         transition_systems.end(),
+                         [] (const unique_ptr<TransitionSystem> & ts) {
+                             return ts->is_goal_state(ts->get_init_state());
+                         }
+                ); 
+    }
+
 }

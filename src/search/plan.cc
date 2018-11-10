@@ -9,6 +9,16 @@
 #include "task_representation/search_task.h"
 
 using namespace std;
+
+
+Plan::Plan (const task_representation::FTSTask *task_) :
+    task(task_), solved(false) {
+    if (task->trivially_solved()) {
+        solved = true;
+        
+    }
+    }
+
 void Plan::set_plan(const std::vector<GlobalState> & states_, const std::vector<int>& labels_) {
     states = states_;
     labels = labels_;

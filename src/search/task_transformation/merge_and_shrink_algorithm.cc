@@ -239,11 +239,11 @@ void MergeAndShrinkAlgorithm::main_loop(
     int maximum_intermediate_size = 0;
     for (int i = 0; i < fts.get_size(); ++i) {
         if (fts.is_active(i)) {
-            int size = fts.get_ts(i).get_size();
-            if (size > maximum_intermediate_size) {
-                maximum_intermediate_size = size;
-            }
+        int size = fts.get_ts(i).get_size();
+        if (size > maximum_intermediate_size) {
+            maximum_intermediate_size = size;
         }
+    }
     }
 
     unique_ptr<MergeStrategy> merge_strategy =
@@ -495,10 +495,13 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 
     bool unsolvable = prune_fts(fts, timer);
     if (unsolvable) {
-        cout << "Atomic FTS is unsolvable, exiting" << endl;
-        utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
+            cout << "Atomic FTS is unsolvable, exiting" << endl;
+            utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
     }
 
+    bool has_simplified; 
+    do {
+        has_simplified = false;
     // Label reduction of atomic FTS.
     if (label_reduction && label_reduction->reduce_atomic_fts()) {
         bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, *label_map, verbosity);
@@ -514,12 +517,16 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     if (shrink_strategy && shrink_atomic_fts) {
         // Shrinking of atomic FTS.
         for (int ts_index = 0; ts_index < fts.get_size(); ++ts_index) {
+                if (!fts.is_active(ts_index)) {
+                    continue;
+                }
             bool shrunk = shrink_factor(
                 fts,
                 ts_index,
                 *shrink_strategy,
                 verbosity,
                 num_states_to_trigger_shrinking);
+                has_simplified |= shrunk;
             if (verbosity >= Verbosity::VERBOSE && shrunk) {
                 fts.statistics(ts_index);
             }
@@ -529,11 +536,14 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         }
     }
 
-    fts.remove_irrelevant_transition_systems(verbosity);
+        has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
+
+        has_simplified |= fts.remove_irrelevant_labels();
 
     if (ran_out_of_time(timer)) {
         return fts;
     }
+    } while (/*run_atomic_loop && */has_simplified);
 
     if (run_main_loop) {
         assert(shrink_strategy && merge_strategy_factory);
@@ -547,6 +557,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 }
 
 unique_ptr<LabelMap> MergeAndShrinkAlgorithm::extract_label_map() {
+    assert(label_map);
     return move(label_map);
 }
 
@@ -648,7 +659,6 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "infinity",
         Bounds("0", "infinity"));
 }
-
 void add_transition_system_size_limit_options_to_parser(OptionParser &parser) {
     parser.add_option<int>(
         "max_states",
@@ -668,62 +678,4 @@ void add_transition_system_size_limit_options_to_parser(OptionParser &parser) {
         "possibly shrink the transition system.",
         "-1",
         Bounds("-1", "infinity"));
-}
-
-void handle_shrink_limit_options_defaults(Options &opts) {
-    int max_states = opts.get<int>("max_states");
-    int max_states_before_merge = opts.get<int>("max_states_before_merge");
-    int threshold = opts.get<int>("threshold_before_merge");
-
-    // If none of the two state limits has been set: set default limit.
-    if (max_states == -1 && max_states_before_merge == -1) {
-        max_states = 50000;
-    }
-
-    // If exactly one of the max_states options has been set, set the other
-    // so that it imposes no further limits.
-    if (max_states_before_merge == -1) {
-        max_states_before_merge = max_states;
-    } else if (max_states == -1) {
-        int n = max_states_before_merge;
-        if (utils::is_product_within_limit(n, n, INF)) {
-            max_states = n * n;
-        } else {
-            max_states = INF;
-        }
-    }
-
-    if (max_states_before_merge > max_states) {
-        cout << "warning: max_states_before_merge exceeds max_states, "
-             << "correcting." << endl;
-        max_states_before_merge = max_states;
-    }
-
-    if (max_states < 1) {
-        cerr << "error: transition system size must be at least 1" << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
-    }
-
-    if (max_states_before_merge < 1) {
-        cerr << "error: transition system size before merge must be at least 1"
-             << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
-    }
-
-    if (threshold == -1) {
-        threshold = max_states;
-    }
-    if (threshold < 1) {
-        cerr << "error: threshold must be at least 1" << endl;
-        utils::exit_with(ExitCode::INPUT_ERROR);
-    }
-    if (threshold > max_states) {
-        cout << "warning: threshold exceeds max_states, correcting" << endl;
-        threshold = max_states;
-    }
-
-    opts.set<int>("max_states", max_states);
-    opts.set<int>("max_states_before_merge", max_states_before_merge);
-    opts.set<int>("threshold_before_merge", threshold);
-}
 }

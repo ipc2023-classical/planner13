@@ -60,7 +60,7 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
             old_to_new_labels[label_no] = new_label_no;
         }
     }
-    cout << "Renumbering labels: " << old_to_new_labels << endl;
+    //cout << "Renumbering labels: " << old_to_new_labels << endl;
     for (unique_ptr<TransitionSystem> &ts : transition_systems) {
         ts->renumber_labels(old_to_new_labels, new_num_labels);
     }

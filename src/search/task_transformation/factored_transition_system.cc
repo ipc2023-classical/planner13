@@ -6,6 +6,7 @@
 
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
+#include "../task_representation/label_equivalence_relation.h"
 
 #include "../utils/collections.h"
 #include "../utils/memory.h"
@@ -234,17 +235,97 @@ bool FactoredTransitionSystem::is_active(int index) const {
 }
   
 
-void FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity verbosity) {
+bool FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity verbosity) {
+    bool removed_tr = false;
     for (size_t index = 0; index < transition_systems.size(); ++index) {
         if (transition_systems[index] && transition_systems[index]->get_size() <= 1) {
             transition_systems[index] = nullptr;
             distances[index] = nullptr;
             mas_representations[index] = nullptr;
             --num_active_entries;
+            removed_tr = true;
             if (verbosity >= Verbosity::VERBOSE) {
                 cout << "removing irrelevant TS at index " << index << endl;
             }
         }
+    return removed_tr;
     }
+    bool  FactoredTransitionSystem::is_irrelevant_label (LabelID label) const {
+        for (const auto & ts : transition_systems) {
+            if(ts && ts->is_relevant_label(label)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+bool FactoredTransitionSystem::remove_irrelevant_labels () {
+    std::vector<LabelID> irrelevant_labels;
+    for (LabelID (label_no); label_no < labels->get_size(); ++label_no) {         
+        if (labels->is_current_label(label_no) && is_irrelevant_label(LabelID(label_no))) {
+            irrelevant_labels.push_back(label_no);
+        }
+    }
+    
+    labels->remove_labels(irrelevant_labels);
+
+    bool may_require_pruning = false;
+    for (size_t i = 0; i < transition_systems.size(); ++i) {
+        if (transition_systems[i]) {
+            may_require_pruning |= transition_systems[i]->remove_labels(irrelevant_labels);
+        }
+    }
+
+    assert(!may_require_pruning);
+
+    return !irrelevant_labels.empty();
 }
+
+
+vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
+   vector<LabelID> tau_labels;
+   for (LabelGroupID relevant_group : transition_systems[index]->get_relevant_label_groups()) {            for (int l : transition_systems[index]->get_label_group(relevant_group)) {
+           if (is_tau_label(index, LabelID(l))) {
+               tau_labels.push_back(LabelID(l));
+           }
+       }
+   }
+   
+   return tau_labels;
+}
+
+   
+    bool FactoredTransitionSystem::is_tau_label (int ts_index, LabelID label) const{
+
+        // cout << "CHECKING TAU " << ts_index << " " << label << endl;
+        for (size_t index = 0; index < transition_systems.size(); ++index) {
+            if (transition_systems[index] && (int)index != ts_index &&
+                !transition_systems[index]->is_selfloop_everywhere(label)) {
+                // cout << label << " is not tau for " << ts_index << " because of " << index <<endl;
+                return false;
+            }
+        }
+
+        //cout << label << " TAU TAU TAU " << ts_index << endl;
+        
+        return true;
+    }
+
+    bool FactoredTransitionSystem::is_only_goal_relevant (int ts_index) const {
+
+        for (size_t i = 0; i < transition_systems.size() ; ++i) {
+            if (transition_systems[i]) {
+                if ((int)i == ts_index){
+                    if (!transition_systems[i]->is_goal_relevant()) {
+                        return false;
+                    }
+                } else {
+                    if (transition_systems[i]->is_goal_relevant()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

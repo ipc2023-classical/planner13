@@ -6,9 +6,14 @@
 namespace options {
 class Options;
 }
+namespace task_representation {
+    class TransitionSystem;
+}
 
 namespace task_transformation {
 struct Signature;
+
+using namespace task_representation;
 
 class ShrinkBisimulation : public ShrinkStrategy {
     enum AtLimit {
@@ -41,9 +46,10 @@ protected:
 public:
     explicit ShrinkBisimulation(const options::Options &opts);
     virtual ~ShrinkBisimulation() override = default;
+
     virtual StateEquivalenceRelation compute_equivalence_relation(
-        const TransitionSystem &ts,
-        const Distances &distances,
+        const FactoredTransitionSystem &fts,
+        int index,
         int target_size) const override;
 
     virtual bool requires_init_distances() const override {
