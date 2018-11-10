@@ -3,7 +3,11 @@
 
 #include "types.h"
 
-#include <vector> 
+#include "../task_representation/labels.h"
+
+#include <vector>
+
+
 namespace task_transformation {
 /* class LabelMap; */
 /* class MergeAndShrinkRepresentation; */
@@ -11,7 +15,7 @@ namespace task_transformation {
     class FactoredTransitionSystem;
     
     class TauGraph {
-        std::vector<std::vector<int> > adjacency_matrix; 
+        std::vector<std::vector<std::pair<int, task_representation::LabelID> > > adjacency_matrix; 
         std::vector<bool> is_goal;
     public:
 
@@ -20,8 +24,10 @@ namespace task_transformation {
         StateEquivalenceRelation compute_own_label_shrinking();
         StateEquivalenceRelation compute_own_label_plus_sg_shrinking(const FactoredTransitionSystem &fts, int index);
 
-        //Inserts tau-labels into the plan to reach target
-        /* void reconstruct_path(int target,  std::Plan & plan); */
+        // Auxiliar method that finds the shortest path from source to a target state. It
+        // returns the path as a pair of label, target transitions.
+        std::vector<std::pair<task_representation::LabelID, int>>
+            find_shortest_path (int source, const std::vector<bool> & target) const; 
     };
 
 }

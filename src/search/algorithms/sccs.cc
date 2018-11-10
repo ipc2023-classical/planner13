@@ -66,8 +66,6 @@ vector<vector<int>> compute_maximal_sccs(
 
 
     
-SCC::SCC(const std::vector<std::vector<int> > &_graph) : graph(_graph){
-    compute_scc_equivalence(graph, sccs);
 }
 
 void SCC::compute_scc_graph() { 
@@ -115,5 +113,7 @@ void SCC::compute_scc_graph() {
 	}
     }
 }
+
+
 
 }

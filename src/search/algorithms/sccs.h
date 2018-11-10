@@ -51,11 +51,26 @@ std::vector<std::vector<int>> compute_maximal_sccs(
 
 class EquivalenceRelation;
 
+
+
+template<class T>
+    int get_successor (const std::pair<int, T> & successor) { 
+    return successor.first;
+}
+
+
+template <class T> 
+int get_successor (const T & successor) {
+    return successor;
+}
+
+
 //TODO: It could be convinient to use template functions here to allow
 //returning the SCC result in different ways (vector<vector<int> >,
 //EquivalenceRelation, or even vector <int> state_to_group. However,
 //it is not so easy to do so since we need to change the whole
 //insertion of sccs into the result
+template<class Q>
 class SCC {
     template <class T> static void insert_in (std::vector<T> & container, T item) {
 	container.push_back(item);
@@ -65,8 +80,9 @@ class SCC {
 	container.push_front(item);
     }
 
+
     template <class T>
-	static void dfs_equivalence(const std::vector<std::vector<int> > &graph, 
+	static void dfs_equivalence(const std::vector<std::vector<Q> > &graph, 
 				    int vertex, int & current_dfs_number,
 				    std::vector<int> & stack,
 				    std::vector<int> & stack_indices,
@@ -79,9 +95,9 @@ class SCC {
 	stack_indices[vertex] = stack.size();
 	stack.push_back(vertex);
 
-	const std::vector<int> &successors = graph[vertex];
+	const std::vector<Q> &successors = graph[vertex];
 	for (size_t i = 0; i < successors.size(); i++) {
-	    int succ = successors[i];
+	    int succ = get_successor (successors[i]);
 	    int succ_dfs_number = dfs_numbers[succ];
 	    if (succ_dfs_number == -1) {
 		dfs_equivalence(graph, succ, current_dfs_number, stack, stack_indices,
@@ -113,7 +129,7 @@ class SCC {
     // Should we have a LabelledTransitionClass for those cases?
     // TODO: Using a const reference is not completely safe. 
     // A shared_ptr could be more appropiate. 
-    const std::vector<std::vector<int> > &graph;
+    const std::vector<std::vector<Q> > &graph;
     
     // Output relative at the SCCs and their connection
     std::vector<std::vector<int> > sccs;
@@ -134,7 +150,7 @@ public:
     //Allows to access scc equivalence computation without creating a new class
     //TODO: is_goal is an optional parameter (use std::optional?)
     template <class T>
-    static void compute_scc_equivalence(const std::vector<std::vector<int> > &graph, 
+        static void compute_scc_equivalence(const std::vector<std::vector<Q> > &graph, 
 					    std::vector<T> & result, 
 					    std::vector<bool> *is_goal = NULL){
     int node_count = graph.size();
@@ -154,8 +170,10 @@ public:
 
     std::reverse(result.begin(), result.end());
 }
-
-    SCC(const std::vector<std::vector<int> > &graph);
+    
+SCC(const std::vector<std::vector<Q > > & _graph) : graph(_graph){
+        compute_scc_equivalence(graph, sccs);
+    }
 
     const std::vector<std::vector<int> > & get_sccs() const{
       return sccs;
@@ -182,7 +200,7 @@ public:
     }
 
 
-
+    
     
 };
 

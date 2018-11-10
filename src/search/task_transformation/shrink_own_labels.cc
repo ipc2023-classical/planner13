@@ -112,7 +112,7 @@ StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
 
     /* perform Tarjan's algorithm for finding SCCs */
     StateEquivalenceRelation final_sccs;
-    sccs::SCC::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
+    sccs::SCC<int>::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
 
    // cout << "===========================================" << endl;
    //    for (int i = 0; i < num_states; i++) {

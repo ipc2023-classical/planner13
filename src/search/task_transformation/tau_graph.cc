@@ -7,39 +7,57 @@
 #include "../algorithms/sccs.h"
 
 #include <algorithm>
+#include <utility>
+#include <map>
 
 using namespace task_representation;
 using namespace std;
 
 namespace task_transformation {
-    TauGraph::TauGraph (const FactoredTransitionSystem &fts, int index, bool preserve_optimality) {
+    TauGraph::TauGraph (const FactoredTransitionSystem &fts,
+                        int index,
+                        bool preserve_optimality) :
+        adjacency_matrix(fts.get_ts(index).get_size()),
+        is_goal (fts.get_ts(index).get_is_goal())  {
         const TransitionSystem & ts = fts.get_ts(index);
         int num_states = ts.get_size();
-        is_goal = ts.get_is_goal();
 
-        cout << "Applying OwnLabel shrinking to ts: " << index << endl;
+        std::vector<std::map<int, LabelID>> adjacency_map;
         
-        vector<vector<int> > adjacency_matrix(num_states);
+        const Labels & labels_info = fts.get_labels();
         for (const auto & gt : ts) {
-            bool is_own = std::any_of(gt.label_group.begin(), gt.label_group.end(),
-                                      [&](int label) {
-                                          return fts.is_tau_label(index, LabelID(label)) &&
-                                          (!preserve_optimality ||
-                                           fts.get_labels().get_label_cost(label) == 0);
-                                      });
+            LabelID best_label;
+            bool is_own = false;
+            for (int label : gt.label_group) {
+                if ((!preserve_optimality ||
+                     fts.get_labels().get_label_cost(label) == 0) &&
+                    fts.is_tau_label(index, LabelID(label))) {
+                    if (!is_own ||
+                        labels_info.get_label_cost(label) <
+                        labels_info.get_label_cost(best_label)) {
+                        is_own = true;
+                        best_label = LabelID(label);
+                    }
+                }
+            }
+                    
             if(is_own) {
                 for (const auto & trans : gt.transitions) {
-                    adjacency_matrix[trans.src].push_back(trans.target);
-                    // cout << trans.src << " -> " << trans.target << endl;
+                    auto pos = adjacency_map[trans.src].find(trans.target);
+                    if (pos == adjacency_map[trans.src].end()) {
+                        adjacency_map[trans.src][trans.target] = best_label;
+                    } else if (labels_info.get_label_cost(best_label) <
+                        labels_info.get_label_cost(pos->second)) {
+                        pos->second = best_label;
+                    }
                 }
             }
         }
     
         /* remove duplicates in adjacency matrix */
         for (int i = 0; i < num_states; i++) {
-            ::sort(adjacency_matrix[i].begin(), adjacency_matrix[i].end());
-            vector<int>::iterator it = unique(adjacency_matrix[i].begin(), adjacency_matrix[i].end());
-            adjacency_matrix[i].erase(it, adjacency_matrix[i].end());
+            copy(adjacency_map[i].begin(), adjacency_map[i].end(),
+                 back_inserter(adjacency_matrix[i]));
         }
     }
 
@@ -47,7 +65,7 @@ namespace task_transformation {
     StateEquivalenceRelation TauGraph::compute_own_label_shrinking(){        
         /* perform Tarjan's algorithm for finding SCCs */
         StateEquivalenceRelation final_sccs;
-        sccs::SCC::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
+        sccs::SCC<pair<int, LabelID> >::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
 
         return final_sccs;
     }
@@ -56,7 +74,7 @@ namespace task_transformation {
     TauGraph::compute_own_label_plus_sg_shrinking(const FactoredTransitionSystem &fts, int index){
         /* perform Tarjan's algorithm for finding SCCs */
         StateEquivalenceRelation final_sccs;
-        sccs::SCC::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
+        sccs::SCC<pair<int, LabelID> >::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
 
         int new_size = final_sccs.size();
         if (fts.is_only_goal_relevant(index)) {
@@ -88,4 +106,45 @@ namespace task_transformation {
     
         return final_sccs;
     }
+
+
+
+
+
+    // Auxiliar method that finds the shortest path from source to a target state. It
+    // returns the path as a pair of label, target transitions.
+    std::vector<std::pair<LabelID, int>>
+    TauGraph::find_shortest_path (int // source
+                                  , const std::vector<bool> & // target
+        ) const {
+
+        return     std::vector<std::pair<LabelID, int>>();
+
+    // static void dijkstra_search(
+    //     const vector<vector<pair<int, int>>> &graph,
+    //     priority_queues::AdaptiveQueue<int> &queue,
+    //     vector<int> &distances, ) {
+        
+    //     while (!queue.empty()) {
+    //         pair<int, int> top_pair = queue.pop();
+    //         int distance = top_pair.first;
+    //         int state = top_pair.second;
+    //         int state_distance = distances[state];
+    //         assert(state_distance <= distance);
+    //         if (state_distance < distance)
+    //             continue;
+    //         for (size_t i = 0; i < graph[state].size(); ++i) {
+    //             const pair<int, int> &transition = graph[state][i];
+    //             int successor = transition.first;
+    //             int cost = transition.second;
+    //             int successor_cost = state_distance + cost;
+    //             if (distances[successor] > successor_cost) {
+    //                 distances[successor] = successor_cost;
+    //                 queue.push(successor_cost, successor);
+    //             }
+    //         }
+    //     }
+    // }
+    }
+
 }
