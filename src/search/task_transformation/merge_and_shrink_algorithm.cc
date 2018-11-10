@@ -647,4 +647,82 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "infinity",
         Bounds("0", "infinity"));
 }
+
+void add_transition_system_size_limit_options_to_parser(OptionParser &parser) {
+    parser.add_option<int>(
+        "max_states",
+        "maximum transition system size allowed at any time point.",
+        "-1",
+        Bounds("-1", "infinity"));
+    parser.add_option<int>(
+        "max_states_before_merge",
+        "maximum transition system size allowed for two transition systems "
+        "before being merged to form the synchronized product.",
+        "-1",
+        Bounds("-1", "infinity"));
+    parser.add_option<int>(
+        "threshold_before_merge",
+        "If a transition system, before being merged, surpasses this soft "
+        "transition system size limit, the shrink strategy is called to "
+        "possibly shrink the transition system.",
+        "-1",
+        Bounds("-1", "infinity"));
+}
+
+void handle_shrink_limit_options_defaults(Options &opts) {
+    int max_states = opts.get<int>("max_states");
+    int max_states_before_merge = opts.get<int>("max_states_before_merge");
+    int threshold = opts.get<int>("threshold_before_merge");
+
+    // If none of the two state limits has been set: set default limit.
+    if (max_states == -1 && max_states_before_merge == -1) {
+        max_states = 50000;
+    }
+
+    // If exactly one of the max_states options has been set, set the other
+    // so that it imposes no further limits.
+    if (max_states_before_merge == -1) {
+        max_states_before_merge = max_states;
+    } else if (max_states == -1) {
+        int n = max_states_before_merge;
+        if (utils::is_product_within_limit(n, n, INF)) {
+            max_states = n * n;
+        } else {
+            max_states = INF;
+        }
+    }
+
+    if (max_states_before_merge > max_states) {
+        cout << "warning: max_states_before_merge exceeds max_states, "
+             << "correcting." << endl;
+        max_states_before_merge = max_states;
+    }
+
+    if (max_states < 1) {
+        cerr << "error: transition system size must be at least 1" << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+
+    if (max_states_before_merge < 1) {
+        cerr << "error: transition system size before merge must be at least 1"
+             << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+
+    if (threshold == -1) {
+        threshold = max_states;
+    }
+    if (threshold < 1) {
+        cerr << "error: threshold must be at least 1" << endl;
+        utils::exit_with(ExitCode::INPUT_ERROR);
+    }
+    if (threshold > max_states) {
+        cout << "warning: threshold exceeds max_states, correcting" << endl;
+        threshold = max_states;
+    }
+
+    opts.set<int>("max_states", max_states);
+    opts.set<int>("max_states_before_merge", max_states_before_merge);
+    opts.set<int>("threshold_before_merge", threshold);
+}
 }

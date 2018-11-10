@@ -80,7 +80,7 @@ public:
       the public add_label_group method below.
     */
     explicit LabelEquivalenceRelation(const Labels &labels);
-    LabelEquivalenceRelation(const LabelEquivalenceRelation &other) = delete;
+    LabelEquivalenceRelation(const LabelEquivalenceRelation &other);
     /*
       NOTE: we need a custom copy constructor here because we need to fill
       label_to_positions with correct LabelIter objects that point to the

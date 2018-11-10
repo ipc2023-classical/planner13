@@ -154,7 +154,7 @@ public:
         std::vector<bool> &&goal_states,
         int init_state,
         bool compute_label_equivalence_relation);
-    TransitionSystem(const TransitionSystem &other) = delete;
+    TransitionSystem(const TransitionSystem &other);
     TransitionSystem(const TransitionSystem &other, const Labels &labels);
     ~TransitionSystem();
     /*
