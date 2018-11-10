@@ -35,8 +35,6 @@ namespace task_transformation {
             return false;
         }
 
-
-
         virtual void dump_strategy_specific_options() const override;
 
         virtual std::string name() const override;

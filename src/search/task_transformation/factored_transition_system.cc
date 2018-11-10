@@ -241,22 +241,34 @@ void FactoredTransitionSystem::remove_irrelevant_transition_systems() {
             transition_systems[index] = nullptr;
             distances[index] = nullptr;
             mas_representations[index] = nullptr;
+            --num_active_entries;
         }
     }
 }
 
-    vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
-        vector<LabelID> tau_labels;
+// std::vector<LabelID> FactoredTransitionSystem::remove_irrelevant_labels () {
+//     std::vector<LabelID> irrelevant_labels;
+    
+//     labels->remove(irrelevant_labels);
+//     for (size_t i = 0; i < transition_systems.size(); ++i) {
+//         if (transition_systems[i]) {
+//             transition_systems[i]->remove_labels(irrelevant_labels);
+//         }
+//     }
+// }
 
-        for (LabelGroupID relevant_group : transition_systems[index]->get_relevant_label_groups()) {            for (int l : transition_systems[index]->get_label_group(relevant_group)) {
-                if (is_tau_label(index, LabelID(l))) {
-                    tau_labels.push_back(LabelID(l));
-                }
-            }
-        }
-        
-        return tau_labels;
-    }
+
+vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
+   vector<LabelID> tau_labels;
+   for (LabelGroupID relevant_group : transition_systems[index]->get_relevant_label_groups()) {            for (int l : transition_systems[index]->get_label_group(relevant_group)) {
+           if (is_tau_label(index, LabelID(l))) {
+               tau_labels.push_back(LabelID(l));
+           }
+       }
+   }
+   
+   return tau_labels;
+}
 
    
     bool FactoredTransitionSystem::is_tau_label (int ts_index, LabelID label) const{

@@ -30,10 +30,6 @@ ShrinkOwnLabels::ShrinkOwnLabels(const Options &opts) :
 ShrinkOwnLabels::~ShrinkOwnLabels() {
 }
 
-// string ShrinkOwnLabels::name() const {
-//     return "own labels (to identify unsol. tasks)";
-// }
-
 void ShrinkOwnLabels::dump_strategy_specific_options() const {
     cout << "Aggregate with goal states: " << 
 	(perform_sg_shrinking? "yes" : "no") << endl;
@@ -86,7 +82,7 @@ StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
 
     int num_states = ts.get_size();
     std::vector<bool> is_goal (ts.get_is_goal());
-    cout << "Applying OwnLabel shrinking to ts: " << index << endl;
+    //cout << "Applying OwnLabel shrinking to ts: " << index << endl;
                                                               
     /* this is a rather memory-inefficient way of implementing Tarjan's algorithm, but
        it's the best I got for now */
@@ -164,12 +160,6 @@ StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
 	equivalence_relation[counter].swap(final_sccs[group]);
 	counter++;
     }
-#ifndef NDEBUG
-    if (new_size < num_states) {
-	cout << "Own-label shrinking reduces the number of states" << endl;
-    }
-#endif
-
 
     return equivalence_relation;
 }

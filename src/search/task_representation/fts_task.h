@@ -57,9 +57,12 @@ public:
         return *labels;
     }
 
+    bool trivially_solved() const;
+
     std::shared_ptr<SearchTask> get_search_task() const;
 
-    void dump() const; 
+    void dump() const;
+    
 };
 }
 

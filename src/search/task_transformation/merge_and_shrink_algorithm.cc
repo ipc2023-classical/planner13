@@ -431,6 +431,7 @@ void MergeAndShrinkAlgorithm::main_loop(
     label_reduction = nullptr;
 }
 
+
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
     const FTSTask &fts_task) {
     if (starting_peak_memory) {
@@ -495,41 +496,51 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         }
     }
 
-    // Label reduction of atomic FTS.
-    if (label_reduction && label_reduction->reduce_atomic_fts()) {
-        bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, *label_map, verbosity);
-        if (verbosity >= Verbosity::NORMAL && reduced) {
-            print_time(timer, "after label reduction of atomic FTS");
-        }
-    }
-
-    if (ran_out_of_time(timer)) {
-        return fts;
-    }
-
-    if (shrink_strategy && shrink_atomic_fts) {
-        // Shrinking of atomic FTS.
-        for (int ts_index = 0; ts_index < fts.get_size(); ++ts_index) {
-            bool shrunk = shrink_factor(
-                fts,
-                ts_index,
-                *shrink_strategy,
-                verbosity,
-                num_states_to_trigger_shrinking);
-            if (verbosity >= Verbosity::VERBOSE && shrunk) {
-                fts.statistics(ts_index);
+    bool has_shrunk; 
+    do {
+        has_shrunk = false;
+        // Label reduction of atomic FTS.
+        if (label_reduction && label_reduction->reduce_atomic_fts()) {
+            bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, *label_map, verbosity);
+            if (verbosity >= Verbosity::NORMAL && reduced) {
+                print_time(timer, "after label reduction of atomic FTS");
             }
         }
-        if (verbosity >= Verbosity::NORMAL) {
-            print_time(timer, "after shrinking of atomic FTS");
+
+        if (ran_out_of_time(timer)) {
+            return fts;
         }
-    }
 
-    fts.remove_irrelevant_transition_systems();
+        if (shrink_strategy && shrink_atomic_fts) {
+            // Shrinking of atomic FTS.
+            for (int ts_index = 0; ts_index < fts.get_size(); ++ts_index) {
+                if (!fts.is_active(ts_index)) {
+                    continue;
+                }
+                bool shrunk = shrink_factor(
+                    fts,
+                    ts_index,
+                    *shrink_strategy,
+                    verbosity,
+                    num_states_to_trigger_shrinking);
+                has_shrunk |= shrunk;
+                if (verbosity >= Verbosity::VERBOSE && shrunk) {
+                    fts.statistics(ts_index);
+                }
+            }
+            if (verbosity >= Verbosity::NORMAL) {
+                print_time(timer, "after shrinking of atomic FTS");
+            }
+        }
 
-    if (ran_out_of_time(timer)) {
-        return fts;
-    }
+        fts.remove_irrelevant_transition_systems();
+
+        // vector<LabelID> irrelevant_labels = fts.remove_irrelevant_labels();
+        
+        if (ran_out_of_time(timer)) {
+            return fts;
+        }
+    } while (/*run_atomic_loop && */has_shrunk);
 
     if (run_main_loop) {
         assert(shrink_strategy && merge_strategy_factory);
@@ -543,6 +554,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 }
 
 unique_ptr<LabelMap> MergeAndShrinkAlgorithm::extract_label_map() {
+    cout << "HERE" << endl;
+    assert(label_map);
     return move(label_map);
 }
 

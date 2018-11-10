@@ -194,6 +194,8 @@ public:
         bool only_equivalent_labels);
     void renumber_labels(const std::vector<int> &old_to_new_labels, int new_num_labels);
 
+    /* void remove_labels(const std::vector<LabelID> & labels); */
+
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,
                                transitions_by_group_id,

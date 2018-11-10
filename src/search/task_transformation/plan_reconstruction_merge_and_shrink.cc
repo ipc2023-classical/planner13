@@ -23,7 +23,6 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
       label_map(move(label_map)) {
 }
 
-
     bool PlanReconstructionMergeAndShrink::match_states(const GlobalState & original_state,
                                                  const GlobalState & abstract_state) const {
         for(size_t i = 0; i < merge_and_shrink_representations.size(); ++i) {

@@ -71,6 +71,7 @@ bool shrink_factor(
       TODO: think about factoring out common logic of this function and the
       function copy_and_shrink_ts in merge_scoring_function_miasm_utils.cc.
     */
+    assert (fts.is_active(index));
     const TransitionSystem &ts = fts.get_ts(index);
     int num_states = ts.get_size();
     if (num_states > num_states_to_trigger_shrinking) {

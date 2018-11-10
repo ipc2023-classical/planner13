@@ -426,6 +426,12 @@ void TransitionSystem::renumber_labels(
     label_equivalence_relation->renumber_labels(old_to_new_labels, new_num_labels);
 }
 
+
+// bool TransitionSystem::remove_labels(const vector<LabelID> & labels) {
+//     std::vector<LabelGroupID> empty_groups = label_equivalence_relation->remove_labels(labels);
+//     transitions_by_group_
+// }
+
 string TransitionSystem::tag() const {
     string desc(get_description());
     desc[0] = toupper(desc[0]);

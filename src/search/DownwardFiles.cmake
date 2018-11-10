@@ -129,6 +129,7 @@ fast_downward_plugin(
         task_transformation/shrink_strategy
         task_transformation/task_transformation
         task_transformation/task_transformation_merge_and_shrink
+        task_transformation/tau_graph
         task_transformation/types
         task_transformation/utils
         task_transformation/variable_order_finder

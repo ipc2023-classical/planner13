@@ -51,6 +51,13 @@ void Labels::reduce_labels(const vector<int> &old_label_nos) {
     num_active_entries -= (old_label_nos.size() - 1);
 }
 
+// void Labels::remove_labels(const vector<int> & labels) {
+//     for (int label : labels) {
+//         labels[label] = nullptr;
+//     }
+//     num_active_entries -= (labels.size());
+// }
+
 unique_ptr<Label> Labels::extract_label(int label_no) {
     assert(is_current_label(label_no));
     return move(labels[label_no]);

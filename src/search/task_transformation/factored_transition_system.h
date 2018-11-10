@@ -174,6 +174,7 @@ public:
 
     void remove_irrelevant_transition_systems();
 
+    //std::vector<LabelID> remove_irrelevant_labels();
     
     bool is_tau_label(int index, LabelID label) const;
     std::vector<LabelID> get_tau_labels(int index) const;
