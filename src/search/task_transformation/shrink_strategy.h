@@ -6,11 +6,13 @@
 #include <string>
 #include <vector>
 
+namespace task_representation {
+    class TransitionSystem;
+}
 
 namespace task_transformation {
     class FactoredTransitionSystem;
-
-class Distances;
+    class Distances;
 
 class ShrinkStrategy {
 protected:
@@ -34,6 +36,11 @@ public:
       results in shrinking the transition system in an information-preserving
       way.
     */
+
+    virtual StateEquivalenceRelation compute_equivalence_relation(
+        const task_representation::TransitionSystem &ts,
+        const Distances &distances,
+        int target_size) const = 0;
 
     virtual StateEquivalenceRelation compute_equivalence_relation(
         const FactoredTransitionSystem &fts,

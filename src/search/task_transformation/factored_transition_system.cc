@@ -248,8 +248,10 @@ bool FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity ve
                 cout << "removing irrelevant TS at index " << index << endl;
             }
         }
-    return removed_tr;
     }
+    return removed_tr;
+}
+    
     bool  FactoredTransitionSystem::is_irrelevant_label (LabelID label) const {
         for (const auto & ts : transition_systems) {
             if(ts && ts->is_relevant_label(label)) {

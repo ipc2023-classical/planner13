@@ -28,6 +28,12 @@ namespace task_transformation {
             int target_size) const override;
 
         
+        virtual StateEquivalenceRelation compute_equivalence_relation(
+            const task_representation::TransitionSystem &ts,
+            const Distances &distances,
+            int target_size) const;
+
+        
         virtual bool requires_init_distances() const {
             return false;
         }

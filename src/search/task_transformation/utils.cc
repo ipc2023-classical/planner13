@@ -13,6 +13,7 @@
 #include <cmath>
 
 using namespace std;
+using namespace task_representation;
 
 namespace task_transformation {
 pair<int, int> compute_shrink_sizes(

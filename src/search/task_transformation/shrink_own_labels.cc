@@ -36,13 +36,22 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
 }
 
     
+StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
+    const task_representation::TransitionSystem &,
+    const Distances &,
+    int ) const {
+    utils::exit_with(utils::ExitCode::UNSUPPORTED);
+    return StateEquivalenceRelation();
+    }
+    
 
    
 StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
     const FactoredTransitionSystem &fts,
     int index,
     int /*target*/) const {
-    /*
+
+/*
      * apply two rules:
      * (1) aggregate all states s1, ..., sn if they lie on an own-label cycle
      *     idea: use Tarjan's algorithm to identify strongly connected components (SCCs)
