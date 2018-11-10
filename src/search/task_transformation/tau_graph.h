@@ -13,9 +13,24 @@ namespace task_transformation {
 /* class MergeAndShrinkRepresentation; */
 
     class FactoredTransitionSystem;
+
+    struct TauTransition {
+        int target;
+        task_representation::LabelID label;
+        int cost;
+
+    TauTransition(int target_, task_representation::LabelID label_, int cost_) :
+        target(target_), label(label_), cost(cost_) {
+        }
+
+        int get_successor() const{
+            return target;
+        }
+    };
+    
     
     class TauGraph {
-        std::vector<std::vector<std::pair<int, task_representation::LabelID> > > adjacency_matrix; 
+        std::vector<std::vector<TauTransition> > adjacency_matrix; 
         std::vector<bool> is_goal;
     public:
 

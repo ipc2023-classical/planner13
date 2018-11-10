@@ -52,15 +52,12 @@ std::vector<std::vector<int>> compute_maximal_sccs(
 class EquivalenceRelation;
 
 
-
-template<class T>
-    int get_successor (const std::pair<int, T> & successor) { 
-    return successor.first;
+template<class T> 
+static int get_successor (const T & successor) { 
+    return successor.get_successor();
 }
 
-
-template <class T> 
-int get_successor (const T & successor) {
+ template<> inline int get_successor<int> (const int & successor) {
     return successor;
 }
 

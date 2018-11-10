@@ -36,12 +36,12 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
 }
 
     
-StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
-    const task_representation::TransitionSystem &,
-    const Distances &,
-    int ) const {
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
-    return StateEquivalenceRelation();
+    StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
+        const task_representation::TransitionSystem &,
+        const Distances &,
+        int ) const {
+        utils::exit_with(utils::ExitCode::UNSUPPORTED);
+        return StateEquivalenceRelation();
     }
     
 
