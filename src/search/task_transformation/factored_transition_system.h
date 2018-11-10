@@ -172,9 +172,10 @@ public:
 
     bool is_active(int index) const;
 
-    void remove_irrelevant_transition_systems();
 
-    //std::vector<LabelID> remove_irrelevant_labels();
+    bool  is_irrelevant_label (LabelID label) const;
+    bool remove_irrelevant_labels();
+    bool remove_irrelevant_transition_systems();
     
     bool is_tau_label(int index, LabelID label) const;
     std::vector<LabelID> get_tau_labels(int index) const;

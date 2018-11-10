@@ -105,6 +105,9 @@ public:
         const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
     void renumber_labels(
         const std::vector<int> &old_to_new_labels, int new_num_labels);
+
+    std::vector<LabelGroupID> remove_labels(const std::vector<LabelID> & labels);
+
     // Moves all labels from one goup into the other
     void move_group_into_group(LabelGroupID from_group_id, LabelGroupID to_group_id);
     int add_label_group(const std::vector<int> &new_labels);

@@ -194,7 +194,7 @@ public:
         bool only_equivalent_labels);
     void renumber_labels(const std::vector<int> &old_to_new_labels, int new_num_labels);
 
-    /* void remove_labels(const std::vector<LabelID> & labels); */
+    bool remove_labels(const std::vector<LabelID> & labels);
 
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,
@@ -258,6 +258,10 @@ public:
     }
     
     const std::vector<int> & get_label_precondition(LabelID label) const;
+
+    bool is_relevant_label (LabelID label) const;
+
+    bool is_relevant_label_group (LabelGroupID group_id) const;
 
     const std::vector<LabelGroupID> & get_relevant_label_groups() const;
 

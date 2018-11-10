@@ -496,9 +496,9 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         }
     }
 
-    bool has_shrunk; 
+    bool has_simplified; 
     do {
-        has_shrunk = false;
+        has_simplified = false;
         // Label reduction of atomic FTS.
         if (label_reduction && label_reduction->reduce_atomic_fts()) {
             bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, *label_map, verbosity);
@@ -523,7 +523,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
                     *shrink_strategy,
                     verbosity,
                     num_states_to_trigger_shrinking);
-                has_shrunk |= shrunk;
+                has_simplified |= shrunk;
                 if (verbosity >= Verbosity::VERBOSE && shrunk) {
                     fts.statistics(ts_index);
                 }
@@ -533,14 +533,14 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             }
         }
 
-        fts.remove_irrelevant_transition_systems();
+        has_simplified |= fts.remove_irrelevant_transition_systems();
 
-        // vector<LabelID> irrelevant_labels = fts.remove_irrelevant_labels();
+        has_simplified |= fts.remove_irrelevant_labels();
         
         if (ran_out_of_time(timer)) {
             return fts;
         }
-    } while (/*run_atomic_loop && */has_shrunk);
+    } while (/*run_atomic_loop && */has_simplified);
 
     if (run_main_loop) {
         assert(shrink_strategy && merge_strategy_factory);
@@ -554,7 +554,6 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 }
 
 unique_ptr<LabelMap> MergeAndShrinkAlgorithm::extract_label_map() {
-    cout << "HERE" << endl;
     assert(label_map);
     return move(label_map);
 }

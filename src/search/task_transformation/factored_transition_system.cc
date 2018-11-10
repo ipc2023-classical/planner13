@@ -235,27 +235,50 @@ bool FactoredTransitionSystem::is_active(int index) const {
 }
   
 
-void FactoredTransitionSystem::remove_irrelevant_transition_systems() {
+bool FactoredTransitionSystem::remove_irrelevant_transition_systems() {
+    bool removed_tr = false;
     for (size_t index = 0; index < transition_systems.size(); ++index) {
         if (transition_systems[index] && transition_systems[index]->get_size() <= 1) {
             transition_systems[index] = nullptr;
             distances[index] = nullptr;
             mas_representations[index] = nullptr;
             --num_active_entries;
+            removed_tr = true;
         }
     }
+    return removed_tr;
 }
 
-// std::vector<LabelID> FactoredTransitionSystem::remove_irrelevant_labels () {
-//     std::vector<LabelID> irrelevant_labels;
+    bool  FactoredTransitionSystem::is_irrelevant_label (LabelID label) const {
+        for (const auto & ts : transition_systems) {
+            if(ts && ts->is_relevant_label(label)) {
+                return false;
+            }
+        }
+        return true;
+    }
     
-//     labels->remove(irrelevant_labels);
-//     for (size_t i = 0; i < transition_systems.size(); ++i) {
-//         if (transition_systems[i]) {
-//             transition_systems[i]->remove_labels(irrelevant_labels);
-//         }
-//     }
-// }
+bool FactoredTransitionSystem::remove_irrelevant_labels () {
+    std::vector<LabelID> irrelevant_labels;
+    for (LabelID (label_no); label_no < labels->get_size(); ++label_no) {         
+        if (labels->is_current_label(label_no) && is_irrelevant_label(LabelID(label_no))) {
+            irrelevant_labels.push_back(label_no);
+        }
+    }
+    
+    labels->remove_labels(irrelevant_labels);
+
+    bool may_require_pruning = false;
+    for (size_t i = 0; i < transition_systems.size(); ++i) {
+        if (transition_systems[i]) {
+            may_require_pruning |= transition_systems[i]->remove_labels(irrelevant_labels);
+        }
+    }
+
+    assert(!may_require_pruning);
+
+    return !irrelevant_labels.empty();
+}
 
 
 vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{

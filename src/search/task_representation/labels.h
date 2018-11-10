@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include "types.h"
 
 namespace task_representation {
 class SASTask;
@@ -57,6 +58,8 @@ public:
     int get_num_active_entries() const {
         return num_active_entries;
     }
+
+    void remove_labels(const std::vector<LabelID> & labels);
 
 //    const std::vector<int> &get_sas_op_indices_for_label(int label) const {
 //        return sas_op_indices_by_label[label];
