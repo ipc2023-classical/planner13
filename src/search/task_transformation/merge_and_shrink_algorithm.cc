@@ -473,15 +473,16 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     std::vector<std::unique_ptr<Distances>> distances =
         create_distances(transition_systems);
 
-
-    const bool compute_init_distances =
-        shrink_strategy->requires_init_distances() ||
-        merge_strategy_factory->requires_init_distances() ||
-        prune_unreachable_states;
-    const bool compute_goal_distances =
-        shrink_strategy->requires_goal_distances() ||
-        merge_strategy_factory->requires_goal_distances() ||
-        prune_irrelevant_states;
+    bool compute_init_distances = prune_unreachable_states;
+    if ((shrink_strategy && shrink_strategy->requires_init_distances()) ||
+            (merge_strategy_factory && merge_strategy_factory->requires_init_distances())) {
+        compute_init_distances = true;
+    }
+    bool compute_goal_distances = prune_irrelevant_states;
+    if ((shrink_strategy && shrink_strategy->requires_goal_distances()) ||
+            (merge_strategy_factory && merge_strategy_factory->requires_goal_distances())) {
+        compute_goal_distances = true;
+    }
 
     FactoredTransitionSystem fts(
         move(labels),
