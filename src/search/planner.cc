@@ -36,7 +36,7 @@ int main(int argc, const char **argv) {
         g_main_task = make_shared<FTSTask>(
             move(labels_and_transition_systems.second),
             move(labels_and_transition_systems.first));
-        g_log << "Main task constructed" << endl;
+        cout << "Main task constructed" << endl;
     }
     
     shared_ptr<TaskTransformation> transformer;
@@ -66,7 +66,7 @@ int main(int argc, const char **argv) {
     } else {
         cout << "No further transformation of atomic FTS." << endl;
     }
-    g_log << "Transform time: " << transform_timer << endl;
+    cout << "Transform time: " << transform_timer << endl;
 
     //g_main_task->dump();
     if (g_main_task->trivially_solved()) {
@@ -100,7 +100,7 @@ int main(int argc, const char **argv) {
     }
 
     utils::Timer search_timer;
-    g_log << "Start search." << endl;
+    cout << "Start search." << endl;
 
     engine->search();
     search_timer.stop();
