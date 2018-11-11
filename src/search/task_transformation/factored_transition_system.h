@@ -12,12 +12,11 @@ class LabelID;
 class TransitionSystem;
 }
 
-using namespace task_representation;
-
 namespace task_transformation {
 class Distances;
 class FactoredTransitionSystem;
 class MergeAndShrinkRepresentation;
+class LabelMap;
 
 class FTSConstIterator {
     /*
@@ -47,11 +46,13 @@ public:
 };
 
 class FactoredTransitionSystem {
-    std::unique_ptr<Labels> labels;
+    std::unique_ptr<task_representation::Labels> labels;
     // Entries with nullptr have been merged.
-    std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
+    std::vector<std::unique_ptr<task_representation::TransitionSystem>> transition_systems;
     std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> mas_representations;
+    std::unique_ptr<task_transformation::LabelMap> label_map;
     std::vector<std::unique_ptr<Distances>> distances;
+
     const bool compute_init_distances;
     const bool compute_goal_distances;
     int num_active_entries;
@@ -72,8 +73,8 @@ class FactoredTransitionSystem {
     void assert_all_components_valid() const;
 public:
     FactoredTransitionSystem(
-        std::unique_ptr<Labels> labels,
-        std::vector<std::unique_ptr<TransitionSystem>> &&transition_systems,
+        std::unique_ptr<task_representation::Labels> labels,
+        std::vector<std::unique_ptr<task_representation::TransitionSystem>> &&transition_systems,
         std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> &&mas_representations,
         std::vector<std::unique_ptr<Distances>> &&distances,
         const bool compute_init_distances,
@@ -125,14 +126,15 @@ public:
     /*
       Various extraction methods, rendering the FTS invalid.
     */
-    std::unique_ptr<TransitionSystem> extract_transition_system(int index);
+    std::vector<std::unique_ptr<task_representation::TransitionSystem>>
+        extract_transition_systems();
     std::unique_ptr<MergeAndShrinkRepresentation> extract_mas_representation(int index);
-    std::unique_ptr<Labels> extract_labels();
+    std::unique_ptr<task_representation::Labels> extract_labels();
 
     void statistics(int index) const;
     void dump(int index) const;
 
-    const TransitionSystem &get_ts(int index) const {
+    const task_representation::TransitionSystem &get_ts(int index) const {
         return *transition_systems[index];
     }
 
@@ -153,7 +155,7 @@ public:
     }
 
     // Used by LabelReduction and MergeScoringFunctionDFP
-    const Labels &get_labels() const {
+    const task_representation::Labels &get_labels() const {
         return *labels;
     }
 
@@ -172,14 +174,16 @@ public:
 
     bool is_active(int index) const;
 
-    bool  is_irrelevant_label (LabelID label) const;
+    bool  is_irrelevant_label (task_representation::LabelID label) const;
     bool remove_irrelevant_labels();
     bool remove_irrelevant_transition_systems(Verbosity verbosity);
     
-    bool is_tau_label(int index, LabelID label) const;
-    std::vector<LabelID> get_tau_labels(int index) const;
+    bool is_tau_label(int index, task_representation::LabelID label) const;
+    std::vector<task_representation::LabelID> get_tau_labels(int index) const;
 
     bool is_only_goal_relevant (int ts_index) const;
+
+    std::pair<std::vector<std::unique_ptr<MergeAndShrinkRepresentation>>, std::unique_ptr<task_transformation::LabelMap>> cleanup (bool continue_mas_process = false);
 
 };
 }

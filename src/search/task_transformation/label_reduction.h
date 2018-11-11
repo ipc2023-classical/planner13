@@ -71,7 +71,6 @@ class LabelReduction {
     void compute_label_mapping(
         const equivalence_relation::EquivalenceRelation *relation,
         const FactoredTransitionSystem &fts,
-        LabelMap &label_map,
         std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         Verbosity verbosity) const;
     equivalence_relation::EquivalenceRelation
@@ -84,7 +83,6 @@ public:
     bool reduce(
         const std::pair<int, int> &next_merge,
         FactoredTransitionSystem &fts,
-        LabelMap &label_map,
         Verbosity verbosity) const;
     void dump_options() const;
     bool reduce_atomic_fts() const {

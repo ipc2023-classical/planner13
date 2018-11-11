@@ -46,7 +46,18 @@ class TauShrinking {
     bool is_target(int s, int label, int abstract_target) const;
 
 public:
-    
+    TauShrinking (int ts_index_predecessor_, int ts_index_successor_,
+                  std::unique_ptr<TauGraph> tau_graph_,
+                  std::vector<int> && abstraction_mapping_,
+                  std::unique_ptr<task_representation::TransitionSystem> transition_system_) :
+    ts_index_predecessor (ts_index_predecessor_),
+        ts_index_successor (ts_index_successor_),
+        tau_graph(move(tau_graph_)),
+        transition_system(move(transition_system_)),
+        abstraction(move(abstraction_mapping_)) {
+        }
+
+        
     void reconstruct_step(int label, const PlanState & target,
                           std::vector<int> & new_label_path,
                           std::vector<PlanState> & new_traversed_states) const ;

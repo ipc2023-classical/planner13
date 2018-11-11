@@ -12,6 +12,8 @@
 #include "../utils/memory.h"
 #include "../utils/system.h"
 
+#include "label_map.h"
+
 #include <cassert>
 
 using namespace std;
@@ -38,16 +40,17 @@ void FTSConstIterator::operator++() {
 
 
 FactoredTransitionSystem::FactoredTransitionSystem(
-    unique_ptr<Labels> labels,
+    unique_ptr<Labels> labels_,
     vector<unique_ptr<TransitionSystem>> &&transition_systems,
     vector<unique_ptr<MergeAndShrinkRepresentation>> &&mas_representations,
     vector<unique_ptr<Distances>> &&distances,
     const bool compute_init_distances,
     const bool compute_goal_distances,
     Verbosity verbosity)
-    : labels(move(labels)),
+    : labels(move(labels_)),
       transition_systems(move(transition_systems)),
       mas_representations(move(mas_representations)),
+      label_map (new LabelMap (labels->get_size())),
       distances(move(distances)),
       compute_init_distances(compute_init_distances),
       compute_goal_distances(compute_goal_distances),
@@ -65,6 +68,7 @@ FactoredTransitionSystem::FactoredTransitionSystem(FactoredTransitionSystem &&ot
     : labels(move(other.labels)),
       transition_systems(move(other.transition_systems)),
       mas_representations(move(other.mas_representations)),
+      label_map(move(other.label_map)),
       distances(move(other.distances)),
       compute_init_distances(move(other.compute_init_distances)),
       compute_goal_distances(move(other.compute_goal_distances)),
@@ -144,10 +148,21 @@ void FactoredTransitionSystem::apply_label_mapping(
     const vector<pair<int, vector<int>>> &label_mapping,
     int combinable_index) {
     assert_all_components_valid();
+    
+    vector<int> old_to_new_labels(labels->get_size(), -1);
     for (const auto &new_label_old_labels : label_mapping) {
         assert(new_label_old_labels.first == labels->get_size());
         labels->reduce_labels(new_label_old_labels.second);
+
+        int next_new_label_no = new_label_old_labels.first;
+        for (int old_label_no : new_label_old_labels.second) {
+            old_to_new_labels[old_label_no] = next_new_label_no;
+        }
+
     }
+
+    label_map->update(old_to_new_labels);
+
     for (size_t i = 0; i < transition_systems.size(); ++i) {
         if (transition_systems[i]) {
             transition_systems[i]->apply_label_reduction(
@@ -192,12 +207,16 @@ int FactoredTransitionSystem::merge(
     return new_index;
 }
 
-unique_ptr<TransitionSystem> FactoredTransitionSystem::extract_transition_system(int index) {
-    // This assertion does not hold since we don't extract both transition
-    // system and merge-and-shrink representation at the same time.
-//    assert(is_active(index));
-    return move(transition_systems[index]);
-}
+// unique_ptr<TransitionSystem> FactoredTransitionSystem::extract_transition_system(int index) {
+//     // This assertion does not hold since we don't extract both transition
+//     // system and merge-and-shrink representation at the same time.
+// //    assert(is_active(index));
+//     return move(transition_systems[index]);
+// }
+
+    vector<unique_ptr<TransitionSystem>> FactoredTransitionSystem::extract_transition_systems() {
+        return move(transition_systems);
+    }
 
 unique_ptr<MergeAndShrinkRepresentation> FactoredTransitionSystem::extract_mas_representation(int index) {
     // This assertion does not hold since we don't extract both transition
@@ -329,5 +348,69 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             }
         }
         return true;
+    }
+
+
+    std::pair<std::vector<std::unique_ptr<MergeAndShrinkRepresentation>>,
+              std::unique_ptr<task_transformation::LabelMap>> 
+    FactoredTransitionSystem::cleanup(bool continue_mas_process) {
+        // "Renumber" factors consecutively. (Actually, nothing to do except storing them
+        // consecutively since factor indices are not stored anywhere.)
+        //cout << "Number of remaining factors: " << num_active_entries << endl;
+
+        vector<unique_ptr<TransitionSystem> > new_transition_systems;
+        new_transition_systems.reserve(num_active_entries);
+        vector<unique_ptr<MergeAndShrinkRepresentation> > old_mas_representations;        
+        old_mas_representations.reserve(num_active_entries);
+        for (int ts_index : *this) {
+            if (is_active(ts_index)) {
+                new_transition_systems.push_back(move(transition_systems[ts_index]));
+                old_mas_representations.push_back(extract_mas_representation(ts_index));
+            }
+        }
+        transition_systems.swap(new_transition_systems);
+        cout << "Done renumbering factors." << endl;
+        // Renumber labels consecutively
+        int new_num_labels = labels->get_num_active_entries();
+        cout << "Number of remaining labels: " << new_num_labels << endl;
+        vector<unique_ptr<task_representation::Label>> active_labels;
+        vector<int> old_to_new_labels(labels->get_size(), -1);
+        active_labels.reserve(new_num_labels);
+        for (int label_no = 0; label_no < labels->get_size(); ++label_no) {
+            if (labels->is_current_label(label_no)) {
+                int new_label_no = active_labels.size();
+                active_labels.push_back(labels->extract_label(label_no));
+                old_to_new_labels[label_no] = new_label_no;
+            }
+        }
+        cout << "Renumbering labels: " << endl;// old_to_new_labels << endl;
+        for (unique_ptr<TransitionSystem> &ts : transition_systems) {
+            ts->renumber_labels(old_to_new_labels, new_num_labels);
+        }
+        cout << "Update label map" << endl;
+        label_map->update(old_to_new_labels);
+
+        auto old_label_map = move(label_map);
+        
+        int space_for_labels = continue_mas_process ?  active_labels.size() :
+            active_labels.size()*2+1;
+        labels = utils::make_unique_ptr<Labels>(move(active_labels), space_for_labels );
+        cout << "Done renumbering labels." << endl;
+        //label_map->dump();
+        if (continue_mas_process) {
+            
+            mas_representations.clear();
+            for (size_t index = 0; index < transition_systems.size(); ++index) {
+                mas_representations.push_back(
+                    utils::make_unique_ptr<MergeAndShrinkRepresentationLeaf>
+                    (index, transition_systems[index]->get_size()));
+            }
+
+            label_map.reset(new LabelMap (labels->get_size()));
+        }
+
+        return make_pair<std::vector<std::unique_ptr<MergeAndShrinkRepresentation>>,
+                         std::unique_ptr<task_transformation::LabelMap>>
+            (move(old_mas_representations), move(old_label_map));
     }
 }

@@ -70,6 +70,9 @@ extern std::vector<int> compute_abstraction_mapping(
     const StateEquivalenceRelation &equivalence_relation);
 
 extern bool is_goal_relevant(const TransitionSystem &ts);
+
+
+
 }
 
 #endif

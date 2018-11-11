@@ -50,7 +50,7 @@ class MergeAndShrinkAlgorithm {
     const int num_transitions_to_abort;
     const int num_transitions_to_exclude;
 
-    std::unique_ptr<task_transformation::LabelMap> label_map;
+    //std::unique_ptr<task_transformation::LabelMap> label_map;
     long starting_peak_memory;
 
     bool ran_out_of_time(const utils::Timer &timer) const;
@@ -71,7 +71,6 @@ public:
     void dump_options() const;
     void warn_on_unusual_options() const;
     FactoredTransitionSystem build_factored_transition_system(const FTSTask &fts_task);
-    std::unique_ptr<LabelMap> extract_label_map();
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

@@ -8,6 +8,7 @@
 #include "plan_reconstruction_tau_path.h"
 
 #include "tau_graph.h"
+#include "utils.h"
 
 #include "../option_parser.h"
 #include "../plugin.h"
@@ -48,21 +49,33 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
     }
     
     bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts,
-                                                            std::unique_ptr<PlanReconstruction> & , Verbosity verbosity) const  {
+                                                         std::unique_ptr<PlanReconstruction> & , Verbosity verbosity) const  {
         bool changes = false;
+        int old_index = 0;
+        int new_index = 0;
         for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
-                
-                TauGraph asd (fts, index, preserve_optimality);
                 unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
                 
-                StateEquivalenceRelation equivalence_relation =
-                    (perform_sg_shrinking ?
-                     tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
-                     tau_graph->compute_own_label_shrinking()); 
+                StateEquivalenceRelation equivalence_relation = (perform_sg_shrinking ?
+                                                                 tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
+                                                                 tau_graph->compute_own_label_shrinking()); 
+                
+                size_t old_size = fts.get_ts(index).get_size();
+                if (equivalence_relation.size() < old_size) {
+                    vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalence_relation);
 
-                //PlanReconstructionTauPath reconstruction();
+                    TauShrinking reconstruction(old_index, new_index, move(tau_graph),
+                                                move(abstraction_mapping),
+                                                unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index))));
+                }
+
                 changes |= fts.apply_abstraction(index, equivalence_relation, verbosity);
+
+                old_index ++;
+                if (equivalence_relation.size() > 1) {
+                    new_index ++;
+                }
             }
         }
         return changes;
