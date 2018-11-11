@@ -33,7 +33,7 @@ def main(revisions=None):
         IssueConfig('astar-hmax-transform-atomic-labelreduction', ["--transform", "transform_merge_and_shrink(label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),run_main_loop=false)", "--search", "astar(hmax)"]),
         IssueConfig('astar-hmax-transform-atomic-bisim', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),shrink_atomic_fts=true,run_main_loop=false)", "--search", "astar(hmax)"]),
         IssueConfig('astar-hmax-transform-atomic-bisim-labelreduction', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false)", "--search", "astar(hmax)"]),
-        IssueConfig('astar-hmax-transform-full-bisim-labelreduction-dfp50k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(50000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false,max_time=900)", "--search", "astar(hmax)"]),
+        IssueConfig('astar-hmax-transform-full-bisim-labelreduction-dfp50k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(50000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(hmax)"]),
     }
 
     exp = IssueExperiment(
@@ -59,12 +59,12 @@ def main(revisions=None):
         '{}-astar-blind-transform-atomic-labelreduction'.format(REVISION),
         '{}-astar-blind-transform-atomic-bisim'.format(REVISION),
         '{}-astar-blind-transform-atomic-bisim-labelreduction'.format(REVISION),
-        '{}-astar-blind-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION),
+        # '{}-astar-blind-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION),
         '{}-astar-hmax-atomic'.format(REVISION),
         '{}-astar-hmax-transform-atomic-labelreduction'.format(REVISION),
         '{}-astar-hmax-transform-atomic-bisim'.format(REVISION),
         '{}-astar-hmax-transform-atomic-bisim-labelreduction'.format(REVISION),
-        '{}-astar-hmax-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION),
+        # '{}-astar-hmax-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION),
     ])
 
     BASELINE_REV = 'fts-search-base'
@@ -80,12 +80,12 @@ def main(revisions=None):
                 ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-atomic-labelreduction'.format(REVISION)),
                 ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-atomic-bisim'.format(REVISION)),
                 ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-atomic-bisim-labelreduction'.format(REVISION)),
-                ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION)),
+                # ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION)),
                 ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-atomic'.format(REVISION)),
                 ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-atomic-labelreduction'.format(REVISION)),
                 ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-atomic-bisim'.format(REVISION)),
                 ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-atomic-bisim-labelreduction'.format(REVISION)),
-                ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION)),
+                # ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-full-bisim-labelreduction-dfp50k-t900'.format(REVISION)),
             ],
             format='html',
             attributes=attributes,
