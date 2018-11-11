@@ -25,7 +25,7 @@ vector<double> MergeScoringFunctionProductSize::compute_scores(
     bool found_valid_merge = false;
     for (pair<int, int> merge_candidate : merge_candidates) {
         int ts_size1 = fts.get_ts(merge_candidate.first).get_size();
-        int ts_size2 = merge_candidate.second;
+        int ts_size2 = fts.get_ts(merge_candidate.second).get_size();
         int score = INF;
         if (utils::is_product_within_limit(ts_size1, ts_size2, max_states)) {
             score = 0;
