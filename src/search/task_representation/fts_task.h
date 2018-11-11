@@ -31,6 +31,10 @@ class FTSTask {
     mutable std::shared_ptr<SearchTask> search_task;
 public:
     FTSTask(
+        const std::vector<std::unique_ptr<TransitionSystem>> &transition_systems_,
+        const std::unique_ptr<Labels> & labels_);
+
+    FTSTask(
         std::vector<std::unique_ptr<TransitionSystem>> &&transition_systems,
         std::unique_ptr<Labels> labels);
     ~FTSTask();

@@ -513,6 +513,9 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         label_map.reset(new LabelMap (labels->get_size()));
 
+        //Making copy of transition systems and labels 
+        predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
+                                                                          labels);
     }    
     
             

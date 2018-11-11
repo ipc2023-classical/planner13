@@ -6,6 +6,8 @@
 
 #include "../global_state.h"
 #include "search_task.h"
+#include "../utils/memory.h"
+
 #include <cassert>
 
 using namespace std;
@@ -13,6 +15,16 @@ using namespace task_transformation;
 
 
 namespace task_representation {
+
+    FTSTask::FTSTask(
+        const std::vector<std::unique_ptr<TransitionSystem>> &transition_systems_,
+        const std::unique_ptr<Labels> & labels_) {
+        labels = utils::make_unique_ptr<Labels> (*labels_);
+        for (const auto & ts : transition_systems_) {
+            transition_systems.push_back(utils::make_unique_ptr<TransitionSystem> (*ts, *labels));
+        }
+    }
+
     FTSTask::FTSTask(
         vector<unique_ptr<TransitionSystem>> &&transition_systems_,
         unique_ptr<Labels> labels)
