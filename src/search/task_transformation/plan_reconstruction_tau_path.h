@@ -7,12 +7,13 @@
 
 namespace task_representation {
 class FTSTask;
+class TransitionSystem;
 }
 
 namespace task_transformation {
 class LabelMap;
 class MergeAndShrinkRepresentation;
-
+class TauGraph;
 
 // This Task Reconstruction obtains a plan from the task right after tau-label shrinking
 // has been applied to a transition system. This requires us, every time this type of
@@ -28,22 +29,32 @@ class MergeAndShrinkRepresentation;
 // is the next label in the plan and abstraction(t) == val where abstraction is the
 // equivalence mapping returned by this abstraction.
 
-class PlanReconstructionTauPath : public PlanReconstruction {
-
-    int ts_index; // Index of the transition system in the successor task
+class TauShrinking {
+    // Index of the transition system in the predecessor and successor task
+    int ts_index_predecessor, ts_index_successor; 
 
     // Tau label graph of the predecessor task
     std::unique_ptr<TauGraph> tau_graph;
     
     // transition system of the predecessor class: needed to know from which states a
     // label is applicable.
-    std::unique_ptr<TransitionSystem> transition_system; 
+    std::unique_ptr<task_representation::TransitionSystem> transition_system; 
 
     // Mapping from states to abstract states
-    std::vector<int> abstraction; 
+    std::vector<int> abstraction;
+    
+    bool is_target(int s, int label, int abstract_target) const;
 
+public:
+    
+    void reconstruct_step(int label, const PlanState & target,
+                          std::vector<int> & new_label_path,
+                          std::vector<PlanState> & new_traversed_states) const ;
+};
 
-    std::vector<bool> get_compatible_states(int label, int abstract_target) const;
+class PlanReconstructionTauPath : public PlanReconstruction {
+    PlanState initial_state;
+    std::vector<TauShrinking> tau_transformations;
 public:
     PlanReconstructionTauPath();
     virtual ~PlanReconstructionTauPath() = default;

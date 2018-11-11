@@ -270,7 +270,11 @@ public:
     }
 
     const LabelGroup &get_label_group(LabelGroupID group_id) const;
+    
     bool is_selfloop_everywhere(LabelID label) const;
+
+    const std::vector<Transition> &get_transitions_with_label(int label_id) const ;
+    
 };
 }
 

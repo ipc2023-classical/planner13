@@ -682,4 +682,9 @@ bool TransitionSystem::is_unit_cost() const {
     return true;
 }
 
+const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int label_id) const {
+    return transitions_by_group_id[label_equivalence_relation->get_group_id(label_id)];
+}
+
+
 }

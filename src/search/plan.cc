@@ -11,6 +11,9 @@
 using namespace std;
 
 
+PlanState::PlanState(const GlobalState &s) : values (s.get_values()) {
+} 
+
 Plan::Plan (const task_representation::FTSTask *task_) :
     task(task_), solved(false) {
     if (task->trivially_solved()) {
@@ -19,16 +22,20 @@ Plan::Plan (const task_representation::FTSTask *task_) :
     }
     }
 
-void Plan::set_plan(const std::vector<GlobalState> & states_, const std::vector<int>& labels_) {
-    states = states_;
-    labels = labels_;
+void Plan::set_plan(std::vector<PlanState> && states_, std::vector<int>&& labels_) {
+    states = move(states_);
+    labels = move(labels_);
     solved=true;
     assert(states.size() == labels.size() + 1);
 }
 
 void Plan::set_plan_operators(const std::vector<GlobalState> & states_,
                               const std::vector<OperatorID> & operators) {
-    states = states_;
+
+    for (const auto & s : states_) {
+        states.push_back(s);
+    }
+
     labels.reserve(operators.size());
     for(auto op : operators) {
         labels.push_back(task->get_search_task()->get_label (op));

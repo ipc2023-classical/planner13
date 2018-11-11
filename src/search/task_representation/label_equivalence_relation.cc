@@ -209,18 +209,20 @@ int LabelEquivalenceRelation::add_label_group(const vector<int> &new_labels) {
 
         if (!affected_group_ids.empty()) {
             for (LabelGroupID group_id : affected_group_ids) {
+
                 LabelGroup &label_group = grouped_labels[group_id];
                 // Setting cost to infinity for empty groups does not hurt.
                 label_group.set_cost(task_transformation::INF);
 
-                for (int label_no : label_group) {
-                    int cost = labels.get_label_cost(label_no);
-                    if (cost < label_group.get_cost()) {
-                        label_group.set_cost(cost);
-                    }
-                }
-                if (label_group.get_cost() == task_transformation::INF) {
+                if (label_group.empty()) {
                     removed_groups.push_back(group_id);
+                } else{
+                    for (int label_no : label_group) {
+                        int cost = labels.get_label_cost(label_no);
+                        if (cost < label_group.get_cost()) {
+                            label_group.set_cost(cost);
+                        }
+                    }
                 }
             }
         }

@@ -24,7 +24,7 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
 }
 
     bool PlanReconstructionMergeAndShrink::match_states(const GlobalState & original_state,
-                                                 const GlobalState & abstract_state) const {
+                                                 const PlanState & abstract_state) const {
         for(size_t i = 0; i < merge_and_shrink_representations.size(); ++i) {
             int value = merge_and_shrink_representations[i]->get_value(original_state);
             if (value != abstract_state[i])  {
@@ -40,7 +40,7 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
         return label_map->get_reduced_label(original_label) == abstract_label;
     }
 
-    void PlanReconstructionMergeAndShrink::reconstruct_step(int label, const GlobalState & target,
+    void PlanReconstructionMergeAndShrink::reconstruct_step(int label, const PlanState & target,
                                                             std::vector<int> & new_label_path,
                                                             std::vector<GlobalState> & new_traversed_states) const {
         const GlobalState & initial_state = new_traversed_states.back();
@@ -92,29 +92,29 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
 
 void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     const std::vector<int> & label_path = plan.get_labels ();
-    const std::vector<GlobalState> & traversed_states = plan.get_traversed_states ();
+    const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
     assert(label_path.size() + 1 == traversed_states.size());
-
-//    cout << "label path : ";
-//    for (int l : label_path) {
-//        cout << l << " ";
-//    }
-//    cout << endl;
     
     std::vector<int> new_label_path;
     std::vector<GlobalState> new_traversed_states;
 
-    GlobalState predecessor = traversed_states[0];
     new_traversed_states.push_back(state_registry.get_initial_state());
     for(size_t step = 0; step < label_path.size(); ++step) {
         //cout << "Step: " << step << endl;
         int label = label_path[step];
         assert(step + 1 < traversed_states.size());
-        const GlobalState & target = traversed_states[step+1];
+        const PlanState & target = traversed_states[step+1];
         reconstruct_step(label, target, new_label_path, new_traversed_states);
     }
+
     
-    plan.set_plan(new_traversed_states, new_label_path);
+    std::vector<PlanState> plan_states;
+    plan_states.reserve(new_traversed_states.size());
+    for (const auto & s : new_traversed_states) {
+        plan_states.push_back(s);
+    }
+    
+    plan.set_plan(move(plan_states), move(new_label_path));
 }
 
 

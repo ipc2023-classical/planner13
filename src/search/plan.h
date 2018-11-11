@@ -1,6 +1,7 @@
 #ifndef PLAN_H
 #define PLAN_H
 
+#include "../utils/hash.h"
 
 #include "global_state.h"
 #include <vector>
@@ -11,12 +12,66 @@ namespace task_representation {
 }
 class OperatorID;
 
-class Plan {
 
+// Internal class to represents the plans of a state. It is similar to state, but without
+// any particular task because during task reconstruction we don't explicitly have an
+// FTSTask object for all the intermediate tasks
+class PlanState {
+    std::vector<int> values;
+public:
+PlanState(std::vector<int> &&values)
+    : values(std::move(values)) {
+    }
+
+    
+    ~PlanState() = default;
+    PlanState(const PlanState &) = default;
+
+    PlanState(const GlobalState &);
+
+    PlanState &operator=(const PlanState &&other) {
+        if (this != &other) {
+            values = std::move(other.values);
+        }
+        return *this;
+    }
+
+    bool operator==(const PlanState &other) const {
+        return values == other.values;
+    }
+
+    bool operator!=(const PlanState &other) const {
+        return !(*this == other);
+    }
+
+    std::size_t hash() const {
+        std::hash<std::vector<int>> hasher;
+        return hasher(values);
+    }
+
+    std::size_t size() const {
+        return values.size();
+    }
+
+    int operator[](std::size_t var_id) const {
+        return values[var_id];
+    }
+
+    int operator[](int var) const {
+        return (*this)[var];
+    }
+
+    const std::vector<int> &get_values() const {
+        return values;
+    }
+};
+
+
+class Plan {
     const task_representation::FTSTask *task;
     bool solved;
     std::vector<int> labels;
-    std::vector<GlobalState> states;
+    std::vector<PlanState> states;
 public:
     Plan (const task_representation::FTSTask *task_);
     ~Plan() = default;
@@ -25,7 +80,7 @@ public:
         return !solved;
     }
 
-    void set_plan(const std::vector<GlobalState> & states, const std::vector<int> & labels);
+    void set_plan(std::vector<PlanState> && states, std::vector<int> && labels);
     void set_plan_operators(const std::vector<GlobalState> & states,
                             const std::vector<OperatorID> & operators);
 
@@ -33,7 +88,7 @@ public:
         return labels;
     }
 
-    const std::vector<GlobalState> & get_traversed_states ()const {
+    const std::vector<PlanState> & get_traversed_states ()const {
         return states;
     }
 

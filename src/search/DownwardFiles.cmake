@@ -107,6 +107,7 @@ fast_downward_plugin(
         task_transformation/merge_and_shrink_representation
         task_transformation/plan_reconstruction
         task_transformation/plan_reconstruction_merge_and_shrink
+        task_transformation/plan_reconstruction_tau_path
         task_transformation/merge_scoring_function
         task_transformation/merge_scoring_function_dfp
         task_transformation/merge_scoring_function_linear

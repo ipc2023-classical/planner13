@@ -35,12 +35,12 @@ class PlanReconstructionMergeAndShrink : public PlanReconstruction {
     //std::vector<int> tau_labels;
     
     bool match_states(const GlobalState & original_state,
-                      const GlobalState & abstract_state) const;
+                      const PlanState & abstract_state) const;
 
     bool match_labels(int original_label,
                       int abstract_label) const;
 
-    void reconstruct_step(int label, const GlobalState & target,
+    void reconstruct_step(int label, const PlanState & target,
                           std::vector<int> & new_label_path,
                           std::vector<GlobalState> & new_traversed_states) const ;
     
