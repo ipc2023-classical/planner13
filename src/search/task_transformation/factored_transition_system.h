@@ -10,6 +10,7 @@ namespace task_representation {
 class Labels;
 class LabelID;
 class TransitionSystem;
+class FTSTask;
 }
 
 namespace task_transformation {
@@ -17,6 +18,7 @@ class Distances;
 class FactoredTransitionSystem;
 class MergeAndShrinkRepresentation;
 class LabelMap;
+class PlanReconstruction;
 
 class FTSConstIterator {
     /*
@@ -52,11 +54,14 @@ class FactoredTransitionSystem {
     std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> mas_representations;
     std::unique_ptr<task_transformation::LabelMap> label_map;
     std::vector<std::unique_ptr<Distances>> distances;
-
+    
     const bool compute_init_distances;
     const bool compute_goal_distances;
     int num_active_entries;
 
+    std::vector<std::shared_ptr<PlanReconstruction>> plan_reconstruction_steps;
+
+    std::shared_ptr<task_representation::FTSTask> predecessor_fts_task;
     /*
       Assert that the factor at the given index is in a consistent state, i.e.
       that there is a transition system, a distances object, and an MSR.
@@ -72,7 +77,7 @@ class FactoredTransitionSystem {
 
     void assert_all_components_valid() const;
 public:
-    FactoredTransitionSystem(
+    FactoredTransitionSystem(std::shared_ptr<task_representation::FTSTask>,
         std::unique_ptr<task_representation::Labels> labels,
         std::vector<std::unique_ptr<task_representation::TransitionSystem>> &&transition_systems,
         std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> &&mas_representations,
@@ -183,7 +188,11 @@ public:
 
     bool is_only_goal_relevant (int ts_index) const;
 
-    std::pair<std::vector<std::unique_ptr<MergeAndShrinkRepresentation>>, std::unique_ptr<task_transformation::LabelMap>> cleanup (bool continue_mas_process = false);
+    void cleanup (bool continue_mas_process = false);
+
+
+    std::shared_ptr<PlanReconstruction> get_plan_reconstruction();
+    std::shared_ptr<task_representation::FTSTask> get_transformed_fts_task();
 
 };
 }

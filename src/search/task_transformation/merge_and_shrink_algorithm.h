@@ -29,8 +29,8 @@ class ShrinkStrategy;
 enum class Verbosity;
 
 class MergeAndShrinkAlgorithm {
-    // TODO: when the option parser supports it, the following should become
-    // unique pointers.
+    // TODO: when the option parser supports it, the following should become unique
+    // pointers.
     std::shared_ptr<MergeStrategyFactory> merge_strategy_factory;
     std::shared_ptr<ShrinkStrategy> shrink_strategy;
     bool shrink_atomic_fts;
@@ -70,7 +70,7 @@ public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;
     void warn_on_unusual_options() const;
-    FactoredTransitionSystem build_factored_transition_system(const FTSTask &fts_task);
+    FactoredTransitionSystem build_factored_transition_system(const std::shared_ptr<task_representation::FTSTask> &fts_task);
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

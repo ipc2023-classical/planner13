@@ -20,11 +20,11 @@ public:
 };
 
 class PlanReconstructionSequence : public PlanReconstruction {
-    std::vector<std::unique_ptr<PlanReconstruction>> plan_reconstructions;
+    std::vector<std::shared_ptr<PlanReconstruction>> plan_reconstructions;
 public:
     explicit PlanReconstructionSequence(
-        std::vector<std::unique_ptr<PlanReconstruction>> &&plan_reconstructions);
-    virtual ~PlanReconstructionSequence() override;
+        std::vector<std::shared_ptr<PlanReconstruction>> plan_reconstructions);
+    virtual ~PlanReconstructionSequence() override = default;
 
     virtual void reconstruct_plan(Plan & plan) const override {
         for (const auto & pr : plan_reconstructions) {

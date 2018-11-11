@@ -3,6 +3,7 @@
 #include "distances.h"
 #include "merge_and_shrink_representation.h"
 #include "utils.h"
+#include "plan_reconstruction_merge_and_shrink.h"
 
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
@@ -40,6 +41,7 @@ void FTSConstIterator::operator++() {
 
 
 FactoredTransitionSystem::FactoredTransitionSystem(
+    std::shared_ptr<task_representation::FTSTask> fts_task, 
     unique_ptr<Labels> labels_,
     vector<unique_ptr<TransitionSystem>> &&transition_systems,
     vector<unique_ptr<MergeAndShrinkRepresentation>> &&mas_representations,
@@ -54,7 +56,8 @@ FactoredTransitionSystem::FactoredTransitionSystem(
       distances(move(distances)),
       compute_init_distances(compute_init_distances),
       compute_goal_distances(compute_goal_distances),
-      num_active_entries(this->transition_systems.size()) {
+      num_active_entries(this->transition_systems.size()),
+      predecessor_fts_task (fts_task){
     for (size_t index = 0; index < this->transition_systems.size(); ++index) {
         if (compute_init_distances || compute_goal_distances) {
             this->distances[index]->compute_distances(
@@ -351,9 +354,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
     }
 
 
-    std::pair<std::vector<std::unique_ptr<MergeAndShrinkRepresentation>>,
-              std::unique_ptr<task_transformation::LabelMap>> 
-    FactoredTransitionSystem::cleanup(bool continue_mas_process) {
+    void FactoredTransitionSystem::cleanup(bool continue_mas_process) {
         // "Renumber" factors consecutively. (Actually, nothing to do except storing them
         // consecutively since factor indices are not stored anywhere.)
         //cout << "Number of remaining factors: " << num_active_entries << endl;
@@ -397,8 +398,12 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         labels = utils::make_unique_ptr<Labels>(move(active_labels), space_for_labels );
         cout << "Done renumbering labels." << endl;
         //label_map->dump();
-        if (continue_mas_process) {
-            
+
+        plan_reconstruction_steps.push_back(
+            make_shared<PlanReconstructionMergeAndShrink>(
+                predecessor_fts_task, move(old_mas_representations), move(old_label_map)));
+ 
+        if (continue_mas_process) {            
             mas_representations.clear();
             for (size_t index = 0; index < transition_systems.size(); ++index) {
                 mas_representations.push_back(
@@ -407,10 +412,25 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             }
 
             label_map.reset(new LabelMap (labels->get_size()));
-        }
 
-        return make_pair<std::vector<std::unique_ptr<MergeAndShrinkRepresentation>>,
-                         std::unique_ptr<task_transformation::LabelMap>>
-            (move(old_mas_representations), move(old_label_map));
+            predecessor_fts_task = make_shared<task_representation::FTSTask>
+                (move(transition_systems), move(labels));
+        }
+    }
+
+    
+            
+            
+    std::shared_ptr<PlanReconstruction> FactoredTransitionSystem::get_plan_reconstruction() {
+        assert(!plan_reconstruction_steps.empty());
+        if (plan_reconstruction_steps.size() == 1) {
+            return plan_reconstruction_steps[0];
+        }
+        
+        return make_shared<PlanReconstructionSequence>(plan_reconstruction_steps);
+    }
+    
+    std::shared_ptr<task_representation::FTSTask> FactoredTransitionSystem::get_transformed_fts_task() {
+        return make_shared<task_representation::FTSTask> (move(transition_systems), move(labels));
     }
 }

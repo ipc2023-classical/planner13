@@ -440,7 +440,7 @@ void MergeAndShrinkAlgorithm::main_loop(
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
-    const FTSTask &fts_task) {
+    const std::shared_ptr<task_representation::FTSTask> &fts_task) {
     if (starting_peak_memory) {
         cerr << "Calling build_factored_transition_system twice is not "
              << "supported!" << endl;
@@ -450,7 +450,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     starting_peak_memory = utils::get_peak_memory_in_kb();
 
     if (label_reduction) {
-        label_reduction->initialize(fts_task);
+        label_reduction->initialize(*fts_task);
     }
 
     utils::Timer timer;
@@ -460,14 +460,14 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     warn_on_unusual_options();
     cout << endl;
 
-    std::unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(fts_task.get_labels());
-    int num_vars = fts_task.get_size();
+    std::unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(fts_task->get_labels());
+    int num_vars = fts_task->get_size();
     assert(num_vars);
     std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
     transition_systems.reserve(num_vars * 2 - 1);
     for (int index = 0; index < num_vars; ++index) {
         transition_systems.push_back(
-            utils::make_unique_ptr<TransitionSystem>(fts_task.get_ts(index), *labels));
+            utils::make_unique_ptr<TransitionSystem>(fts_task->get_ts(index), *labels));
     }
 
     std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> mas_representations =
@@ -486,7 +486,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         compute_goal_distances = true;
     }
 
-    FactoredTransitionSystem fts(
+    FactoredTransitionSystem fts(fts_task,
         move(labels),
         move(transition_systems),
         move(mas_representations),
@@ -555,7 +555,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 
     if (run_main_loop) {
         assert(shrink_strategy && merge_strategy_factory);
-        main_loop(fts, fts_task, timer);
+        main_loop(fts, *fts_task, timer);
     }
     const bool final = true;
     report_peak_memory_delta(final);

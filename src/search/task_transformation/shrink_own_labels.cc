@@ -50,34 +50,45 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
     
     bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts,
                                                          std::unique_ptr<PlanReconstruction> & , Verbosity verbosity) const  {
-        bool changes = false;
         int old_index = 0;
         int new_index = 0;
+
+        //All equivalences must be applied after computing the equivalences for other FTSs
+        vector<StateEquivalenceRelation> equivalences (fts.get_size());
+        vector<int> equivalences_to_apply;
+        vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction ; 
         for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
                 unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
-                
-                StateEquivalenceRelation equivalence_relation = (perform_sg_shrinking ?
-                                                                 tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
-                                                                 tau_graph->compute_own_label_shrinking()); 
-                
+ 
+
+                equivalences[index] = ((perform_sg_shrinking ?
+                                        tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
+                                        tau_graph->compute_own_label_shrinking()));
+
                 size_t old_size = fts.get_ts(index).get_size();
-                if (equivalence_relation.size() < old_size) {
-                    vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalence_relation);
+                if (equivalences[index].size() < old_size) {
+                    equivalences_to_apply.push_back(index);
+                    vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[index]);
 
-                    TauShrinking reconstruction(old_index, new_index, move(tau_graph),
-                                                move(abstraction_mapping),
-                                                unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index))));
+                    tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, new_index, move(tau_graph),
+                                                                                             move(abstraction_mapping),
+                                                                                             unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
                 }
-
-                changes |= fts.apply_abstraction(index, equivalence_relation, verbosity);
-
+            
                 old_index ++;
-                if (equivalence_relation.size() > 1) {
+                if (equivalences[index].size() > 1) {
                     new_index ++;
                 }
             }
         }
+        
+        bool changes = false;
+        if (equivalences_to_apply.empty()){
+            for (int index : equivalences_to_apply) {
+                changes |= fts.apply_abstraction(index, equivalences[index], verbosity);
+            }
+        }        
         return changes;
     }
 
