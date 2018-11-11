@@ -243,16 +243,8 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
         int index,
         int target_size) const {
 
-	return compute_equivalence_relation(fts.get_ts(index), fts.get_distances(index), target_size);
-
-}
-   
-StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
-    const TransitionSystem &ts,
-    const Distances &distances,
-    int target_size) const {
-
-
+    const TransitionSystem &ts = fts.get_ts(index);
+    const Distances &distances = fts.get_distances(index);
 
     int num_states = ts.get_size();
 
@@ -369,6 +361,29 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
 
     return equivalence_relation;
 }
+
+
+     bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts,
+                                                std::unique_ptr<PlanReconstruction> & , Verbosity verbosity, int index) const  {
+        StateEquivalenceRelation equivalence_relation =
+            compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
+        return fts.apply_abstraction(index, equivalence_relation, verbosity);
+        
+    }
+    
+    bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts,
+                                                std::unique_ptr<PlanReconstruction> & , Verbosity verbosity) const  {
+        bool changes = false;
+        for (int index = 0; index < fts.get_size(); ++index) {
+            if (fts.is_active(index)) {
+                StateEquivalenceRelation equivalence_relation =
+                    compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
+                changes |= fts.apply_abstraction(index, equivalence_relation, verbosity);
+            }
+        }
+        return changes;
+    }
+
 
 string ShrinkBisimulation::name() const {
     return "bisimulation";

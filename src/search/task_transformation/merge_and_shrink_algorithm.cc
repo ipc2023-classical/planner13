@@ -18,6 +18,7 @@
 #include "../task_representation/fts_task.h"
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
+#include "plan_reconstruction.h"
 
 #include "../utils/markup.h"
 #include "../utils/math.h"
@@ -374,13 +375,15 @@ void MergeAndShrinkAlgorithm::main_loop(
             break;
         }
 
+
         // Shrinking
-        bool shrunk = shrink_factor(
-            fts,
-            merged_index,
-            *shrink_strategy,
-            verbosity,
-            num_states_to_trigger_shrinking);
+        unique_ptr<PlanReconstruction> plan_reconstruction;
+        bool shrunk = shrink_strategy->
+            apply_shrinking_transformation(fts, plan_reconstruction,
+                                           verbosity, merged_index);
+
+        // bool shrunk = shrink_factor( fts, merged_index, *shrink_strategy, verbosity,
+        //     num_states_to_trigger_shrinking);
         if (verbosity >= Verbosity::NORMAL && shrunk) {
             print_time(timer, "after shrinking");
         }
@@ -516,21 +519,25 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 
     if (shrink_strategy && shrink_atomic_fts) {
         // Shrinking of atomic FTS.
-        for (int ts_index = 0; ts_index < fts.get_size(); ++ts_index) {
-                if (!fts.is_active(ts_index)) {
-                    continue;
-                }
-            bool shrunk = shrink_factor(
-                fts,
-                ts_index,
-                *shrink_strategy,
-                verbosity,
-                num_states_to_trigger_shrinking);
-                has_simplified |= shrunk;
-            if (verbosity >= Verbosity::VERBOSE && shrunk) {
-                fts.statistics(ts_index);
-            }
-        }
+        // for (int ts_index = 0; ts_index < fts.get_size(); ++ts_index) {
+        //         if (!fts.is_active(ts_index)) {
+        //             continue;
+        //         }
+        //     bool shrunk = shrink_factor(
+        //         fts,
+        //         ts_index,
+        //         *shrink_strategy,
+        //         verbosity,
+        //         num_states_to_trigger_shrinking);
+        //         has_simplified |= shrunk;
+        //     if (verbosity >= Verbosity::VERBOSE && shrunk) {
+        //         fts.statistics(ts_index);
+        //     }
+        // }
+
+        
+        unique_ptr<PlanReconstruction> plan_reconstruction;
+        shrink_strategy->apply_shrinking_transformation(fts, plan_reconstruction, verbosity);
         if (verbosity >= Verbosity::NORMAL) {
             print_time(timer, "after shrinking of atomic FTS");
         }

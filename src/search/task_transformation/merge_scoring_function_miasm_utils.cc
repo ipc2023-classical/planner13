@@ -22,17 +22,19 @@ namespace task_transformation {
   return the result. Return nullptr otherwise.
 */
 unique_ptr<TransitionSystem> copy_and_shrink_ts(
-    const TransitionSystem &ts,
-    const Distances &distances,
+    const FactoredTransitionSystem &fts,
+    int index,
     const ShrinkStrategy &shrink_strategy,
     int new_size,
     Verbosity verbosity) {
+
+    const TransitionSystem & ts = fts.get_ts(index);
     /*
       TODO: think about factoring out common logic of this function and the
       function shrink_factor in utils.cc
     */
     StateEquivalenceRelation equivalence_relation =
-        shrink_strategy.compute_equivalence_relation(ts, distances, new_size);
+        shrink_strategy.compute_equivalence_relation(fts, index, new_size);
     // TODO: We currently violate this; see issue250
     //assert(equivalence_relation.size() <= target_size);
     int new_num_states = equivalence_relation.size();
@@ -86,18 +88,14 @@ unique_ptr<TransitionSystem> shrink_before_merge_externally(
     Verbosity verbosity = Verbosity::SILENT;
     unique_ptr<TransitionSystem> ts1 = nullptr;
     if (must_shrink_ts1) {
-        ts1 = copy_and_shrink_ts(
-            original_ts1,
-            fts.get_distances(index1),
-            shrink_strategy,
-            new_sizes.first,
-            verbosity);
+        ts1 = copy_and_shrink_ts(fts, index1,
+                                 shrink_strategy,
+                                 new_sizes.first,
+                                 verbosity);
     }
     unique_ptr<TransitionSystem> ts2 = nullptr;
     if (must_shrink_ts2) {
-        ts2 = copy_and_shrink_ts(
-            original_ts2,
-            fts.get_distances(index2),
+        ts2 = copy_and_shrink_ts(fts, index2, 
             shrink_strategy,
             new_sizes.second,
             verbosity);

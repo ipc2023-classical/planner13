@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace task_representation {
     class TransitionSystem;
@@ -13,6 +14,7 @@ namespace task_representation {
 namespace task_transformation {
     class FactoredTransitionSystem;
     class Distances;
+    class PlanReconstruction;
 
 class ShrinkStrategy {
 protected:
@@ -38,14 +40,16 @@ public:
     */
 
     virtual StateEquivalenceRelation compute_equivalence_relation(
-        const task_representation::TransitionSystem &ts,
-        const Distances &distances,
-        int target_size) const = 0;
-
-    virtual StateEquivalenceRelation compute_equivalence_relation(
         const FactoredTransitionSystem &fts,
         int index,
         int target_size) const = 0;
+
+
+    virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts,
+                                                std::unique_ptr<PlanReconstruction> & plan_reconstruction, Verbosity verbosity) const = 0;
+    
+    virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts,
+                                                std::unique_ptr<PlanReconstruction> & plan_reconstruction, Verbosity verbosity, int index) const = 0;
 
     virtual bool requires_init_distances() const = 0;
     virtual bool requires_goal_distances() const = 0;

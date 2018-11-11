@@ -40,12 +40,12 @@ extern std::pair<int, int> compute_shrink_sizes(
   factor, imposing its current size as the allowed maxmimum size in order to
   not force and information-lossy shrinking.
 */
-extern bool shrink_factor(
-    FactoredTransitionSystem &fts,
-    int index,
-    const ShrinkStrategy &shrink_strategy,
-    Verbosity verbosit,
-    int num_states_to_trigger_shrinking);
+/* extern bool shrink_factor( */
+/*     FactoredTransitionSystem &fts, */
+/*     int index, */
+/*     const ShrinkStrategy &shrink_strategy, */
+/*     Verbosity verbosity, */
+/*     int num_states_to_trigger_shrinking); */
 
 /*
   Prune unreachable and/or irrelevant states of the factor at index. This

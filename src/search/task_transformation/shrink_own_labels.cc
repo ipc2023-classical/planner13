@@ -35,15 +35,30 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
 	(perform_sg_shrinking? "yes" : "no") << endl;
 }
 
+
+
     
-    StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(
-        const task_representation::TransitionSystem &,
-        const Distances &,
-        int ) const {
-        utils::exit_with(utils::ExitCode::UNSUPPORTED);
-        return StateEquivalenceRelation();
+    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts,
+                                                            std::unique_ptr<PlanReconstruction> & , Verbosity verbosity, int index) const  {
+        StateEquivalenceRelation equivalence_relation =
+            compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
+        return fts.apply_abstraction(index, equivalence_relation, verbosity);
+        
     }
     
+    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts,
+                                                            std::unique_ptr<PlanReconstruction> & , Verbosity verbosity) const  {
+        bool changes = false;
+        for (int index = 0; index < fts.get_size(); ++index) {
+            if (fts.is_active(index)) {
+                StateEquivalenceRelation equivalence_relation =
+                    compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
+                changes |= fts.apply_abstraction(index, equivalence_relation, verbosity);
+            }
+        }
+        return changes;
+    }
+
 
    
 StateEquivalenceRelation ShrinkOwnLabels::compute_equivalence_relation(

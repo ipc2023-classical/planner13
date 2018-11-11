@@ -26,11 +26,12 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     TaskTransformationMergeAndShrink::transform_task(
         const shared_ptr<task_representation::FTSTask> &fts_task) {
     MergeAndShrinkAlgorithm mas_algorithm(options);
+    
     FactoredTransitionSystem fts =
         mas_algorithm.build_factored_transition_system(*fts_task);
 
-    // "Renumber" factors consecutively. (Actually, nothing to do except
-    // storing them consecutively since factor indices are not stored anywhere.)
+    // "Renumber" factors consecutively. (Actually, nothing to do except storing them
+    // consecutively since factor indices are not stored anywhere.)
     int num_factors = fts.get_num_active_entries();
     cout << "Number of remaining factors: " << num_factors << endl;
     vector<unique_ptr<task_representation::TransitionSystem>>

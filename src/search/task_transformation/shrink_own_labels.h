@@ -22,18 +22,18 @@ namespace task_transformation {
 
         virtual ~ShrinkOwnLabels() override;
 
+
         virtual StateEquivalenceRelation compute_equivalence_relation(
             const FactoredTransitionSystem &fts,
             int index,
-            int target_size) const override;
+            int /*target*/) const override;
 
-        
-        virtual StateEquivalenceRelation compute_equivalence_relation(
-            const task_representation::TransitionSystem &ts,
-            const Distances &distances,
-            int target_size) const;
+        virtual bool apply_shrinking_transformation( FactoredTransitionSystem &fts,
+                                                    std::unique_ptr<PlanReconstruction> & plan_reconstruction, Verbosity verbosity) const override;
+    
+        virtual bool apply_shrinking_transformation( FactoredTransitionSystem &fts,
+                                                    std::unique_ptr<PlanReconstruction> & plan_reconstruction, Verbosity verbosity, int index) const override;
 
-        
         virtual bool requires_init_distances() const {
             return false;
         }

@@ -55,6 +55,7 @@ pair<int, int> compute_shrink_sizes(
     return make_pair(new_size1, new_size2);
 }
 
+
 /*
   This method checks if the transition system of the factor at index violates
   the size limit given via new_size (e.g. as computed by compute_shrink_sizes)
@@ -62,34 +63,34 @@ pair<int, int> compute_shrink_sizes(
   if the size limit is not violated. If so, trigger the shrinking process.
   Return true iff the factor was actually shrunk.
 */
-bool shrink_factor(
-    FactoredTransitionSystem &fts,
-    int index,
-    const ShrinkStrategy &shrink_strategy,
-    Verbosity verbosity,
-    int num_states_to_trigger_shrinking) {
-    /*
-      TODO: think about factoring out common logic of this function and the
-      function copy_and_shrink_ts in merge_scoring_function_miasm_utils.cc.
-    */
-    assert (fts.is_active(index));
-    const TransitionSystem &ts = fts.get_ts(index);
-    int num_states = ts.get_size();
-    if (num_states > num_states_to_trigger_shrinking) {
-        if (verbosity >= Verbosity::VERBOSE) {
-            cout << ts.tag() << "current size: " << num_states;
-            cout << "< number of states to trigger shrinking: "
-                 << num_states_to_trigger_shrinking << endl;
-        }
+// bool shrink_factor(
+//     FactoredTransitionSystem &fts,
+//     int index,
+//     const ShrinkStrategy &shrink_strategy,
+//     Verbosity verbosity,
+//     int num_states_to_trigger_shrinking) {
+//     /*
+//       TODO: think about factoring out common logic of this function and the
+//       function copy_and_shrink_ts in merge_scoring_function_miasm_utils.cc.
+//     */
+//     assert (fts.is_active(index));
+//     const TransitionSystem &ts = fts.get_ts(index);
+//     int num_states = ts.get_size();
+//     if (num_states > num_states_to_trigger_shrinking) {
+//         if (verbosity >= Verbosity::VERBOSE) {
+//             cout << ts.tag() << "current size: " << num_states;
+//             cout << "< number of states to trigger shrinking: "
+//                  << num_states_to_trigger_shrinking << endl;
+//         }
 
-        StateEquivalenceRelation equivalence_relation =
-            shrink_strategy.compute_equivalence_relation(fts, index, num_states);
-        // TODO: We currently violate this; see issue250
-        //assert(equivalence_relation.size() <= target_size);
-        return fts.apply_abstraction(index, equivalence_relation, verbosity);
-    }
-    return false;
-}
+//         StateEquivalenceRelation equivalence_relation =
+//             shrink_strategy.compute_equivalence_relation(fts, index, num_states);
+//         // TODO: We currently violate this; see issue250
+//         //assert(equivalence_relation.size() <= target_size);
+//         return fts.apply_abstraction(index, equivalence_relation, verbosity);
+//     }
+//     return false;
+// }
 
 bool prune_step(
    FactoredTransitionSystem &fts,
