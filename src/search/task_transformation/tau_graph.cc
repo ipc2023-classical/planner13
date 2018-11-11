@@ -23,6 +23,7 @@ namespace task_transformation {
         adjacency_matrix(fts.get_ts(index).get_size()),
         is_goal (fts.get_ts(index).get_is_goal())  {
 
+        
         const TransitionSystem & ts = fts.get_ts(index);
         int num_states = ts.get_size();
 

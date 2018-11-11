@@ -9,10 +9,7 @@ using namespace task_representation;
 using namespace std;
 
 namespace task_transformation { 
-    PlanReconstructionTauPath::PlanReconstructionTauPath() : initial_state(vector<int>()) {
-
-}
-
+    
 // Does s has a transition with label to some t whose abstraction is abstract_target?
 bool TauShrinking::is_target(int s, int label, int abstract_target) const {
     for (const Transition & tr : transition_system->get_transitions_with_label(label) ) {
@@ -73,8 +70,8 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         int label = label_path[step];
         assert(step + 1 < traversed_states.size());
         const PlanState & target = traversed_states[step+1];
-        for (const TauShrinking & tau_shrinking : tau_transformations) {
-            tau_shrinking.reconstruct_step(label, target, new_label_path, new_traversed_states);
+        for (const auto & tau_shrinking : tau_transformations) {
+            tau_shrinking->reconstruct_step(label, target, new_label_path, new_traversed_states);
         }
     }
     

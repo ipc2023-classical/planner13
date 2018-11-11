@@ -110,6 +110,7 @@ TransitionSystem::TransitionSystem(const TransitionSystem &other)
       num_states(other.num_states),
       goal_states(other.goal_states),
       init_state(other.init_state) {
+    
 }
 
 TransitionSystem::TransitionSystem(const TransitionSystem &other, const Labels &labels)

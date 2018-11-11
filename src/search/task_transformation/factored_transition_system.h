@@ -118,7 +118,7 @@ public:
     bool apply_abstraction(
         int index,
         const StateEquivalenceRelation &state_equivalence_relation,
-        Verbosity verbosity);
+        Verbosity verbosity, bool ignore_mas_representation = false);
 
     /*
       Merge the two factors at index1 and index2.
@@ -188,9 +188,17 @@ public:
 
     bool is_only_goal_relevant (int ts_index) const;
 
-    void cleanup (bool continue_mas_process = false);
+    void cleanup ();
+
+    void reinitialize_predecessor_task ();
 
 
+    
+
+
+    void add_plan_reconstruction(std::shared_ptr<PlanReconstruction> plan_reconstruction) {
+        plan_reconstruction_steps.push_back(plan_reconstruction);
+    }
     std::shared_ptr<PlanReconstruction> get_plan_reconstruction();
     std::shared_ptr<task_representation::FTSTask> get_transformed_fts_task();
 

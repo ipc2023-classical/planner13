@@ -49,7 +49,7 @@ public:
     TauShrinking (int ts_index_predecessor_, int ts_index_successor_,
                   std::unique_ptr<TauGraph> tau_graph_,
                   std::vector<int> && abstraction_mapping_,
-                  std::unique_ptr<task_representation::TransitionSystem> transition_system_) :
+                  std::unique_ptr<task_representation::TransitionSystem> && transition_system_) :
     ts_index_predecessor (ts_index_predecessor_),
         ts_index_successor (ts_index_successor_),
         tau_graph(move(tau_graph_)),
@@ -65,9 +65,13 @@ public:
 
 class PlanReconstructionTauPath : public PlanReconstruction {
     PlanState initial_state;
-    std::vector<TauShrinking> tau_transformations;
+    std::vector<std::unique_ptr<TauShrinking> > tau_transformations;
 public:
-    PlanReconstructionTauPath();
+    PlanReconstructionTauPath(PlanState initial_state_,
+                              std::vector<std::unique_ptr<TauShrinking> > && transformations) :
+    initial_state(initial_state_), tau_transformations(move(transformations)) {
+    }
+    
     virtual ~PlanReconstructionTauPath() = default;
     virtual void reconstruct_plan(Plan &plan) const override;
 };

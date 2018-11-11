@@ -53,10 +53,10 @@ public:
 
     
     virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts,
-                                                std::unique_ptr<PlanReconstruction> & plan_reconstruction, Verbosity verbosity) const override;
+                                                Verbosity verbosity) const override;
     
     virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts,
-                                                std::unique_ptr<PlanReconstruction> & plan_reconstruction, Verbosity verbosity, int index) const override;
+                                                Verbosity verbosity, int index) const override;
 
     virtual bool requires_init_distances() const override {
         return false;

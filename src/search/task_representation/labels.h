@@ -38,6 +38,9 @@ public:
     Labels(
         std::vector<std::unique_ptr<Label>> &&labels,
         int max_size);
+    
+    std::vector<int>  cleanup();
+        
 //        std::vector<std::vector<int>> &&sas_op_indices_by_label);
     Labels(const Labels &other);
     ~Labels();

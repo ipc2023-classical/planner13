@@ -30,19 +30,8 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     FactoredTransitionSystem fts =
         mas_algorithm.build_factored_transition_system(fts_task);
 
-    fts.cleanup();
-    // auto mas_representations = move(mapping.first);
-    // auto label_map = move(mapping.second);
-    // auto transition_systems = fts.extract_transition_systems();
-    // auto labels = fts.extract_labels(); 
 
-    // cout << "Collection information on plan reconstruction..." << endl;
-    // shared_ptr<task_representation::FTSTask> transformed_fts_task =
-    //     make_shared<task_representation::FTSTask>(move(transition_systems), move(labels));
-    
-    // shared_ptr<PlanReconstructionMergeAndShrink> plan_reconstruction =
-    //     make_shared<PlanReconstructionMergeAndShrink>(
-    //         fts_task, move(mas_representations), move(label_map));
+    fts.cleanup();
     
     return make_pair(fts.get_transformed_fts_task(), fts.get_plan_reconstruction());
 }

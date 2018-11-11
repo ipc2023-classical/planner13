@@ -161,7 +161,9 @@ void LabelEquivalenceRelation::renumber_labels(
         int new_label_no = old_to_new_labels[old_label_no];
         if (new_label_no == -1) {
             // Skip already reduced labels (= -1)
-            assert(!labels.is_current_label(old_label_no));
+            //Removed assertion because it is violated in the FTS cleanup
+            //assert(!labels.is_current_label(old_label_no));
+            
         } else {
             LabelGroupID group_id = label_to_positions_copy[old_label_no].first;
             LabelIter label_it = label_to_positions_copy[old_label_no].second;

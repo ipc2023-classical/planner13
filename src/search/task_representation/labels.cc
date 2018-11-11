@@ -21,6 +21,21 @@ Labels::Labels(
 //      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
 }
 
+    vector<int>  Labels::cleanup() {
+        vector<int> old_to_new_labels (get_size(), -1);
+        int new_label_no = 0;
+        for (int label_no = 0; label_no < get_size(); ++label_no) {
+            if (is_current_label(label_no)) {
+                if (label_no != new_label_no) {
+                    labels[new_label_no] = extract_label(label_no);
+                }
+                old_to_new_labels[label_no] = new_label_no++;
+            }
+        }
+        labels.resize(new_label_no);
+        return old_to_new_labels;        
+    }
+
 Labels::Labels(const Labels &other)
     : max_size(other.max_size), num_active_entries(other.num_active_entries) {
     labels.reserve(other.labels.size());

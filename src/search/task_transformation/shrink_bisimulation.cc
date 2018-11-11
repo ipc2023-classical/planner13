@@ -363,8 +363,7 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
 }
 
 
-     bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts,
-                                                std::unique_ptr<PlanReconstruction> & , Verbosity verbosity, int index) const  {
+     bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int index) const  {
         StateEquivalenceRelation equivalence_relation =
             compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
         return fts.apply_abstraction(index, equivalence_relation, verbosity);
@@ -372,7 +371,7 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
     }
     
     bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts,
-                                                std::unique_ptr<PlanReconstruction> & , Verbosity verbosity) const  {
+                                                Verbosity verbosity) const  {
         bool changes = false;
         for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
