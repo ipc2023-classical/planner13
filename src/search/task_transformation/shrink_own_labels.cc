@@ -5,7 +5,9 @@
 #include "../task_representation/label_equivalence_relation.h"
 #include "../task_representation/transition_system.h"
 #include "../task_representation/labels.h"
+#include "plan_reconstruction_tau_path.h"
 
+#include "tau_graph.h"
 
 #include "../option_parser.h"
 #include "../plugin.h"
@@ -14,6 +16,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <algorithm>
 
 using namespace std;
@@ -35,8 +38,6 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
 	(perform_sg_shrinking? "yes" : "no") << endl;
 }
 
-
-
     
     bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts,
                                                             std::unique_ptr<PlanReconstruction> & , Verbosity verbosity, int index) const  {
@@ -51,8 +52,16 @@ void ShrinkOwnLabels::dump_strategy_specific_options() const {
         bool changes = false;
         for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
+                
+                TauGraph asd (fts, index, preserve_optimality);
+                unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
+                
                 StateEquivalenceRelation equivalence_relation =
-                    compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
+                    (perform_sg_shrinking ?
+                     tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
+                     tau_graph->compute_own_label_shrinking()); 
+
+                //PlanReconstructionTauPath reconstruction();
                 changes |= fts.apply_abstraction(index, equivalence_relation, verbosity);
             }
         }

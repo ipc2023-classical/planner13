@@ -51,6 +51,8 @@ reconstruct_step(int label, const PlanState & abstract_target_state,
     for (const auto & step : tau_path) {
         new_label_path.push_back(step.first);
         auto new_state = new_traversed_states.back();
+        new_state.set(ts_index_predecessor, step.second);
+        new_traversed_states.push_back(new_state);
     }
 }
 

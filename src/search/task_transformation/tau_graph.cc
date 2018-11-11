@@ -22,11 +22,12 @@ namespace task_transformation {
                         bool preserve_optimality) :
         adjacency_matrix(fts.get_ts(index).get_size()),
         is_goal (fts.get_ts(index).get_is_goal())  {
+
         const TransitionSystem & ts = fts.get_ts(index);
         int num_states = ts.get_size();
 
-        std::vector<std::map<int, TauTransition>> adjacency_map;
-        
+        std::vector<std::map<int, TauTransition>> adjacency_map(num_states);
+
         const Labels & labels_info = fts.get_labels();
         for (const auto & gt : ts) {
             LabelID best_label;
@@ -45,7 +46,9 @@ namespace task_transformation {
             }
                     
             if(is_own) {
+                
                 for (const auto & trans : gt.transitions) {
+
                     auto pos = adjacency_map[trans.src].find(trans.target);
                     if (pos == adjacency_map[trans.src].end()) {
                         adjacency_map[trans.src].insert(
@@ -62,7 +65,6 @@ namespace task_transformation {
                 }
             }
         }
-    
         /* remove duplicates in adjacency matrix */
         for (int i = 0; i < num_states; i++) {
             for(const auto & entry : adjacency_map[i]) {
@@ -77,6 +79,8 @@ namespace task_transformation {
         StateEquivalenceRelation final_sccs;
         sccs::SCC<TauTransition>::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
 
+        cout << "FINAL SCCS: " << final_sccs.size() << endl;
+        cout << final_sccs[0].empty() << endl;
         return final_sccs;
     }
 
@@ -101,21 +105,22 @@ namespace task_transformation {
                     }
                 }
             }
+            // only need to apply abstraction if this actually changes anything
+            StateEquivalenceRelation equivalence_relation;
+            equivalence_relation.resize(new_size);
+            int counter = 0;
+            for (size_t group = 0; group < final_sccs.size(); ++group) {
+                if (final_sccs[group].empty())
+                    continue;
+                equivalence_relation[counter].swap(final_sccs[group]);
+                counter++;
+            }
+
+            return equivalence_relation;
         }
-    
-        // only need to apply abstraction if this actually changes anything
-        StateEquivalenceRelation equivalence_relation;
-        equivalence_relation.resize(new_size);
-        int counter = 0;
-        for (size_t group = 0; group < final_sccs.size(); ++group) {
-            if (final_sccs[group].empty())
-                continue;
-            equivalence_relation[counter].swap(final_sccs[group]);
-            counter++;
-        }
-    
         return final_sccs;
     }
+    
 
 
 

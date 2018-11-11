@@ -61,6 +61,10 @@ PlanState(std::vector<int> &&values)
         return (*this)[var];
     }
 
+    void set(int var, int val)  {
+        values[var]  = val;
+    }
+
     const std::vector<int> &get_values() const {
         return values;
     }
