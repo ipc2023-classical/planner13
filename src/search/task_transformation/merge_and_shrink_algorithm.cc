@@ -237,6 +237,7 @@ void MergeAndShrinkAlgorithm::main_loop(
     FactoredTransitionSystem &fts,
     const FTSTask &fts_task,
     const utils::Timer &timer) {
+    cout << endl << "Running main loop..." << endl;
     int maximum_intermediate_size = 0;
     for (int i = 0; i < fts.get_size(); ++i) {
         if (fts.is_active(i)) {
@@ -550,6 +551,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         return fts;
     }
     } while (/*run_atomic_loop && */has_simplified);
+
+    cout << "Merge-and-shrink atomic construction runtime: " << timer << endl;
 
     if (run_main_loop) {
         assert(shrink_strategy && merge_strategy_factory);

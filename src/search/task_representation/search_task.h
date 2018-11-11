@@ -153,7 +153,7 @@ private:
         std::vector<FactPair> &effects);
     void create_fts_operators();
 public:
-    SearchTask(const FTSTask & fts_task);
+    SearchTask(const FTSTask & fts_task, bool print_time);
 
     bool is_goal_state(const GlobalState &state) const;
 

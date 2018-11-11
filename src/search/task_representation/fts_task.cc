@@ -19,7 +19,9 @@ namespace task_representation {
         : transition_systems(move(transition_systems_)),
           labels(move(labels)) {
 
-        cout << "Constructing FTS Task: " << transition_systems.size() << endl;
+        cout << "Constructing FTS Task with " << transition_systems.size()
+             << " variables and " << this->labels->get_size() << " labels"
+             << endl;
 #ifndef NDEBUG
         for (int label = 0; label < this->labels->get_size(); ++label) {
             assert(this->labels->is_current_label(label));
@@ -105,9 +107,9 @@ vector<int> FTSTask::get_goal_variables() const {
 
 
 
-shared_ptr<SearchTask> FTSTask::get_search_task() const {
+shared_ptr<SearchTask> FTSTask::get_search_task(bool print_time) const {
     if(!search_task){
-	search_task = make_shared<SearchTask> (*this);
+    search_task = make_shared<SearchTask> (*this, print_time);
     }
     return search_task;
 }
