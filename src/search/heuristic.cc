@@ -21,7 +21,8 @@ Heuristic::Heuristic(const Options &opts)
       heuristic_cache(HEntry(NO_VALUE, true)), //TODO: is true really a good idea here?
       cache_h_values(opts.get<bool>("cache_estimates")),
       task(g_main_task),
-      search_task(task->get_search_task()) {
+      // HACK: true means to dump the construction time of the search task.
+      search_task(task->get_search_task(true)) {
     //opts.get<shared_ptr<FTSTaskTransformation>>("transform")
 }
 

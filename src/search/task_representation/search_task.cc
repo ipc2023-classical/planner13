@@ -14,6 +14,7 @@
 #include "../utils/logging.h"
 #include "../utils/memory.h"
 #include "../utils/system.h"
+#include "../utils/timer.h"
 
 #include <map>
 #include <unordered_map>
@@ -52,13 +53,14 @@ std::unique_ptr<int_packer::IntPacker> compute_state_packer(const FTSTask &fts_t
 }
 
 
-SearchTask::SearchTask(const FTSTask &fts_task) :
+SearchTask::SearchTask(const FTSTask &fts_task, bool print_time) :
     fts_task(fts_task),
     state_packer(move(compute_state_packer(fts_task))),
 //    axiom_evaluator (fts_task),
     min_operator_cost (fts_task.get_min_operator_cost()) {
     size_t num_variables = fts_task.get_size();
     int num_labels = fts_task.get_num_labels();
+    utils::Timer timer;
     cout << "Building search task wrapper for FTS task with " << num_variables
          << " variables and " << num_labels << " labels..." <<  endl;
     activated_labels_by_var_by_state.resize(num_variables);
@@ -87,7 +89,11 @@ SearchTask::SearchTask(const FTSTask &fts_task) :
         initial_state.push_back(ts.get_init_state());
     }
 
-    cout << "Done building search task wrapper for FTS task." << endl;
+    if (print_time) {
+        cout << "Done building search task wrapper for FTS task: " << timer << endl;
+    } else {
+        cout << "Done building search task wrapper for FTS task." << endl;
+    }
 }
 
 bool SearchTask::is_label_group_relevant(
