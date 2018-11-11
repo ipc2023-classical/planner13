@@ -342,9 +342,6 @@ void MergeAndShrinkAlgorithm::main_loop(
            }
        }
 
-       fts.remove_irrelevant_transition_systems(verbosity);
-       
-
         /*
           NOTE: both the shrink strategy classes and the construction
           of the composite transition system require the input
@@ -358,6 +355,8 @@ void MergeAndShrinkAlgorithm::main_loop(
             }
             break;
         }
+
+        fts.remove_irrelevant_transition_systems(verbosity);
 
         if (ran_out_of_time(timer)) {
             break;
