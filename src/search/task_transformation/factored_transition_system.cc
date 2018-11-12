@@ -402,14 +402,15 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         assert((size_t)num_active_entries == transition_systems.size());
 
-        plan_reconstruction_steps.push_back(
-            make_shared<PlanReconstructionMergeAndShrink>(
-                predecessor_fts_task, move(old_mas_representations), move(label_map)));        
+        if (predecessor_fts_task){
+            plan_reconstruction_steps.push_back(
+                make_shared<PlanReconstructionMergeAndShrink>(
+                    predecessor_fts_task, move(old_mas_representations), move(label_map)));
+        }
     }
 
 
     void FactoredTransitionSystem::reinitialize_predecessor_task() {
-       
         mas_representations.clear();
         for (size_t index = 0; index < transition_systems.size(); ++index) {
             mas_representations.push_back(
@@ -419,9 +420,13 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         label_map.reset(new LabelMap (labels->get_size()));
 
-        //Making copy of transition systems and labels 
-        predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
-                                                                          labels);
+        if(!transition_systems.empty()) {
+            //Making copy of transition systems and labels 
+            predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
+                                                                              labels);
+        } else {
+            predecessor_fts_task = nullptr;
+        }
     }    
     
             
