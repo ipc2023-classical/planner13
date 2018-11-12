@@ -51,10 +51,13 @@ namespace task_transformation {
         int old_index = 0;
         int new_index = 0;
         vector<int> initial_state_values;
+
+        std::set<int> exclude_transition_systems;
         //All equivalences must be applied after computing the equivalences for other FTSs
         vector<StateEquivalenceRelation> equivalences (fts.get_size());
         vector<int> equivalences_to_apply;
-        vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction ; 
+        vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction;
+        
         for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
                 unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
@@ -67,35 +70,41 @@ namespace task_transformation {
 
                 size_t old_size = fts.get_ts(index).get_size();
                 if (equivalences[old_index].size() < old_size) {
-                    equivalences_to_apply.push_back(old_index);
+
+                    int succ_index = -1;
+                    if (equivalences[old_index].size() > 1) {
+                        equivalences_to_apply.push_back(old_index);
+                        succ_index = new_index++;
+                    } else{
+                        assert (equivalences[old_index].size() == 1); 
+                        exclude_transition_systems.insert(index);
+                    }
+
                     vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[old_index]);
 
-                    
                     unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
                                                          
-                    tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, new_index, move(tau_graph),
+                    tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
                                                                                                  move(abstraction_mapping),
                                                                                                  unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
-
-
-                }
-
-                old_index ++;
-                if (equivalences[old_index].size() > 1) {
+                } else {
                     new_index ++;
                 }
+                old_index ++;
             }
         }
 
-        bool changes = false;
-        if (!equivalences_to_apply.empty()){
-            cout << "OwnLabelShrinking applicable in " << equivalences_to_apply.size() << " systems" << endl;
+        bool changes = exclude_transition_systems.empty();
+        if (!equivalences_to_apply.empty() || !exclude_transition_systems.empty() ){ 
+            cout << "OwnLabelShrinking applicable in " <<
+                (equivalences_to_apply.size() + exclude_transition_systems.size())  << " out of " << old_index << " systems" << endl;
 
             // 1) Extract the plan reconstruction M&S and insert it in the list of plan
             // reconstruction steps
-            
-            fts.cleanup();
+            fts.cleanup(exclude_transition_systems);
 
+            assert(fts.get_size() == new_index);
+            
             // 2) Add tau plan reconstruction step 
             fts.add_plan_reconstruction(
                 make_shared<PlanReconstructionTauPath>(PlanState(move(initial_state_values)),
@@ -109,12 +118,8 @@ namespace task_transformation {
 
             // 4) Re-initialize fts with new merge_and_shrink and label mappings
             fts.reinitialize_predecessor_task();
-            
-            assert(fts.get_size() == old_index);
 
-
-                        
-        
+           cout << "There are " << fts.get_size() << " systems after applying own label shrinking"  <<endl;
 
         }
         return changes;

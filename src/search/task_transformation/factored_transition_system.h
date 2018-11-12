@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 
 namespace task_representation {
 class Labels;
@@ -188,7 +189,7 @@ public:
 
     bool is_only_goal_relevant (int ts_index) const;
 
-    void cleanup ();
+    void cleanup (const std::set<int> & exclude_transition_systems = std::set<int>());
 
     void reinitialize_predecessor_task ();
 

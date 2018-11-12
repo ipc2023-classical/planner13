@@ -360,104 +360,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         return true;
     }
 
-
-    // void FactoredTransitionSystem::cleanup(bool continue_mas_process) {
-    //     // "Renumber" factors consecutively. (Actually, nothing to do except storing them
-    //     // consecutively since factor indices are not stored anywhere.)
-    //     //cout << "Number of remaining factors: " << num_active_entries << endl;
-
-    //     // Renumber labels consecutively
-    //     int new_num_labels = labels->get_num_active_entries();
-    //     cout << "Number of remaining labels: " << new_num_labels << endl;
-    //     vector<unique_ptr<task_representation::Label>> active_labels;
-    //     vector<int> old_to_new_labels(labels->get_size(), -1);
-    //     active_labels.reserve(new_num_labels);
-    //     for (int label_no = 0; label_no < labels->get_size(); ++label_no) {
-    //         if (labels->is_current_label(label_no)) {
-    //             int new_label_no = active_labels.size();
-    //             active_labels.push_back(labels->extract_label(label_no));
-    //             old_to_new_labels[label_no] = new_label_no;
-    //         }
-    //     }
-        
-    //     cout << "Renumbering labels: " << endl;// old_to_new_labels << endl;
-    //     for (unique_ptr<TransitionSystem> &ts : transition_systems) {
-    //         if (ts) {
-    //             ts->renumber_labels(old_to_new_labels, new_num_labels);
-    //         }
-    //     }
-
-
-    //     vector<unique_ptr<TransitionSystem> > new_transition_systems;
-    //     new_transition_systems.reserve(num_active_entries);
-    //     vector<unique_ptr<Distances> > new_distances;
-    //     new_distances.reserve(num_active_entries);
-
-    //     vector<unique_ptr<MergeAndShrinkRepresentation> > old_mas_representations;        
-    //     old_mas_representations.reserve(num_active_entries);
-
-    //     int space_for_labels = continue_mas_process ?
-    //         active_labels.size()*2-1 :
-    //         active_labels.size();
-
-    //     unique_ptr<Labels> old_labels = move(labels);
-    //     labels.reset(new Labels(move(active_labels), space_for_labels));
-
-    //     for (int ts_index : *this) {
-    //         if (is_active(ts_index)) {
-    //             new_transition_systems.
-    //                 push_back(utils::make_unique_ptr<TransitionSystem>(*transition_systems[ts_index], *labels));
-    //             new_distances.push_back(utils::make_unique_ptr<Distances>(*(new_transition_systems.back())));
-
-    //             new_distances.back()->compute_distances(
-    //                 compute_init_distances, compute_goal_distances, Verbosity::NORMAL);
-
-    //             old_mas_representations.push_back(extract_mas_representation(ts_index));
-    //         }
-    //     }
-        
-    //     transition_systems.swap(new_transition_systems);
-    //     distances.swap(new_distances);
-        
-    //     cout << "Done renumbering factors." << transition_systems.size() << endl;
-
-    //     cout << "Update label map" << endl;
-    //     label_map->update(old_to_new_labels);
-    //     auto old_label_map = move(label_map);
-    //     cout << "Done renumbering labels." << endl;
-
-    //     plan_reconstruction_steps.push_back(
-    //         make_shared<PlanReconstructionMergeAndShrink>(
-    //             predecessor_fts_task, move(old_mas_representations),
-    //             move(old_label_map)));
- 
-    //     if (continue_mas_process) {            
-    //         mas_representations.clear();
-    //         for (size_t index = 0; index < transition_systems.size(); ++index) {
-    //             mas_representations.push_back(
-    //                 utils::make_unique_ptr<MergeAndShrinkRepresentationLeaf>
-    //                 (index, transition_systems[index]->get_size()));
-    //         }
-
-    //         label_map.reset(new LabelMap (labels->get_size()));
-
-
-
-
-    //         // new_transition_systems.clear();
-    //         // for(auto & ts : transition_systems ) {
-    //         //     new_transition_systems.push_back(utils::make_unique_ptr<TransitionSystem> (*ts));
-    //         // }
-            
-    //         // predecessor_fts_task = make_shared<task_representation::FTSTask>
-    //         //     (move(new_transition_systems), utils::make_unique_ptr<Labels>(*labels));
-    //     }
-    // }
-
-
-
-
-    void FactoredTransitionSystem::cleanup() {
+    void FactoredTransitionSystem::cleanup(const set<int> & exclude_transition_systems) {
         // "Renumber" factors consecutively. (Actually, nothing to do except storing them
         // consecutively since factor indices are not stored anywhere.)
         //cout << "Number of remaining factors: " << num_active_entries << endl;
@@ -471,30 +374,30 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         old_mas_representations.reserve(num_active_entries);
         for (int ts_index : *this) {
             if (is_active(ts_index)) {
-                new_transition_systems.push_back(move(transition_systems[ts_index]));
                 old_mas_representations.push_back(extract_mas_representation(ts_index));
-                new_distances.push_back(move(distances[ts_index]));
+                if (!exclude_transition_systems.count(ts_index)) {
+                    new_transition_systems.push_back(move(transition_systems[ts_index]));
+                    new_distances.push_back(move(distances[ts_index]));
+                }
             }
         }
         transition_systems.swap(new_transition_systems);
         distances.swap(new_distances);
         cout << "Done renumbering factors." << endl;
-        // Renumber labels consecutively
+        //Renumber labels consecutively
         int new_num_labels = labels->get_num_active_entries();
-        // cout << "Number of remaining labels: " << new_num_labels << endl;
+        cout << "Number of remaining labels: " << new_num_labels << endl;
         vector<int> old_to_new_labels = labels->cleanup();
         assert(new_num_labels == labels->get_size());
 
         cout << "Renumbering labels: " << endl;// old_to_new_labels << endl;
         for (unique_ptr<TransitionSystem> &ts : transition_systems) {
-             ts->renumber_labels(old_to_new_labels, new_num_labels);
-         }
-        // cout << "Update label map" << endl;
-         label_map->update(old_to_new_labels);
+            ts->renumber_labels(old_to_new_labels, new_num_labels);
+        }
+        label_map->update(old_to_new_labels);
 
-        // //labels = utils::make_unique_ptr<Labels>(move(active_labels), space_for_labels );
-        // cout << "Done renumbering labels." << endl;
-        //label_map->dump();
+        cout << "Done renumbering labels." << endl;
+        label_map->dump();
 
         plan_reconstruction_steps.push_back(
             make_shared<PlanReconstructionMergeAndShrink>(

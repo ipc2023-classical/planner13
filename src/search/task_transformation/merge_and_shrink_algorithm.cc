@@ -527,6 +527,11 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 
         has_simplified |= fts.remove_irrelevant_labels();
 
+
+        if (fts.get_size() == 0) {
+            return fts;
+        }
+
     if (ran_out_of_time(timer)) {
         return fts;
     }
