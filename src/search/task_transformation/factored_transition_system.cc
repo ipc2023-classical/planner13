@@ -368,7 +368,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         // 1) Construct plan reconstruction object       
         vector<unique_ptr<TransitionSystem> > new_transition_systems;
         vector<unique_ptr<Distances> > new_distances;
-
+        num_active_entries = 0;
         new_transition_systems.reserve(num_active_entries);
         vector<unique_ptr<MergeAndShrinkRepresentation> > old_mas_representations;        
         old_mas_representations.reserve(num_active_entries);
@@ -376,6 +376,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             if (is_active(ts_index)) {
                 old_mas_representations.push_back(extract_mas_representation(ts_index));
                 if (!exclude_transition_systems.count(ts_index)) {
+                    num_active_entries ++;
                     new_transition_systems.push_back(move(transition_systems[ts_index]));
                     new_distances.push_back(move(distances[ts_index]));
                 }
@@ -398,6 +399,8 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         cout << "Done renumbering labels." << endl;
         label_map->dump();
+
+        assert((size_t)num_active_entries == transition_systems.size());
 
         plan_reconstruction_steps.push_back(
             make_shared<PlanReconstructionMergeAndShrink>(
