@@ -43,9 +43,12 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
     void PlanReconstructionMergeAndShrink::reconstruct_step(int label, const PlanState & target,
                                                             std::vector<int> & new_label_path,
                                                             std::vector<GlobalState> & new_traversed_states) const {
+
         const GlobalState & initial_state = new_traversed_states.back();
         auto search_task = predecessor_task->get_search_task();
 
+        cout << "Reconstructing step from "  << " to " << target << " with " << label << endl;
+        cout << g_sas_task()->get_operator_name(label) << endl;
         std::vector<OperatorID> applicable_ops; 
         search_task->generate_applicable_ops(initial_state, applicable_ops);
         bool found_match = false;
@@ -92,9 +95,11 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
 
 void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
 
+
     const std::vector<int> & label_path = plan.get_labels ();
     const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
     cout << "M&S reconstruction of plan with " << label_path.size() << " steps for task with " << predecessor_task->get_size() << " variables"   << endl;
+    cout << *label_map << endl;
     assert(label_path.size() + 1 == traversed_states.size());
     
     std::vector<int> new_label_path;

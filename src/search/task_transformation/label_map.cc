@@ -26,4 +26,12 @@ void LabelMap::dump() const {
     }
     cout << endl;
 }
+
+    std::ostream &operator<<(std::ostream &os, const LabelMap & label_map) {
+    for (int entry : label_map.reduced_labels) {
+        os << entry << " ";
+    }
+    return os;
+
+    }
 }

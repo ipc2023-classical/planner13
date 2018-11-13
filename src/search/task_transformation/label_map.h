@@ -2,6 +2,7 @@
 #define TASK_TRANSFORMATION_LABEL_MAP_H
 
 #include <vector>
+#include <iostream>
 
 namespace task_transformation {
 class LabelMap{
@@ -22,6 +23,8 @@ public:
 //    int get_original_label(int reduced_label) const{
 //        return original_labels[reduced_label];
 //    }
+
+        friend std::ostream &operator<<(std::ostream &os, const LabelMap & label_map);
 };
 }
 
