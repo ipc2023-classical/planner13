@@ -161,7 +161,9 @@ void LabelEquivalenceRelation::renumber_labels(
         int new_label_no = old_to_new_labels[old_label_no];
         if (new_label_no == -1) {
             // Skip already reduced labels (= -1)
-            //Removed assertion because it is violated in the FTS cleanup
+            // Removed assertion because it is violated in the FTS cleanup, but
+            // not conceptually, only because there, the labels object is
+            // updated before calling this method.
             //assert(!labels.is_current_label(old_label_no));
             
         } else {

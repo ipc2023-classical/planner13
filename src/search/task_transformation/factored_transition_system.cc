@@ -10,6 +10,7 @@
 #include "../task_representation/label_equivalence_relation.h"
 
 #include "../utils/collections.h"
+#include "../utils/logging.h"
 #include "../utils/memory.h"
 #include "../utils/system.h"
 
@@ -368,10 +369,10 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         // 1) Construct plan reconstruction object       
         vector<unique_ptr<TransitionSystem> > new_transition_systems;
         vector<unique_ptr<Distances> > new_distances;
+        vector<unique_ptr<MergeAndShrinkRepresentation> > old_mas_representations;
+        new_transition_systems.reserve(transition_systems.capacity());
+        new_distances.reserve(distances.capacity());
         num_active_entries = 0;
-        new_transition_systems.reserve(num_active_entries);
-        vector<unique_ptr<MergeAndShrinkRepresentation> > old_mas_representations;        
-        old_mas_representations.reserve(num_active_entries);
         for (int ts_index : *this) {
             if (is_active(ts_index)) {
                 old_mas_representations.push_back(extract_mas_representation(ts_index));
@@ -391,7 +392,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         vector<int> old_to_new_labels = labels->cleanup();
         assert(new_num_labels == labels->get_size());
 
-        cout << "Renumbering labels: " << endl;// old_to_new_labels << endl;
+        cout << "Renumbering labels: " << old_to_new_labels << endl;
         for (unique_ptr<TransitionSystem> &ts : transition_systems) {
             ts->renumber_labels(old_to_new_labels, new_num_labels);
         }
