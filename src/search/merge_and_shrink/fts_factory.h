@@ -11,14 +11,16 @@
   merge-and-shrink should not need to know about planning task concepts.
 */
 
-class TaskProxy;
+namespace task_representation {
+class FTSTask;
+}
 
 namespace merge_and_shrink {
 class FactoredTransitionSystem;
 enum class Verbosity;
 
 extern FactoredTransitionSystem create_factored_transition_system(
-    const TaskProxy &task_proxy,
+    const task_representation::FTSTask &fts_task,
     bool compute_init_distances,
     bool compute_goal_distances,
     Verbosity verbosity);

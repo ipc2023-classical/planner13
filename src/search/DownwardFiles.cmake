@@ -656,11 +656,14 @@ fast_downward_plugin(
         merge_and_shrink/label_equivalence_relation
         merge_and_shrink/label_reduction
         merge_and_shrink/labels
+        merge_and_shrink/merge_and_shrink_algorithm
         merge_and_shrink/merge_and_shrink_heuristic
         merge_and_shrink/merge_and_shrink_representation
         merge_and_shrink/merge_scoring_function
         merge_and_shrink/merge_scoring_function_dfp
         merge_and_shrink/merge_scoring_function_goal_relevance
+        merge_and_shrink/merge_scoring_function_miasm
+        merge_and_shrink/merge_scoring_function_miasm_utils
         merge_and_shrink/merge_scoring_function_single_random
         merge_and_shrink/merge_scoring_function_total_order
         merge_and_shrink/merge_selector
@@ -669,10 +672,10 @@ fast_downward_plugin(
         merge_and_shrink/merge_strategy_aliases
         merge_and_shrink/merge_strategy_factory
         merge_and_shrink/merge_strategy_factory_precomputed
-        merge_and_shrink/merge_strategy_factory_sccs
+        #merge_and_shrink/merge_strategy_factory_sccs
         merge_and_shrink/merge_strategy_factory_stateless
         merge_and_shrink/merge_strategy_precomputed
-        merge_and_shrink/merge_strategy_sccs
+        #merge_and_shrink/merge_strategy_sccs
         merge_and_shrink/merge_strategy_stateless
         merge_and_shrink/merge_tree
         merge_and_shrink/merge_tree_factory

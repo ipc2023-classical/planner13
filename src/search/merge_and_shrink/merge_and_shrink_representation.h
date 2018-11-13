@@ -4,7 +4,10 @@
 #include <memory>
 #include <vector>
 
+namespace task_representation {
 class State;
+}
+using namespace task_representation;
 
 namespace merge_and_shrink {
 class Distances;

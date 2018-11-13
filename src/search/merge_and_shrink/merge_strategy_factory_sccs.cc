@@ -5,7 +5,7 @@
 #include "merge_tree_factory.h"
 #include "transition_system.h"
 
-#include "../task_proxy.h"
+#include "../task_representation/fts_task.h"
 
 #include "../algorithms/sccs.h"
 #include "../options/option_parser.h"
@@ -44,9 +44,9 @@ MergeStrategyFactorySCCs::MergeStrategyFactorySCCs(const options::Options &optio
 }
 
 unique_ptr<MergeStrategy> MergeStrategyFactorySCCs::compute_merge_strategy(
-    const TaskProxy &task_proxy,
+    const task_representation::FTSTask &fts_task,
     const FactoredTransitionSystem &fts) {
-    VariablesProxy vars = task_proxy.get_variables();
+    VariablesProxy vars = fts_task.get_variables();
     int num_vars = vars.size();
 
     // Compute SCCs of the causal graph.
@@ -54,7 +54,7 @@ unique_ptr<MergeStrategy> MergeStrategyFactorySCCs::compute_merge_strategy(
     cg.reserve(num_vars);
     for (VariableProxy var : vars) {
         const vector<int> &successors =
-            task_proxy.get_causal_graph().get_successors(var.get_id());
+            fts_task.get_causal_graph().get_successors(var.get_id());
         cg.push_back(successors);
     }
     vector<vector<int>> sccs(sccs::compute_maximal_sccs(cg));
@@ -105,12 +105,12 @@ unique_ptr<MergeStrategy> MergeStrategyFactorySCCs::compute_merge_strategy(
     }
 
     if (merge_selector) {
-        merge_selector->initialize(task_proxy);
+        merge_selector->initialize(fts_task);
     }
 
     return utils::make_unique_ptr<MergeStrategySCCs>(
         fts,
-        task_proxy,
+        fts_task,
         merge_tree_factory,
         merge_selector,
         move(non_singleton_cg_sccs),

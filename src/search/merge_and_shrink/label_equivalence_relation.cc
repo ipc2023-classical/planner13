@@ -124,4 +124,15 @@ int LabelEquivalenceRelation::add_label_group(const vector<int> &new_labels) {
     }
     return new_group_id;
 }
+
+// Duplicate
+int LabelEquivalenceRelation::add_label_group(
+    list<int>::const_iterator start_it, list<int>::const_iterator end_it) {
+    int new_group_id = grouped_labels.size();
+    grouped_labels.push_back(LabelGroup());
+    for (list<int>::const_iterator it = start_it; it != end_it; ++it) {
+        add_label_to_group(new_group_id, *it);
+    }
+    return new_group_id;
+}
 }

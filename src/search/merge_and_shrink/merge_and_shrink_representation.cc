@@ -3,7 +3,8 @@
 #include "distances.h"
 #include "types.h"
 
-#include "../task_proxy.h"
+#include "../task_representation/fts_task.h"
+#include "../task_representation/state.h"
 
 #include <algorithm>
 #include <cassert>
@@ -56,7 +57,7 @@ void MergeAndShrinkRepresentationLeaf::apply_abstraction_to_lookup_table(
 }
 
 int MergeAndShrinkRepresentationLeaf::get_value(const State &state) const {
-    int value = state[var_id].get_value();
+    int value = state[var_id];
     return lookup_table[value];
 }
 

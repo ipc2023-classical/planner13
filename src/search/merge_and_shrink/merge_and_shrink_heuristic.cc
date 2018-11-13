@@ -10,7 +10,7 @@
 #include "../option_parser.h"
 #include "../plugin.h"
 
-#include "../task_utils/task_properties.h"
+#include "../task_representation/state.h"
 
 #include "../utils/markup.h"
 #include "../utils/system.h"
@@ -29,7 +29,7 @@ MergeAndShrinkHeuristic::MergeAndShrinkHeuristic(const options::Options &opts)
 
     cout << "Initializing merge-and-shrink heuristic..." << endl;
     MergeAndShrinkAlgorithm algorithm(opts);
-    FactoredTransitionSystem fts = algorithm.build_factored_transition_system(task_proxy);
+    FactoredTransitionSystem fts = algorithm.build_factored_transition_system(*task);
 
     /*
       TODO: This constructor has quite a bit of fiddling with aspects of
@@ -82,7 +82,7 @@ MergeAndShrinkHeuristic::MergeAndShrinkHeuristic(const options::Options &opts)
 }
 
 int MergeAndShrinkHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state);
+    task_representation::State state = convert_global_state(global_state);
     int cost = mas_representation->get_value(state);
     if (cost == PRUNED_STATE || cost == INF) {
         // If state is unreachable or irrelevant, we encountered a dead end.

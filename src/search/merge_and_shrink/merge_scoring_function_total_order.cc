@@ -3,7 +3,7 @@
 #include "factored_transition_system.h"
 #include "transition_system.h"
 
-#include "../task_proxy.h"
+#include "../task_representation/fts_task.h"
 
 #include "../options/option_parser.h"
 #include "../options/options.h"
@@ -58,9 +58,9 @@ vector<double> MergeScoringFunctionTotalOrder::compute_scores(
     return scores;
 }
 
-void MergeScoringFunctionTotalOrder::initialize(const TaskProxy &task_proxy) {
+void MergeScoringFunctionTotalOrder::initialize(const task_representation::FTSTask &fts_task) {
     initialized = true;
-    int num_variables = task_proxy.get_variables().size();
+    int num_variables = fts_task.get_size();
     int max_transition_system_count = num_variables * 2 - 1;
     vector<int> transition_system_order;
     transition_system_order.reserve(max_transition_system_count);
