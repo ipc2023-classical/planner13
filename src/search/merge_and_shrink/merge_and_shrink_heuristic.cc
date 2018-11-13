@@ -91,7 +91,7 @@ int MergeAndShrinkHeuristic::compute_heuristic(const GlobalState &global_state) 
     return cost;
 }
 
-static shared_ptr<Heuristic> _parse(options::OptionParser &parser) {
+static Heuristic *_parse(options::OptionParser &parser) {
     parser.document_synopsis(
         "Merge-and-shrink heuristic",
         "This heuristic implements the algorithm described in the following "
@@ -177,9 +177,9 @@ static shared_ptr<Heuristic> _parse(options::OptionParser &parser) {
     if (parser.dry_run()) {
         return nullptr;
     } else {
-        return make_shared<MergeAndShrinkHeuristic>(opts);
+        return new MergeAndShrinkHeuristic(opts);
     }
 }
 
-static options::PluginShared<Evaluator> _plugin("merge_and_shrink", _parse);
+static options::Plugin<Heuristic> _plugin("merge_and_shrink", _parse);
 }

@@ -42,9 +42,9 @@ namespace task_representation {
         for (const auto &ts : this->transition_systems) {
             assert(ts);
             assert(ts->get_size() > 1);
-           for (const auto &tr: *ts) { //assert that there are no dead labels
-               assert(!tr.transitions.empty());
-           }
+//           for (const auto &tr: *ts) { //assert that there are no dead labels
+//               assert(!tr.transitions.empty());
+//           }
         }
 #endif
     }

@@ -228,5 +228,5 @@ static shared_ptr<MergeScoringFunction>_parse(options::OptionParser &parser) {
         return make_shared<MergeScoringFunctionTotalOrder>(options);
 }
 
-static options::PluginShared<MergeScoringFunction> _plugin("total_order", _parse);
+static options::PluginShared<MergeScoringFunction> _plugin("mas_total_order", _parse);
 }

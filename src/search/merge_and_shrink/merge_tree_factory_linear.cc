@@ -143,5 +143,5 @@ static shared_ptr<MergeTreeFactory> _parse(options::OptionParser &parser) {
         return make_shared<MergeTreeFactoryLinear>(opts);
 }
 
-static options::PluginShared<MergeTreeFactory> _plugin("linear", _parse);
+static options::PluginShared<MergeTreeFactory> _plugin("mas_linear", _parse);
 }

@@ -388,5 +388,5 @@ static PluginTypePlugin<LabelReduction> _type_plugin(
     "LabelReduction",
     "This page describes the current single 'option' for label reduction.");
 
-static PluginShared<LabelReduction> _plugin("exact", _parse);
+static PluginShared<LabelReduction> _plugin("mas_exact", _parse);
 }
