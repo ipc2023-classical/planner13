@@ -1,6 +1,5 @@
 #include "system.h"
 
-using namespace std;
 namespace utils {
 const char *get_exit_code_message_reentrant(ExitCode exitcode) {
     switch (exitcode) {

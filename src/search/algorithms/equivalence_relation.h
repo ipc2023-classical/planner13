@@ -8,7 +8,6 @@
 #include <vector>
 
 namespace equivalence_relation {
-    
 class Block;
 typedef std::list<int>::iterator ElementListIter;
 typedef std::list<int>::const_iterator ElementListConstIter;
