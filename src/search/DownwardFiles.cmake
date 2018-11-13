@@ -47,9 +47,13 @@ fast_downward_plugin(
     HELP "Core source files"
     SOURCES
         planner
+
+        #abstract_task
+        #axioms
         evaluation_context
         evaluation_result
         evaluator
+        #global_operator
         globals
         global_state
         heuristic_cache
@@ -71,6 +75,8 @@ fast_downward_plugin(
         search_statistics
         state_id
         state_registry
+        #task_proxy
+
     DEPENDS INT_PACKER ORDERED_SET SEGMENTED_VECTOR FTS_REPRESENTATION
     CORE_PLUGIN
 )
@@ -554,70 +560,70 @@ fast_downward_plugin(
     DEPENDS PRIORITY_QUEUES RELAXATION_HEURISTIC
 )
 
-fast_downward_plugin(
-    NAME CORE_TASKS
-    HELP "Core task transformations"
-    SOURCES
-        tasks/cost_adapted_task
-        tasks/delegating_task
-        tasks/root_task
-)
+#fast_downward_plugin(
+    #NAME CORE_TASKS
+    #HELP "Core task transformations"
+    #SOURCES
+        #tasks/cost_adapted_task
+        #tasks/delegating_task
+        #tasks/root_task
+#)
 
-fast_downward_plugin(
-    NAME EXTRA_TASKS
-    HELP "Non-core task transformations"
-    SOURCES
-        tasks/domain_abstracted_task
-        tasks/domain_abstracted_task_factory
-        tasks/modified_goals_task
-        tasks/modified_operator_costs_task
-    DEPENDS TASK_PROPERTIES
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME EXTRA_TASKS
+    #HELP "Non-core task transformations"
+    #SOURCES
+        #tasks/domain_abstracted_task
+        #tasks/domain_abstracted_task_factory
+        #tasks/modified_goals_task
+        #tasks/modified_operator_costs_task
+    #DEPENDS TASK_PROPERTIES
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME CAUSAL_GRAPH
-    HELP "Causal Graph"
-    SOURCES
-        task_utils/causal_graph
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME CAUSAL_GRAPH
+    #HELP "Causal Graph"
+    #SOURCES
+        #task_utils/causal_graph
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME SAMPLING
-    HELP "Sampling"
-    SOURCES
-        task_utils/sampling
-    DEPENDS SUCCESSOR_GENERATOR TASK_PROPERTIES
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME SAMPLING
+    #HELP "Sampling"
+    #SOURCES
+        #task_utils/sampling
+    #DEPENDS SUCCESSOR_GENERATOR TASK_PROPERTIES
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME SUCCESSOR_GENERATOR
-    HELP "Successor generator"
-    SOURCES
-        task_utils/successor_generator
-        task_utils/successor_generator_factory
-        task_utils/successor_generator_internals
-    DEPENDS TASK_PROPERTIES
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME SUCCESSOR_GENERATOR
+    #HELP "Successor generator"
+    #SOURCES
+        #task_utils/successor_generator
+        #task_utils/successor_generator_factory
+        #task_utils/successor_generator_internals
+    #DEPENDS TASK_PROPERTIES
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME TASK_PROPERTIES
-    HELP "Task properties"
-    SOURCES
-        task_utils/task_properties
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME TASK_PROPERTIES
+    #HELP "Task properties"
+    #SOURCES
+        #task_utils/task_properties
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME VARIABLE_ORDER_FINDER
-    HELP "Variable order finder"
-    SOURCES
-        task_utils/variable_order_finder
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME VARIABLE_ORDER_FINDER
+    #HELP "Variable order finder"
+    #SOURCES
+        #task_utils/variable_order_finder
+    #DEPENDENCY_ONLY
+#)
 
 fast_downward_plugin(
     NAME CEGAR
@@ -763,7 +769,7 @@ fast_downward_plugin(
     HELP "Algorithm to compute the strongly connected components (SCCs) of a "
          "directed graph."
     SOURCES
-        algorithms/sccs.cc
+        algorithms/sccs
     DEPENDENCY_ONLY
 )
 

@@ -4,11 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace task_representation {
-class SASTask;
-}
-
-using namespace task_representation;
+class TaskProxy;
 
 namespace merge_and_shrink {
 class FactoredTransitionSystem;
@@ -27,7 +23,7 @@ public:
     virtual bool requires_goal_distances() const = 0;
 
     // Overriding methods must set initialized to true.
-    virtual void initialize(const SASTask &) {
+    virtual void initialize(const TaskProxy &) {
         initialized = true;
     }
 

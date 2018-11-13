@@ -25,7 +25,7 @@ static shared_ptr<MergeStrategyFactory>_parse_dfp(options::OptionParser &parser)
         "the following paper:" + utils::format_paper_reference(
             {"Silvan Sievers", "Martin Wehrle", "Malte Helmert"},
             "Generalized Label Reduction for Merge-and-Shrink Heuristics",
-            "http://ai.cs.unibas.ch/papers/sievers-et-al-aaai2014.pdf",
+            "https://ai.dmi.unibas.ch/papers/sievers-et-al-aaai2014.pdf",
             "Proceedings of the 28th AAAI Conference on Artificial"
             " Intelligence (AAAI 2014)",
             "2358-2366",
@@ -47,7 +47,7 @@ static shared_ptr<MergeStrategyFactory>_parse_dfp(options::OptionParser &parser)
         "ordering options void.",
         "false");
     if (parser.dry_run() && !parser.help_mode())
-        cerr << "Warning: this command line option has been deprecated. Please "
+        cout << "Warning: this command line option has been deprecated. Please "
             "consult fast-downward.org for equivalent new command line options."
              << endl;
 
@@ -97,7 +97,7 @@ static shared_ptr<MergeStrategyFactory> _parse_linear(
         "are described in the paper:" + utils::format_paper_reference(
             {"Malte Helmert", "Patrik Haslum", "Joerg Hoffmann"},
             "Flexible Abstraction Heuristics for Optimal Sequential Planning",
-            "http://ai.cs.unibas.ch/papers/helmert-et-al-icaps2007.pdf",
+            "https://ai.dmi.unibas.ch/papers/helmert-et-al-icaps2007.pdf",
             "Proceedings of the Seventeenth International Conference on"
             " Automated Planning and Scheduling (ICAPS 2007)",
             "176-183",
@@ -106,7 +106,7 @@ static shared_ptr<MergeStrategyFactory> _parse_linear(
         "equivalent configuration\n"
         "{{{\nmerge_strategy=merge_precomputed(merge_tree=linear(<variable_order>))\n}}}");
     if (parser.dry_run() && !parser.help_mode())
-        cerr << "Warning: this command line option has been deprecated. Please "
+        cout << "Warning: this command line option has been deprecated. Please "
             "consult fast-downward.org for equivalent new command line options."
              << endl;
 

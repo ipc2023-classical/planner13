@@ -153,25 +153,27 @@ void LabelEquivalenceRelation::apply_label_mapping(
 }
 
 void LabelEquivalenceRelation::renumber_labels(
-    const vector<int> &old_to_new_labels, int new_num_labels) {
-    vector<pair<LabelGroupID, LabelIter>> label_to_positions_copy(label_to_positions);
-    vector<pair<LabelGroupID, LabelIter>>().swap(label_to_positions);
-    label_to_positions.resize(new_num_labels);
+    const vector<int> &old_to_new_labels, int) {
+    // old_to_new_labels has to map to *all* new label numbers, i.e., the
+    // renumbering must be complete (a surjective function).
+    vector<pair<LabelGroupID, LabelIter>> new_label_to_positions(labels.get_max_size());
     for (size_t old_label_no = 0; old_label_no < old_to_new_labels.size(); ++old_label_no) {
         int new_label_no = old_to_new_labels[old_label_no];
         if (new_label_no == -1) {
             // Skip already reduced labels (= -1)
-            //Removed assertion because it is violated in the FTS cleanup
+            // Removed assertion because it is violated in the FTS cleanup, but
+            // not conceptually, only because there, the labels object is
+            // updated before calling this method.
             //assert(!labels.is_current_label(old_label_no));
-            
         } else {
-            LabelGroupID group_id = label_to_positions_copy[old_label_no].first;
-            LabelIter label_it = label_to_positions_copy[old_label_no].second;
+            LabelGroupID group_id = label_to_positions[old_label_no].first;
+            LabelIter label_it = label_to_positions[old_label_no].second;
             grouped_labels[group_id].erase(label_it);
             LabelIter new_label_it = grouped_labels[group_id].insert(new_label_no);
-            label_to_positions[new_label_no] = make_pair(group_id, new_label_it);
+            new_label_to_positions[new_label_no] = make_pair(group_id, new_label_it);
         }
     }
+    label_to_positions.swap(new_label_to_positions);
 }
 
 void LabelEquivalenceRelation::move_group_into_group(
