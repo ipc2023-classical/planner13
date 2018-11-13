@@ -560,43 +560,43 @@ fast_downward_plugin(
     DEPENDS PRIORITY_QUEUES RELAXATION_HEURISTIC
 )
 
-fast_downward_plugin(
-    NAME CORE_TASKS
-    HELP "Core task transformations"
-    SOURCES
-        tasks/cost_adapted_task
-        tasks/delegating_task
-        tasks/root_task
-)
+#fast_downward_plugin(
+    #NAME CORE_TASKS
+    #HELP "Core task transformations"
+    #SOURCES
+        #tasks/cost_adapted_task
+        #tasks/delegating_task
+        #tasks/root_task
+#)
 
-fast_downward_plugin(
-    NAME EXTRA_TASKS
-    HELP "Non-core task transformations"
-    SOURCES
-        tasks/domain_abstracted_task
-        tasks/domain_abstracted_task_factory
-        tasks/modified_goals_task
-        tasks/modified_operator_costs_task
-    DEPENDS TASK_PROPERTIES
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME EXTRA_TASKS
+    #HELP "Non-core task transformations"
+    #SOURCES
+        #tasks/domain_abstracted_task
+        #tasks/domain_abstracted_task_factory
+        #tasks/modified_goals_task
+        #tasks/modified_operator_costs_task
+    #DEPENDS TASK_PROPERTIES
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME CAUSAL_GRAPH
-    HELP "Causal Graph"
-    SOURCES
-        task_utils/causal_graph
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME CAUSAL_GRAPH
+    #HELP "Causal Graph"
+    #SOURCES
+        #task_utils/causal_graph
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME SAMPLING
-    HELP "Sampling"
-    SOURCES
-        task_utils/sampling
-    DEPENDS SUCCESSOR_GENERATOR TASK_PROPERTIES
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME SAMPLING
+    #HELP "Sampling"
+    #SOURCES
+        #task_utils/sampling
+    #DEPENDS SUCCESSOR_GENERATOR TASK_PROPERTIES
+    #DEPENDENCY_ONLY
+#)
 
 #fast_downward_plugin(
     #NAME SUCCESSOR_GENERATOR
@@ -617,13 +617,13 @@ fast_downward_plugin(
     #DEPENDENCY_ONLY
 #)
 
-fast_downward_plugin(
-    NAME VARIABLE_ORDER_FINDER
-    HELP "Variable order finder"
-    SOURCES
-        task_utils/variable_order_finder
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME VARIABLE_ORDER_FINDER
+    #HELP "Variable order finder"
+    #SOURCES
+        #task_utils/variable_order_finder
+    #DEPENDENCY_ONLY
+#)
 
 fast_downward_plugin(
     NAME CEGAR
