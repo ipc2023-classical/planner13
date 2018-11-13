@@ -181,5 +181,5 @@ static shared_ptr<Heuristic> _parse(options::OptionParser &parser) {
     }
 }
 
-static options::Plugin<Evaluator> _plugin("merge_and_shrink", _parse);
+static options::PluginShared<Evaluator> _plugin("merge_and_shrink", _parse);
 }
