@@ -47,9 +47,13 @@ fast_downward_plugin(
     HELP "Core source files"
     SOURCES
         planner
+
+        #abstract_task
+        #axioms
         evaluation_context
         evaluation_result
         evaluator
+        #global_operator
         globals
         global_state
         heuristic_cache
@@ -71,6 +75,8 @@ fast_downward_plugin(
         search_statistics
         state_id
         state_registry
+        #task_proxy
+
     DEPENDS INT_PACKER ORDERED_SET SEGMENTED_VECTOR FTS_REPRESENTATION
     CORE_PLUGIN
 )
@@ -592,24 +598,24 @@ fast_downward_plugin(
     DEPENDENCY_ONLY
 )
 
-fast_downward_plugin(
-    NAME SUCCESSOR_GENERATOR
-    HELP "Successor generator"
-    SOURCES
-        task_utils/successor_generator
-        task_utils/successor_generator_factory
-        task_utils/successor_generator_internals
-    DEPENDS TASK_PROPERTIES
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME SUCCESSOR_GENERATOR
+    #HELP "Successor generator"
+    #SOURCES
+        #task_utils/successor_generator
+        #task_utils/successor_generator_factory
+        #task_utils/successor_generator_internals
+    #DEPENDS TASK_PROPERTIES
+    #DEPENDENCY_ONLY
+#)
 
-fast_downward_plugin(
-    NAME TASK_PROPERTIES
-    HELP "Task properties"
-    SOURCES
-        task_utils/task_properties
-    DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+    #NAME TASK_PROPERTIES
+    #HELP "Task properties"
+    #SOURCES
+        #task_utils/task_properties
+    #DEPENDENCY_ONLY
+#)
 
 fast_downward_plugin(
     NAME VARIABLE_ORDER_FINDER
