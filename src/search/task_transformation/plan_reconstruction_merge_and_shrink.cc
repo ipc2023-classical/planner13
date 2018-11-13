@@ -91,8 +91,10 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
     }
 
 void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
+
     const std::vector<int> & label_path = plan.get_labels ();
     const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
+    cout << "M&S reconstruction of plan with " << label_path.size() << " steps for task with " << predecessor_task->get_size() << " variables"   << endl;
     assert(label_path.size() + 1 == traversed_states.size());
     
     std::vector<int> new_label_path;

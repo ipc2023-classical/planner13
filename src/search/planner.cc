@@ -71,7 +71,6 @@ int main(int argc, const char **argv) {
     //g_main_task->dump();
     if (g_main_task->trivially_solved()) {
         cout << "Task solved without search" << endl;
-        utils::exit_with(ExitCode::PLAN_FOUND);
         Plan plan (g_main_task.get());
         if (transformer) {
             utils::Timer reconstruct_timer;

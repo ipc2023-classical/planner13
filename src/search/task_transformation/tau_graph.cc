@@ -132,6 +132,7 @@ namespace task_transformation {
     std::vector<std::pair<LabelID, int>>
     TauGraph::find_shortest_path (int source, const std::vector<bool> & target) const {
 
+        cout << "Find shortest path" << endl;
         std::vector<std::pair<LabelID, int>> result_path;
 
         int num_states = adjacency_matrix.size();
@@ -140,7 +141,6 @@ namespace task_transformation {
         distances[source] = 0;
         vector<pair<int, LabelID>> best_supporter(num_states, pair<int, LabelID> (-1, LabelID(-1)));
 
-
         priority_queues::AdaptiveQueue<int> queue;
         queue.push(0, source);
 
@@ -148,7 +148,6 @@ namespace task_transformation {
             pair<int, int> top_pair = queue.pop();
             int distance = top_pair.first;
             int state = top_pair.second;
-
             if (target[state]) {
                 while(best_supporter[state].first != -1) {
                     result_path.push_back(pair<LabelID, int>

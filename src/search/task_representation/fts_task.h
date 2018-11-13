@@ -61,6 +61,7 @@ public:
         return *labels;
     }
 
+    std::vector<int> get_initial_state() const ;
     bool trivially_solved() const;
 
     std::shared_ptr<SearchTask> get_search_task(bool print_time = false) const;

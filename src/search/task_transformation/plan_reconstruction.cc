@@ -5,8 +5,8 @@ using namespace std;
 
 namespace task_transformation {
 PlanReconstructionSequence::PlanReconstructionSequence(
-    vector<shared_ptr<PlanReconstruction>> plan_reconstructions)
-    : plan_reconstructions(plan_reconstructions) {
+    vector<shared_ptr<PlanReconstruction>> plan_reconstructions_)
+    : plan_reconstructions(plan_reconstructions_) {
 
     std::reverse(plan_reconstructions.begin(), plan_reconstructions.end());
 }

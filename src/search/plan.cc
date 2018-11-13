@@ -18,7 +18,7 @@ Plan::Plan (const task_representation::FTSTask *task_) :
     task(task_), solved(false) {
     if (task->trivially_solved()) {
         solved = true;
-        
+        states.push_back(task->get_initial_state());
     }
     }
 
@@ -52,4 +52,15 @@ void Plan::set_plan_operators(const std::vector<GlobalState> & states_,
 //        states[i+1].dump_fdr();
 //    }
 }
+
+
+ostream &operator<<(ostream &os, const PlanState & s) {
+    for (int val : s.values) {
+        os << " " << val;
+    }
+    
+
+    return os << " ";
+}
+
 

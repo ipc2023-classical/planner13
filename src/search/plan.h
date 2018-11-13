@@ -58,7 +58,7 @@ PlanState(std::vector<int> &&values)
     }
 
     int operator[](int var) const {
-        return (*this)[var];
+        return values[var];
     }
 
     void set(int var, int val)  {
@@ -68,6 +68,8 @@ PlanState(std::vector<int> &&values)
     const std::vector<int> &get_values() const {
         return values;
     }
+
+    friend std::ostream &operator<<(std::ostream &os, const PlanState & plan_state);
 };
 
 

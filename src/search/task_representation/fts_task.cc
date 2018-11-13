@@ -131,6 +131,16 @@ void FTSTask::dump() const {
         ts->dump_labels_and_transitions();
     }
 }
+
+    
+vector<int> FTSTask::get_initial_state() const {
+    vector<int> res;
+    res.reserve(transition_systems.size());
+    for (const auto & ts: transition_systems) {
+        res.push_back(ts->get_init_state());
+    }
+    return res;
+}
     
     bool FTSTask::trivially_solved() const {
         return transition_systems.size() == 0 ||
