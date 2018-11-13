@@ -503,25 +503,25 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     bool has_simplified; 
     do {
         has_simplified = false;
-    // Label reduction of atomic FTS.
-    if (label_reduction && label_reduction->reduce_atomic_fts()) {
-        bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
-        if (verbosity >= Verbosity::NORMAL && reduced) {
-            print_time(timer, "after label reduction of atomic FTS");
+        // Label reduction of atomic FTS.
+        if (label_reduction && label_reduction->reduce_atomic_fts()) {
+            bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
+            if (verbosity >= Verbosity::NORMAL && reduced) {
+                print_time(timer, "after label reduction of atomic FTS");
+            }
         }
-    }
 
-    if (ran_out_of_time(timer)) {
-        return fts;
-    }
-
-    if (shrink_strategy && shrink_atomic_fts) {
-        shrink_strategy->apply_shrinking_transformation(fts, verbosity);
-        
-        if (verbosity >= Verbosity::NORMAL) {
-            print_time(timer, "after shrinking of atomic FTS");
+        if (ran_out_of_time(timer)) {
+            return fts;
         }
-    }
+
+        if (shrink_strategy && shrink_atomic_fts) {
+            shrink_strategy->apply_shrinking_transformation(fts, verbosity);
+
+            if (verbosity >= Verbosity::NORMAL) {
+                print_time(timer, "after shrinking of atomic FTS");
+            }
+        }
 
         has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
 
@@ -532,9 +532,9 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             return fts;
         }
 
-    if (ran_out_of_time(timer)) {
-        return fts;
-    }
+        if (ran_out_of_time(timer)) {
+            return fts;
+        }
     } while (/*run_atomic_loop && */has_simplified);
 
     cout << "Merge-and-shrink atomic construction runtime: " << timer << endl;
