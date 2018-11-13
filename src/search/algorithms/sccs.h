@@ -166,9 +166,9 @@ public:
 			    dfs_numbers, dfs_minima, result, is_goal);
 
     std::reverse(result.begin(), result.end());
-}
-    
-SCC(const std::vector<std::vector<Q > > & _graph) : graph(_graph){
+    }
+
+    SCC(const std::vector<std::vector<Q > > & _graph) : graph(_graph){
         compute_scc_equivalence(graph, sccs);
     }
 
@@ -182,7 +182,7 @@ SCC(const std::vector<std::vector<Q > > & _graph) : graph(_graph){
     }
 
     const std::vector <int> & get_scc_layer() {
-      if(vertex_scc.empty()) compute_scc_graph();	
+      if(vertex_scc.empty()) compute_scc_graph();
       return scc_layer;
     }
 
@@ -195,11 +195,6 @@ SCC(const std::vector<std::vector<Q > > & _graph) : graph(_graph){
       if(vertex_scc.empty()) compute_scc_graph();
       return scc_graph;
     }
-
-
-    
-    
 };
-
 }
 #endif
