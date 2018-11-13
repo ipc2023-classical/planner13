@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 
-class TaskProxy;
+namespace task_representation {
+class FTSTask;
+}
 
 namespace merge_and_shrink {
 class FactoredTransitionSystem;
@@ -21,7 +23,7 @@ public:
     virtual std::pair<int, int> select_merge(
         const FactoredTransitionSystem &fts,
         const std::vector<int> &indices_subset = std::vector<int>()) const = 0;
-    virtual void initialize(const TaskProxy &task_proxy) = 0;
+    virtual void initialize(const task_representation::FTSTask &fts_task) = 0;
     void dump_options() const;
     virtual bool requires_init_distances() const = 0;
     virtual bool requires_goal_distances() const = 0;

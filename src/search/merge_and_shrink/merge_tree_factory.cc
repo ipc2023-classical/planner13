@@ -11,6 +11,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace task_representation;
 
 namespace merge_and_shrink {
 MergeTreeFactory::MergeTreeFactory(const options::Options &options)
@@ -38,7 +39,7 @@ void MergeTreeFactory::dump_options() const {
 }
 
 unique_ptr<MergeTree> MergeTreeFactory::compute_merge_tree(
-    const TaskProxy &,
+    const FTSTask &,
     const FactoredTransitionSystem &,
     const vector<int> &) {
     cerr << "This merge tree does not support being computed on a subset "

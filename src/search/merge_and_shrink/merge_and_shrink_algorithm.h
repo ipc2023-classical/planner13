@@ -3,7 +3,9 @@
 
 #include <memory>
 
-class TaskProxy;
+namespace task_representation {
+class FTSTask;
+}
 
 namespace options {
 class OptionParser;
@@ -51,7 +53,7 @@ class MergeAndShrinkAlgorithm {
     void statistics(int maximum_intermediate_size) const;
     void main_loop(
         FactoredTransitionSystem &fts,
-        const TaskProxy &task_proxy,
+        const task_representation::FTSTask &fts_task,
         const utils::Timer &timer);
 
     void report_peak_memory_delta(bool final = false) const;
@@ -59,7 +61,7 @@ public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;
     void warn_on_unusual_options() const;
-    FactoredTransitionSystem build_factored_transition_system(const TaskProxy &task_proxy);
+    FactoredTransitionSystem build_factored_transition_system(const task_representation::FTSTask &fts_task);
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

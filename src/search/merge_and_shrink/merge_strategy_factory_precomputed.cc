@@ -19,10 +19,10 @@ MergeStrategyFactoryPrecomputed::MergeStrategyFactoryPrecomputed(
 }
 
 unique_ptr<MergeStrategy> MergeStrategyFactoryPrecomputed::compute_merge_strategy(
-    const TaskProxy &task_proxy,
+    const task_representation::FTSTask &fts_task,
     const FactoredTransitionSystem &fts) {
     unique_ptr<MergeTree> merge_tree =
-        merge_tree_factory->compute_merge_tree(task_proxy);
+        merge_tree_factory->compute_merge_tree(fts_task);
     return utils::make_unique_ptr<MergeStrategyPrecomputed>(fts, move(merge_tree));
 }
 
@@ -62,5 +62,5 @@ static shared_ptr<MergeStrategyFactory>_parse(options::OptionParser &parser) {
         return make_shared<MergeStrategyFactoryPrecomputed>(opts);
 }
 
-static options::PluginShared<MergeStrategyFactory> _plugin("merge_precomputed", _parse);
+static options::PluginShared<MergeStrategyFactory> _plugin("mas_merge_precomputed", _parse);
 }

@@ -18,9 +18,9 @@ MergeStrategyFactoryStateless::MergeStrategyFactoryStateless(
 }
 
 unique_ptr<MergeStrategy> MergeStrategyFactoryStateless::compute_merge_strategy(
-    const TaskProxy &task_proxy,
+    const task_representation::FTSTask &fts_task,
     const FactoredTransitionSystem &fts) {
-    merge_selector->initialize(task_proxy);
+    merge_selector->initialize(fts_task);
     return utils::make_unique_ptr<MergeStrategyStateless>(fts, merge_selector);
 }
 
@@ -57,5 +57,5 @@ static shared_ptr<MergeStrategyFactory>_parse(options::OptionParser &parser) {
         return make_shared<MergeStrategyFactoryStateless>(opts);
 }
 
-static options::PluginShared<MergeStrategyFactory> _plugin("merge_stateless", _parse);
+static options::PluginShared<MergeStrategyFactory> _plugin("mas_merge_stateless", _parse);
 }

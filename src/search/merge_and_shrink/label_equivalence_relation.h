@@ -108,6 +108,7 @@ public:
     // Moves all labels from one group into the other.
     void move_group_into_group(int from_group_id, int to_group_id);
     int add_label_group(const std::vector<int> &new_labels);
+    int add_label_group(std::list<int>::const_iterator start_it, std::list<int>::const_iterator end_it);
 
     bool is_empty_group(int group_id) const {
         return grouped_labels[group_id].empty();

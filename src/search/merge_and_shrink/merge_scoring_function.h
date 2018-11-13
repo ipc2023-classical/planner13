@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 
-class TaskProxy;
+namespace task_representation {
+class FTSTask;
+}
 
 namespace merge_and_shrink {
 class FactoredTransitionSystem;
@@ -23,7 +25,7 @@ public:
     virtual bool requires_goal_distances() const = 0;
 
     // Overriding methods must set initialized to true.
-    virtual void initialize(const TaskProxy &) {
+    virtual void initialize(const task_representation::FTSTask &) {
         initialized = true;
     }
 

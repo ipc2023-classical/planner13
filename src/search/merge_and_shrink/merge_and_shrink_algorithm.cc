@@ -16,8 +16,6 @@
 #include "../options/option_parser.h"
 #include "../options/options.h"
 
-#include "../task_utils/task_properties.h"
-
 #include "../utils/markup.h"
 #include "../utils/math.h"
 #include "../utils/system.h"
@@ -175,7 +173,7 @@ bool MergeAndShrinkAlgorithm::prune_fts(
 
 void MergeAndShrinkAlgorithm::main_loop(
     FactoredTransitionSystem &fts,
-    const TaskProxy &task_proxy,
+    const task_representation::FTSTask &fts_task,
     const utils::Timer &timer) {
     int maximum_intermediate_size = 0;
     for (int i = 0; i < fts.get_size(); ++i) {
@@ -186,7 +184,7 @@ void MergeAndShrinkAlgorithm::main_loop(
     }
 
     unique_ptr<MergeStrategy> merge_strategy =
-        merge_strategy_factory->compute_merge_strategy(task_proxy, fts);
+        merge_strategy_factory->compute_merge_strategy(fts_task, fts);
     merge_strategy_factory = nullptr;
 
     int iteration_counter = 0;
@@ -299,7 +297,7 @@ void MergeAndShrinkAlgorithm::main_loop(
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
-    const TaskProxy &task_proxy) {
+    const task_representation::FTSTask &fts_task) {
     if (starting_peak_memory) {
         cerr << "Calling build_factored_transition_system twice is not "
              << "supported!" << endl;
@@ -308,12 +306,12 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     starting_peak_memory = utils::get_peak_memory_in_kb();
 
     if (label_reduction) {
-        label_reduction->initialize(task_proxy);
+        label_reduction->initialize(fts_task);
     }
 
     utils::Timer timer;
     cout << "Running merge-and-shrink algorithm..." << endl;
-    task_properties::verify_no_axioms(task_proxy);
+//    task_properties::verify_no_axioms(fts_task);
     dump_options();
     warn_on_unusual_options();
     cout << endl;
@@ -328,7 +326,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         prune_irrelevant_states;
     FactoredTransitionSystem fts =
         create_factored_transition_system(
-            task_proxy,
+            fts_task,
             compute_init_distances,
             compute_goal_distances,
             verbosity);
@@ -344,7 +342,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     if (unsolvable) {
         cout << "Atomic FTS is unsolvable, stopping computation." << endl;
     } else {
-        main_loop(fts, task_proxy, timer);
+        main_loop(fts, fts_task, timer);
     }
     const bool final = true;
     report_peak_memory_delta(final);

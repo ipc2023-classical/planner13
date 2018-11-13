@@ -6,14 +6,16 @@
 #include <memory>
 #include <vector>
 
-class TaskProxy;
+namespace task_representation {
+class FTSTask;
+}
 
 namespace merge_and_shrink {
 class MergeSelector;
 class MergeTreeFactory;
 class MergeTree;
 class MergeStrategySCCs : public MergeStrategy {
-    const TaskProxy &task_proxy;
+    const task_representation::FTSTask &fts_task;
     std::shared_ptr<MergeTreeFactory> merge_tree_factory;
     std::shared_ptr<MergeSelector> merge_selector;
     std::vector<std::vector<int>> non_singleton_cg_sccs;
@@ -25,7 +27,7 @@ class MergeStrategySCCs : public MergeStrategy {
 public:
     MergeStrategySCCs(
         const FactoredTransitionSystem &fts,
-        const TaskProxy &task_proxy,
+        const task_representation::FTSTask &fts_task,
         const std::shared_ptr<MergeTreeFactory> &merge_tree_factory,
         const std::shared_ptr<MergeSelector> &merge_selector,
         std::vector<std::vector<int>> non_singleton_cg_sccs,

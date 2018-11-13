@@ -4,7 +4,9 @@
 #include <memory>
 #include <vector>
 
-class TaskProxy;
+namespace task_representation {
+class FTSTask;
+}
 
 namespace equivalence_relation {
 class EquivalenceRelation;
@@ -75,7 +77,7 @@ class LabelReduction {
         const FactoredTransitionSystem &fts) const;
 public:
     explicit LabelReduction(const options::Options &options);
-    void initialize(const TaskProxy &task_proxy);
+    void initialize(const task_representation::FTSTask &fts_task);
     bool reduce(
         const std::pair<int, int> &next_merge,
         FactoredTransitionSystem &fts,

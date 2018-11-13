@@ -8,7 +8,7 @@
 
 #include "../option_parser.h"
 #include "../plugin.h"
-#include "../task_proxy.h"
+#include "../task_representation/fts_task.h"
 
 #include "../algorithms/equivalence_relation.h"
 #include "../utils/collections.h"
@@ -38,11 +38,11 @@ bool LabelReduction::initialized() const {
     return !transition_system_order.empty();
 }
 
-void LabelReduction::initialize(const TaskProxy &task_proxy) {
+void LabelReduction::initialize(const task_representation::FTSTask &fts_task) {
     assert(!initialized());
 
     // Compute the transition system order.
-    size_t max_transition_system_count = task_proxy.get_variables().size() * 2 - 1;
+    size_t max_transition_system_count = fts_task.get_size() * 2 - 1;
     transition_system_order.reserve(max_transition_system_count);
     if (lr_system_order == REGULAR
         || lr_system_order == RANDOM) {
@@ -388,5 +388,5 @@ static PluginTypePlugin<LabelReduction> _type_plugin(
     "LabelReduction",
     "This page describes the current single 'option' for label reduction.");
 
-static PluginShared<LabelReduction> _plugin("exact", _parse);
+static PluginShared<LabelReduction> _plugin("mas_exact", _parse);
 }
