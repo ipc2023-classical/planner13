@@ -769,7 +769,7 @@ fast_downward_plugin(
     HELP "Algorithm to compute the strongly connected components (SCCs) of a "
          "directed graph."
     SOURCES
-        algorithms/sccs.cc
+        algorithms/sccs
     DEPENDENCY_ONLY
 )
 
