@@ -99,11 +99,6 @@ namespace task_transformation {
             cout << "OwnLabelShrinking applicable in " <<
                 (equivalences_to_apply.size() + exclude_transition_systems.size())  << " out of " << old_index << " systems" << endl;
 
-            cout << "Excluding TSs: ";
-            for (int ts : exclude_transition_systems) {
-                cout  << " " << ts;
-            }
-            cout << endl;
                 
             // 1) Extract the plan reconstruction M&S and insert it in the list of plan
             // reconstruction steps

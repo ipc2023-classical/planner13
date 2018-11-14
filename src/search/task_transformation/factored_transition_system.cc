@@ -367,6 +367,16 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         // consecutively since factor indices are not stored anywhere.)
         //cout << "Number of remaining factors: " << num_active_entries << endl;
 
+
+        if (exclude_transition_systems.size()){
+        cout << "Excluding TSs: ";
+        for (int ts : exclude_transition_systems) {
+            cout  << " " << transition_systems[ts]->tag();
+        }
+        cout << endl;
+        }
+        
+
         // 1) Construct plan reconstruction object       
         vector<unique_ptr<TransitionSystem> > new_transition_systems;
         vector<unique_ptr<Distances> > new_distances;
@@ -428,8 +438,8 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
                                                                               labels);
 
-            cout << "Reinitialize predecessor task: " << endl;
-            predecessor_fts_task->dump();
+            // cout << "Reinitialize predecessor task: " << endl;
+            // predecessor_fts_task->dump();
         } else {
             predecessor_fts_task = nullptr;
         }

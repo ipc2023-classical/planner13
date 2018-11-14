@@ -25,7 +25,7 @@ namespace task_transformation {
 
         const TransitionSystem & ts = fts.get_ts(index);
         int num_states = ts.get_size();
-       cout<< "Constructing Tau Graph for: "; ts.dump_labels_and_transitions(); cout <<endl;
+       // cout<< "Constructing Tau Graph for: "; ts.dump_labels_and_transitions(); cout <<endl;
  
         std::vector<std::map<int, TauTransition>> adjacency_map(num_states);
 
@@ -140,7 +140,7 @@ namespace task_transformation {
     std::vector<std::pair<LabelID, int>>
     TauGraph::find_shortest_path (int source, const std::vector<bool> & target) const {
 
-        cout << "Find shortest path" << endl;
+        // cout << "Find shortest path" << endl;
         std::vector<std::pair<LabelID, int>> result_path;
 
         int num_states = adjacency_matrix.size();

@@ -15,7 +15,7 @@ namespace task_transformation {
 // Does s has a transition with label to some t whose abstraction is abstract_target?
 bool TauShrinking::is_target(int s, int label, int abstract_target) const {
     for (const Transition & tr : transition_system->get_transitions_with_label(label) ) {
-        if (tr.src == s && abstraction[tr.target] == abstract_target) {
+        if (tr.src == s &&  (abstract_target == -1 || abstraction[tr.target] == abstract_target)) {
             return true;
         }
     }
@@ -53,7 +53,13 @@ reconstruct_step(int label, const PlanState & abstract_target_state,
                  std::vector<PlanState> & new_traversed_states) const {
 
     int source = new_traversed_states.back()[ts_index_predecessor];
-    int abstract_target = abstract_target_state[ts_index_successor];
+    int abstract_target = ts_index_successor >= 0 ?  abstract_target_state[ts_index_successor] : -1;
+
+    // if (transition_system->get_incorporated_variables().size() == 1) {
+    //     cout << g_sas_task()->get_fact_name(FactPair(transition_system->get_incorporated_variables()[0], source)) << endl;
+    // }
+
+   
     if (is_target(source, label, abstract_target)) {
         return; // Nothing to do
     }
@@ -73,7 +79,7 @@ reconstruct_step(int label, const PlanState & abstract_target_state,
 
 void TauShrinking::reconstruct_goal_step(std::vector<int> & new_label_path,
                                          std::vector<PlanState> & new_traversed_states) const {
-    cout << "Reconstructing goal: " << transition_system->get_incorporated_variables()[0] << endl;
+    // cout << "Reconstructing goal: " << transition_system->get_incorporated_variables()[0] << endl;
     assert(!new_traversed_states.empty());
     assert (ts_index_predecessor >= 0);
     assert(ts_index_predecessor < (int)(new_traversed_states.back().size()));
@@ -106,11 +112,11 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         tau_shrinking->reconstruct_goal_step(new_label_path, new_traversed_states);
     }
 
-    cout << "Tau path " << new_traversed_states[0];
-    for(size_t step = 0; step < new_label_path.size(); ++step) {
-        cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
-    }
-    cout << endl;
+    // cout << "Tau path " << new_traversed_states[0];
+    // for(size_t step = 0; step < new_label_path.size(); ++step) {
+    //     cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
+    // }
+    // cout << endl;
 
     plan.set_plan(move(new_traversed_states), move(new_label_path));    
 }
