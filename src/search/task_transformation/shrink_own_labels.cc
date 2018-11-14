@@ -40,11 +40,14 @@ namespace task_transformation {
     }
 
     
-    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int index) const  {
-        StateEquivalenceRelation equivalence_relation =
-            compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
-        return fts.apply_abstraction(index, equivalence_relation, verbosity);
-        
+    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &// fts
+                                                         , Verbosity // verbosity
+                                                         , int // index
+        ) const  {
+        // StateEquivalenceRelation equivalence_relation =
+        //     compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
+        // return fts.apply_abstraction(index, equivalence_relation, verbosity);
+        return false;
     }
     
     bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity) const  {
@@ -57,8 +60,8 @@ namespace task_transformation {
         vector<StateEquivalenceRelation> equivalences (fts.get_size());
         vector<int> equivalences_to_apply;
         vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction;
-        
-        for (int index = 0; index < fts.get_size(); ++index) {
+          
+      for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
                 unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
                 initial_state_values.push_back(fts.get_ts(index).get_init_state());

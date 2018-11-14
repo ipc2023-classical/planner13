@@ -429,6 +429,8 @@ void TransitionSystem::apply_label_reduction(
 
         compute_locally_equivalent_labels();
     }
+    
+    selfloop_everywhere_label_groups.clear();
 
     assert(are_transitions_sorted_unique());
 }
@@ -438,6 +440,7 @@ void TransitionSystem::apply_label_mapping(
     // We can leave label group IDs (and thus wehre their transitions are)
     // intact and only need to change the label numbers in label groups.
     label_equivalence_relation->apply_label_mapping(label_mapping);
+    selfloop_everywhere_label_groups.clear();
 }
 
 
@@ -459,12 +462,9 @@ bool TransitionSystem::remove_labels(const vector<LabelID> & labels) {
                 relevant_label_groups.erase(item);
             }
         }
-
-        if (!selfloop_everywhere_label_groups.empty()) {
-            selfloop_everywhere_label_groups[empty_group] = false;
-        }
     }
-
+    
+    selfloop_everywhere_label_groups.clear();
     return relevant_label_group_removed;
 }
 
@@ -639,8 +639,8 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
     }
     
     bool TransitionSystem::is_selfloop_everywhere(LabelID label) const {
+
         if (selfloop_everywhere_label_groups.empty()) {
-            
             selfloop_everywhere_label_groups.resize(label_equivalence_relation->get_size(), false);
             for (LabelGroupID group_id (0); group_id < label_equivalence_relation->get_size(); ++group_id) {
                 if (!label_equivalence_relation->is_empty_group(group_id)) {
@@ -662,10 +662,12 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
             //     cout << selfloop_everywhere_label_groups[group_id] << " ";
             // }
             // cout << endl << endl << endl;
-
         }
 
         LabelGroupID label_group = label_equivalence_relation->get_group_id(label);
+        assert(label_group >=0);
+        assert((size_t)label_group < selfloop_everywhere_label_groups.size());
+        
         return selfloop_everywhere_label_groups[label_group];
     }
 

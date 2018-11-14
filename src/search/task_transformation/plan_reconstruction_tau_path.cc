@@ -69,10 +69,8 @@ reconstruct_step(int label, const PlanState & target_state,
         for (int s = 0; s < num_states; ++s) {
             targets[s] = is_target(s, label, abstract_target);
         }
-
         reconstruct_step (source, targets, new_label_path, new_traversed_states);
     }
-    
 }
 
 void TauShrinking::reconstruct_goal_step(std::vector<int> & new_label_path,
@@ -83,6 +81,7 @@ void TauShrinking::reconstruct_goal_step(std::vector<int> & new_label_path,
     assert(ts_index_predecessor < (int)(new_traversed_states.back().size()));
     int source = new_traversed_states.back()[ts_index_predecessor];
     reconstruct_step (source, transition_system->get_is_goal(), new_label_path, new_traversed_states);
+
 }
 
 void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {    
@@ -106,7 +105,6 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         for (const auto & tau_shrinking : tau_transformations) {
             tau_shrinking->reconstruct_step(label, target, new_label_path, new_traversed_states);
         }
-
         
         new_label_path.push_back(label);
         new_traversed_states.push_back(PlanState (target, new_traversed_states.back()));
@@ -116,11 +114,11 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         tau_shrinking->reconstruct_goal_step(new_label_path, new_traversed_states);
     }
 
-    // cout << "Tau path " << new_traversed_states[0];
-    // for(size_t step = 0; step < new_label_path.size(); ++step) {
-    //     cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
-    // }
-    // cout << endl;
+    //cout << "Tau path " << new_traversed_states[0];
+    //for(size_t step = 0; step < new_label_path.size(); ++step) {
+    //    cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
+    //}
+    //cout << endl;
     
     plan.set_plan(move(new_traversed_states), move(new_label_path));    
 }

@@ -21,6 +21,8 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
       search_space(state_registry,OperatorCost::NORMAL), 
       merge_and_shrink_representations(move(merge_and_shrink_representations)),
       label_map(move(label_map)) {
+
+    //predecessor_task->dump();
 }
 
     bool PlanReconstructionMergeAndShrink::match_states(const GlobalState & original_state,
@@ -107,6 +109,7 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     std::vector<GlobalState> new_traversed_states;
 
     new_traversed_states.push_back(state_registry.get_initial_state());
+
     for(size_t step = 0; step < label_path.size(); ++step) {
         //cout << "Step: " << step << endl;
         int label = label_path[step];
@@ -121,7 +124,13 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     for (const auto & s : new_traversed_states) {
         plan_states.push_back(s);
     }
-    
+
+    //cout << "MS reconstructed path " << plan_states[0];
+  //  for(size_t step = 0; step < new_label_path.size(); ++step) {
+   //     cout << " --" << new_label_path[step] << "--> " << plan_states[step+1];
+   // }
+   // cout << endl;
+
     plan.set_plan(move(plan_states), move(new_label_path));
 }
 
