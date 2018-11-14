@@ -4,12 +4,13 @@
 #include "../utils/memory.h"
 
 #include "../task_representation/sas_task.h"
+#include "../task_transformation/label_map.h"
 
 #include <cassert>
 #include <iostream>
 
 using namespace std;
-
+using namespace task_transformation;
 namespace task_representation {
 Labels::Labels(
     vector<unique_ptr<Label>> &&labels,
@@ -21,7 +22,7 @@ Labels::Labels(
 //      sas_op_indices_by_label(move(sas_op_indices_by_label)) {
 }
 
-    vector<int>  Labels::cleanup() {
+    LabelMapping  Labels::cleanup() {
         vector<int> old_to_new_labels (get_size(), -1);
         int new_label_no = 0;
         for (int label_no = 0; label_no < get_size(); ++label_no) {
@@ -33,7 +34,9 @@ Labels::Labels(
             }
         }
         labels.resize(new_label_no);
-        return old_to_new_labels;        
+
+        
+        return LabelMapping(old_to_new_labels, new_label_no);        
     }
 
 Labels::Labels(const Labels &other)

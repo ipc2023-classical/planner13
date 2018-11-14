@@ -23,10 +23,10 @@ namespace task_transformation {
         adjacency_matrix(fts.get_ts(index).get_size()),
         is_goal (fts.get_ts(index).get_is_goal())  {
 
-        
         const TransitionSystem & ts = fts.get_ts(index);
         int num_states = ts.get_size();
-
+       cout<< "Constructing Tau Graph for: "; ts.dump_labels_and_transitions(); cout <<endl;
+ 
         std::vector<std::map<int, TauTransition>> adjacency_map(num_states);
 
         const Labels & labels_info = fts.get_labels();
@@ -74,7 +74,15 @@ namespace task_transformation {
         }
     }
 
-    
+
+
+    void TauGraph::apply_label_mapping(const LabelMapping & label_mapping) {
+        for ( auto & row : adjacency_matrix){
+            for (auto & item : row) {
+                item.label = LabelID(label_mapping[item.label]);
+            }
+        }
+    }
     StateEquivalenceRelation TauGraph::compute_own_label_shrinking(){        
         /* perform Tarjan's algorithm for finding SCCs */
         StateEquivalenceRelation final_sccs;

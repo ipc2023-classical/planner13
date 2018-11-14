@@ -2,6 +2,7 @@
 #define TASK_TRANSFORMATION_FACTORED_TRANSITION_SYSTEM_H
 
 #include "types.h"
+#include "label_map.h"
 
 #include <memory>
 #include <vector>
@@ -189,7 +190,7 @@ public:
 
     bool is_only_goal_relevant (int ts_index) const;
 
-    void cleanup (const std::set<int> & exclude_transition_systems = std::set<int>());
+    LabelMapping cleanup (const std::set<int> & exclude_transition_systems = std::set<int>());
 
     void reinitialize_predecessor_task ();
 

@@ -4,6 +4,7 @@
 #include "plan_reconstruction.h"
 #include "../search_space.h"
 #include "../state_registry.h"
+#include "label_map.h"
 
 namespace task_representation {
 class FTSTask;
@@ -11,7 +12,6 @@ class TransitionSystem;
 }
 
 namespace task_transformation {
-class LabelMap;
 class MergeAndShrinkRepresentation;
 class TauGraph;
 
@@ -62,6 +62,8 @@ public:
         abstraction(move(abstraction_mapping_)) {
         }
 
+
+    void apply_label_mapping(const LabelMapping & label_mapping);
 
         
     void reconstruct_step(int label, const PlanState & target,

@@ -99,11 +99,21 @@ namespace task_transformation {
             cout << "OwnLabelShrinking applicable in " <<
                 (equivalences_to_apply.size() + exclude_transition_systems.size())  << " out of " << old_index << " systems" << endl;
 
+            cout << "Excluding TSs: ";
+            for (int ts : exclude_transition_systems) {
+                cout  << " " << ts;
+            }
+            cout << endl;
+                
             // 1) Extract the plan reconstruction M&S and insert it in the list of plan
             // reconstruction steps
-            fts.cleanup(exclude_transition_systems);
-
+           LabelMapping lm = fts.cleanup(exclude_transition_systems);
+           for (auto & sh : tau_shrinking_reconstruction) {
+               sh->apply_label_mapping(lm);
+           }
             assert(fts.get_size() == new_index);
+
+            
             
             // 2) Add tau plan reconstruction step 
             fts.add_plan_reconstruction(

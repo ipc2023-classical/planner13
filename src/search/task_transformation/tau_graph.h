@@ -42,7 +42,8 @@ namespace task_transformation {
         // Auxiliar method that finds the shortest path from source to a target state. It
         // returns the path as a pair of label, target transitions.
         std::vector<std::pair<task_representation::LabelID, int>>
-            find_shortest_path (int source, const std::vector<bool> & target) const; 
+            find_shortest_path (int source, const std::vector<bool> & target) const;
+        void apply_label_mapping(const LabelMapping & label_mapping); 
     };
 
 }

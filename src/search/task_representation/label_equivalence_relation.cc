@@ -4,12 +4,14 @@
 
 #include "../task_transformation/types.h"
 
+#include "../task_transformation/label_map.h"
+
 #include <set>
 #include <cassert>
 #include <iostream>
 
 using namespace std;
-
+using namespace task_transformation;
 namespace task_representation {
 LabelGroup::LabelGroup() : cost(task_transformation::INF) {
 }
@@ -152,8 +154,10 @@ void LabelEquivalenceRelation::apply_label_mapping(
     }
 }
 
-void LabelEquivalenceRelation::renumber_labels(
-    const vector<int> &old_to_new_labels, int) {
+void LabelEquivalenceRelation::apply_label_mapping(
+    const LabelMapping &label_mapping) {
+
+    const vector<int> & old_to_new_labels = label_mapping.get_old_to_new_labels();
     // old_to_new_labels has to map to *all* new label numbers, i.e., the
     // renumbering must be complete (a surjective function).
     vector<pair<LabelGroupID, LabelIter>> new_label_to_positions(labels.get_max_size());

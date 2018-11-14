@@ -5,6 +5,31 @@
 #include <iostream>
 
 namespace task_transformation {
+
+
+class LabelMapping {
+    std::vector<int> old_to_new_labels;
+    int num_new_labels;
+
+public: 
+LabelMapping(std::vector<int> old_to_new_labels, int num_new_labels) :
+    old_to_new_labels(old_to_new_labels), num_new_labels(num_new_labels){ 
+    }
+
+    const std::vector<int> & get_old_to_new_labels() const {
+        return old_to_new_labels;
+    }
+
+    int operator[](std::size_t var_id) const {
+        return old_to_new_labels[var_id];
+    }
+
+    int operator[](int var) const {
+        return old_to_new_labels[var];
+    }
+        
+};
+
 class LabelMap{
     std::vector<int> reduced_labels; // reduced label numbers indexed by original label number
 //    std::vector<int> original_labels; // indexed by reduced label number
@@ -12,6 +37,7 @@ public:
     explicit LabelMap(int num_labels);
     LabelMap(const LabelMap & ) = default;
 
+    void update(const LabelMapping &old_to_new_labels);
     void update(const std::vector<int> &old_to_new_labels);
 
     int get_reduced_label(int old_label) const{

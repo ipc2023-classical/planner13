@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "../task_transformation/types.h"
+#include "../task_transformation/label_map.h"
 
 #include <iostream>
 #include <memory>
@@ -192,7 +193,7 @@ public:
     void apply_label_reduction(
         const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         bool only_equivalent_labels);
-    void renumber_labels(const std::vector<int> &old_to_new_labels, int new_num_labels);
+    void apply_label_mapping(const task_transformation::LabelMapping &label_mapping);
 
     bool remove_labels(const std::vector<LabelID> & labels);
 

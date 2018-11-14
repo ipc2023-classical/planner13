@@ -171,8 +171,9 @@ void FactoredTransitionSystem::apply_label_mapping(
 
     }
 
+    assert(label_map);
     label_map->update(old_to_new_labels);
-
+    
     for (size_t i = 0; i < transition_systems.size(); ++i) {
         if (transition_systems[i]) {
             transition_systems[i]->apply_label_reduction(
@@ -361,7 +362,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         return true;
     }
 
-    void FactoredTransitionSystem::cleanup(const set<int> & exclude_transition_systems) {
+    LabelMapping FactoredTransitionSystem::cleanup(const set<int> & exclude_transition_systems) {
         // "Renumber" factors consecutively. (Actually, nothing to do except storing them
         // consecutively since factor indices are not stored anywhere.)
         //cout << "Number of remaining factors: " << num_active_entries << endl;
@@ -387,19 +388,18 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         distances.swap(new_distances);
         cout << "Done renumbering factors." << endl;
         //Renumber labels consecutively
-        int new_num_labels = labels->get_num_active_entries();
-        cout << "Number of remaining labels: " << new_num_labels << endl;
-        vector<int> old_to_new_labels = labels->cleanup();
-        assert(new_num_labels == labels->get_size());
+        LabelMapping label_mapping = labels->cleanup();
+        //assert(new_num_labels == labels->get_size());
 
-        cout << "Renumbering labels: " << old_to_new_labels << endl;
+        // cout << "Renumbering labels: " << old_to_new_labels << endl;
         for (unique_ptr<TransitionSystem> &ts : transition_systems) {
-            ts->renumber_labels(old_to_new_labels, new_num_labels);
+            ts->apply_label_mapping(label_mapping);
         }
-        label_map->update(old_to_new_labels);
 
-        cout << "Done renumbering labels." << endl;
-        label_map->dump();
+        //Note: This mapping must not be done for label map
+        label_map->update(label_mapping);
+        //cout << "Done renumbering labels." << endl;
+        //label_map->dump();
 
         assert((size_t)num_active_entries == transition_systems.size());
 
@@ -408,6 +408,8 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
                 make_shared<PlanReconstructionMergeAndShrink>(
                     predecessor_fts_task, move(old_mas_representations), move(label_map)));
         }
+
+        return label_mapping;
     }
 
 
@@ -425,6 +427,9 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             //Making copy of transition systems and labels 
             predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
                                                                               labels);
+
+            cout << "Reinitialize predecessor task: " << endl;
+            predecessor_fts_task->dump();
         } else {
             predecessor_fts_task = nullptr;
         }

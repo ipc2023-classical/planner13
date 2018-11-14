@@ -433,11 +433,11 @@ void TransitionSystem::apply_label_reduction(
     assert(are_transitions_sorted_unique());
 }
 
-void TransitionSystem::renumber_labels(
-    const vector<int> &old_to_new_labels, int new_num_labels) {
+void TransitionSystem::apply_label_mapping(
+    const LabelMapping & label_mapping) {
     // We can leave label group IDs (and thus wehre their transitions are)
     // intact and only need to change the label numbers in label groups.
-    label_equivalence_relation->renumber_labels(old_to_new_labels, new_num_labels);
+    label_equivalence_relation->apply_label_mapping(label_mapping);
 }
 
 

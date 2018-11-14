@@ -22,7 +22,10 @@ bool TauShrinking::is_target(int s, int label, int abstract_target) const {
     return false;
 }
 
-
+void TauShrinking::apply_label_mapping(const LabelMapping & label_mapping) {
+    transition_system->apply_label_mapping(label_mapping);
+    tau_graph->apply_label_mapping(label_mapping);
+}
 void TauShrinking::
 reconstruct_step(int source, const std::vector<bool> & targets,
                  std::vector<int> & new_label_path,
@@ -41,8 +44,6 @@ reconstruct_step(int source, const std::vector<bool> & targets,
         //     cout << g_sas_task()->get_fact_name(FactPair(transition_system->get_incorporated_variables()[0], new_state)) << endl;
         // }
     }
-    
-
 }
 
 
@@ -80,9 +81,7 @@ void TauShrinking::reconstruct_goal_step(std::vector<int> & new_label_path,
     reconstruct_step (source, transition_system->get_is_goal(), new_label_path, new_traversed_states);
 }
 
-void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
-
-    
+void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {    
     const std::vector<int> & label_path = plan.get_labels ();
     const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
     cout << "TauPath reconstruction of plan with " << label_path.size() << " steps" << endl;
@@ -107,10 +106,11 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         tau_shrinking->reconstruct_goal_step(new_label_path, new_traversed_states);
     }
 
-    cout << "Tau path ";
-    for (auto state : new_traversed_states) {
-        cout << state << endl;
+    cout << "Tau path " << new_traversed_states[0];
+    for(size_t step = 0; step < new_label_path.size(); ++step) {
+        cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
     }
+    cout << endl;
 
     plan.set_plan(move(new_traversed_states), move(new_label_path));    
 }

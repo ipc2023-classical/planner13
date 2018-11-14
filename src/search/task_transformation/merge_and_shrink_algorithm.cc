@@ -11,6 +11,7 @@
 #include "shrink_strategy.h"
 #include "types.h"
 #include "utils.h"
+#include "plan_reconstruction.h"
 
 #include "../options/option_parser.h"
 #include "../options/options.h"
@@ -18,7 +19,7 @@
 #include "../task_representation/fts_task.h"
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
-#include "plan_reconstruction.h"
+
 
 #include "../utils/markup.h"
 #include "../utils/math.h"
@@ -445,7 +446,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
              << "supported!" << endl;
         utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
     }
-    
+
+    fts_task->dump();
     starting_peak_memory = utils::get_peak_memory_in_kb();
 
     if (label_reduction) {
@@ -514,6 +516,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         if (ran_out_of_time(timer)) {
             return fts;
         }
+
 
         if (shrink_strategy && shrink_atomic_fts) {
             shrink_strategy->apply_shrinking_transformation(fts, verbosity);

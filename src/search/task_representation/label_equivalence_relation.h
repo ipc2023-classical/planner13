@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "../task_transformation/label_map.h"
+
 namespace task_representation {
 class Labels;
 
@@ -103,9 +105,10 @@ public:
     void apply_label_mapping(
         const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         const std::unordered_set<LabelGroupID> *affected_group_ids = nullptr);
-    void renumber_labels(
-        const std::vector<int> &old_to_new_labels, int new_num_labels);
 
+    void apply_label_mapping(const task_transformation::LabelMapping &label_mapping);
+
+    
     std::vector<LabelGroupID> remove_labels(const std::vector<LabelID> & labels);
 
     // Moves all labels from one goup into the other

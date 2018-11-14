@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "types.h"
+#include "../task_transformation/label_map.h"
 
 namespace task_representation {
 class SASTask;
@@ -39,7 +40,7 @@ public:
         std::vector<std::unique_ptr<Label>> &&labels,
         int max_size);
     
-    std::vector<int>  cleanup();
+    task_transformation::LabelMapping  cleanup();
         
 //        std::vector<std::vector<int>> &&sas_op_indices_by_label);
     Labels(const Labels &other);
