@@ -362,12 +362,10 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         return true;
     }
 
-    LabelMapping FactoredTransitionSystem::cleanup(const set<int> & exclude_transition_systems) {
+    FTSMapping FactoredTransitionSystem::cleanup(const set<int> & exclude_transition_systems) {
         // "Renumber" factors consecutively. (Actually, nothing to do except storing them
         // consecutively since factor indices are not stored anywhere.)
         //cout << "Number of remaining factors: " << num_active_entries << endl;
-
-
         if (exclude_transition_systems.size()){
         cout << "Excluding TSs: ";
         for (int ts : exclude_transition_systems) {
@@ -375,8 +373,10 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         }
         cout << endl;
         }
-        
 
+        
+        std::vector<int> transition_system_mapping (num_active_entries, -1);
+        
         // 1) Construct plan reconstruction object       
         vector<unique_ptr<TransitionSystem> > new_transition_systems;
         vector<unique_ptr<Distances> > new_distances;
@@ -384,21 +384,29 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         new_transition_systems.reserve(transition_systems.capacity());
         new_distances.reserve(distances.capacity());
         num_active_entries = 0;
+        int old_active_entries = 0;
         for (int ts_index : *this) {
             if (is_active(ts_index)) {
                 old_mas_representations.push_back(extract_mas_representation(ts_index));
                 if (!exclude_transition_systems.count(ts_index)) {
+                    transition_system_mapping[old_active_entries] = num_active_entries;
                     num_active_entries ++;
                     new_transition_systems.push_back(move(transition_systems[ts_index]));
                     new_distances.push_back(move(distances[ts_index]));
                 }
+                old_active_entries++;
             }
         }
+
+
         transition_systems.swap(new_transition_systems);
         distances.swap(new_distances);
         cout << "Done renumbering factors." << endl;
         //Renumber labels consecutively
-        LabelMapping label_mapping = labels->cleanup();
+        auto label_mapping = labels->cleanup();
+
+        
+
         //assert(new_num_labels == labels->get_size());
 
         // cout << "Renumbering labels: " << old_to_new_labels << endl;
@@ -419,7 +427,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
                     predecessor_fts_task, move(old_mas_representations), move(label_map)));
         }
 
-        return label_mapping;
+        return FTSMapping (move(transition_system_mapping), move(label_mapping));
     }
 
 

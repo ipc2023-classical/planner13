@@ -102,9 +102,9 @@ namespace task_transformation {
                 
             // 1) Extract the plan reconstruction M&S and insert it in the list of plan
             // reconstruction steps
-           LabelMapping lm = fts.cleanup(exclude_transition_systems);
+           FTSMapping fts_m = fts.cleanup(exclude_transition_systems);
            for (auto & sh : tau_shrinking_reconstruction) {
-               sh->apply_label_mapping(lm);
+               sh->apply_label_mapping(fts_m.label_mapping);
            }
             assert(fts.get_size() == new_index);
 
@@ -112,7 +112,7 @@ namespace task_transformation {
             
             // 2) Add tau plan reconstruction step 
             fts.add_plan_reconstruction(
-                make_shared<PlanReconstructionTauPath>(PlanState(move(initial_state_values)),
+                make_shared<PlanReconstructionTauPath>(fts_m, PlanState(move(initial_state_values)),
                                                        move(tau_shrinking_reconstruction)));
 
             // 3) Apply abstractions: 

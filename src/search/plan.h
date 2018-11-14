@@ -23,6 +23,11 @@ PlanState(std::vector<int> &&values)
     : values(std::move(values)) {
     }
 
+    PlanState(const PlanState & other,
+              const std::vector<int> & transition_system_mapping);
+
+
+    PlanState(const PlanState & other, const PlanState & default_values);
     
     ~PlanState() = default;
     PlanState(const PlanState &) = default;
@@ -35,6 +40,16 @@ PlanState(std::vector<int> &&values)
         }
         return *this;
     }
+
+    bool compatible(const PlanState &other) const;
+    
+    bool is_complete() const{
+        for (int v : values) {
+            if (v == -1) return false;
+        }
+        return true;
+    }
+
 
     bool operator==(const PlanState &other) const {
         return values == other.values;

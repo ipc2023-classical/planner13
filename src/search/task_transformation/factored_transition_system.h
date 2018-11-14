@@ -49,6 +49,18 @@ public:
     }
 };
 
+class FTSMapping {
+public:
+    std::vector<int> transition_system_mapping;
+    LabelMapping label_mapping;
+
+FTSMapping(std::vector<int> && ts_mapping, LabelMapping && lm)  :
+    transition_system_mapping(std::move(ts_mapping)),
+        label_mapping(std::move(lm)){
+        
+    }
+};
+
 class FactoredTransitionSystem {
     std::unique_ptr<task_representation::Labels> labels;
     // Entries with nullptr have been merged.
@@ -190,7 +202,8 @@ public:
 
     bool is_only_goal_relevant (int ts_index) const;
 
-    LabelMapping cleanup (const std::set<int> & exclude_transition_systems = std::set<int>());
+    FTSMapping cleanup
+        (const std::set<int> & exclude_transition_systems = std::set<int>());
 
     void reinitialize_predecessor_task ();
 

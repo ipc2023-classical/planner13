@@ -5,6 +5,7 @@
 #include "../search_space.h"
 #include "../state_registry.h"
 #include "label_map.h"
+#include "factored_transition_system.h"
 
 namespace task_representation {
 class FTSTask;
@@ -78,10 +79,13 @@ public:
 class PlanReconstructionTauPath : public PlanReconstruction {
     PlanState initial_state;
     std::vector<std::unique_ptr<TauShrinking> > tau_transformations;
+
+    std::vector<int> transition_system_mapping;
 public:
-    PlanReconstructionTauPath(PlanState initial_state_,
+PlanReconstructionTauPath(const FTSMapping & fts_mapping, PlanState initial_state_,
                               std::vector<std::unique_ptr<TauShrinking> > && transformations) :
-    initial_state(initial_state_), tau_transformations(move(transformations)) {
+    initial_state(initial_state_), tau_transformations(move(transformations)),
+        transition_system_mapping(fts_mapping.transition_system_mapping) {
     }
     
     virtual ~PlanReconstructionTauPath() = default;

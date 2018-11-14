@@ -139,7 +139,8 @@ namespace task_transformation {
     // returns the path as a pair of label, target transitions.
     std::vector<std::pair<LabelID, int>>
     TauGraph::find_shortest_path (int source, const std::vector<bool> & target) const {
-
+        assert (source >= 0);
+        assert((size_t)source < target.size());
         // cout << "Find shortest path" << endl;
         std::vector<std::pair<LabelID, int>> result_path;
 

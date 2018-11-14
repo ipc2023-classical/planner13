@@ -48,32 +48,30 @@ reconstruct_step(int source, const std::vector<bool> & targets,
 
 
 void TauShrinking::
-reconstruct_step(int label, const PlanState & abstract_target_state,
+reconstruct_step(int label, const PlanState & target_state,
                  std::vector<int> & new_label_path,
                  std::vector<PlanState> & new_traversed_states) const {
 
+    //cout << new_traversed_states.back() << endl;
     int source = new_traversed_states.back()[ts_index_predecessor];
-    int abstract_target = ts_index_successor >= 0 ?  abstract_target_state[ts_index_successor] : -1;
+    assert(source >= 0);
+    int abstract_target = ts_index_successor >= 0 ?  target_state[ts_index_predecessor] : -1;
 
     // if (transition_system->get_incorporated_variables().size() == 1) {
     //     cout << g_sas_task()->get_fact_name(FactPair(transition_system->get_incorporated_variables()[0], source)) << endl;
     // }
-
    
-    if (is_target(source, label, abstract_target)) {
-        return; // Nothing to do
+    if (!is_target(source, label, abstract_target)) {        
+        int num_states = transition_system->get_size();
+        // Find the right target
+
+        std::vector<bool> targets(num_states, false);
+        for (int s = 0; s < num_states; ++s) {
+            targets[s] = is_target(s, label, abstract_target);
+        }
+
+        reconstruct_step (source, targets, new_label_path, new_traversed_states);
     }
-
-    int num_states = transition_system->get_size();
-
-    // Find the right target
-
-    std::vector<bool> targets(num_states, false);
-    for (int s = 0; s < num_states; ++s) {
-        targets[s] = is_target(s, label, abstract_target);
-    }
-
-    reconstruct_step (source, targets, new_label_path, new_traversed_states);
     
 }
 
@@ -95,17 +93,23 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
 
     std::vector<int> new_label_path;
     std::vector<PlanState> new_traversed_states;
-     
+
+    assert(initial_state.compatible(PlanState(traversed_states[0], transition_system_mapping))); 
     new_traversed_states.push_back(initial_state);
+    assert(initial_state.is_complete());
 
     for(size_t step = 0; step < label_path.size(); ++step) {
         //cout << "Step: " << step << endl;
         int label = label_path[step];
         assert(step + 1 < traversed_states.size());
-        const PlanState & target = traversed_states[step+1];
+        PlanState target = PlanState(traversed_states[step+1], transition_system_mapping);
         for (const auto & tau_shrinking : tau_transformations) {
             tau_shrinking->reconstruct_step(label, target, new_label_path, new_traversed_states);
         }
+
+        
+        new_label_path.push_back(label);
+        new_traversed_states.push_back(PlanState (target, new_traversed_states.back()));
     }
 
     for (const auto & tau_shrinking : tau_transformations) {
@@ -117,8 +121,9 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
     //     cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
     // }
     // cout << endl;
-
+    
     plan.set_plan(move(new_traversed_states), move(new_label_path));    
 }
+
 
 }

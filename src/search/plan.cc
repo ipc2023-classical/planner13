@@ -64,3 +64,39 @@ ostream &operator<<(ostream &os, const PlanState & s) {
 }
 
 
+
+PlanState::PlanState(const PlanState & other,
+                     const std::vector<int> & transition_system_mapping) :
+    values(transition_system_mapping.size(), -1) {
+    for(size_t i = 0; i < transition_system_mapping.size(); ++i) {
+        if (transition_system_mapping[i] >= 0) {
+            values[i] = other[transition_system_mapping[i]];
+        }
+    }
+}
+
+
+
+PlanState::PlanState(const PlanState & other, const PlanState & default_values) :
+    values(other.values) {
+    for(size_t i = 0; i < values.size(); ++i) {
+        if (values[i] < 0) {
+            values[i] = default_values[i];
+        }
+    }
+}
+
+
+bool PlanState::compatible(const PlanState & other) const {
+    if (values.size() != other.values.size()) {
+        return false;
+    }
+
+    for(size_t i = 0; i < values.size(); ++i) {
+        if (values[i] >= 0 && other.values[i] >= 0 && values[i] != other.values[i]) {
+            return false;
+        }
+    }
+    return true;
+
+}
