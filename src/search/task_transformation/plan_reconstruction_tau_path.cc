@@ -83,10 +83,10 @@ reconstruct_step(int label, const PlanState & abstract_target, PlanState & concr
         std::vector<bool> targets(num_states, false);
         for (int s = 0; s < num_states; ++s) {
             targets[s] = is_target(s, label, projected_abstract_target);
-            if (targets[s]) {
+            /*if (targets[s]) {
                 cout << s << " is a valid target" << endl;
                     
-            }
+                }*/
         }
 
         reconstruct_step (source, targets, new_label_path, new_traversed_states);

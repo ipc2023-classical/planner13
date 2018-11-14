@@ -88,8 +88,8 @@ namespace task_transformation {
         StateEquivalenceRelation final_sccs;
         sccs::SCC<TauTransition>::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
 
-        cout << "FINAL SCCS: " << final_sccs.size() << endl;
-        cout << final_sccs[0].empty() << endl;
+        // cout << "FINAL SCCS: " << final_sccs.size() << endl;
+        // cout << final_sccs[0].empty() << endl;
         return final_sccs;
     }
 

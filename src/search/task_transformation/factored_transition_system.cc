@@ -340,8 +340,6 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             }
                     
         }
-
-        //cout << label << " TAU TAU TAU " << ts_index << endl;
         
         return true;
     }
