@@ -447,7 +447,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
     }
 
-    fts_task->dump();
+    // fts_task->dump();
     starting_peak_memory = utils::get_peak_memory_in_kb();
 
     if (label_reduction) {
