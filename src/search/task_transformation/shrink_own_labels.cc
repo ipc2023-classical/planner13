@@ -40,17 +40,9 @@ namespace task_transformation {
     }
 
     
-    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &// fts
-                                                         , Verbosity // verbosity
-                                                         , int // index
-        ) const  {
-        // StateEquivalenceRelation equivalence_relation =
-        //     compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
-        // return fts.apply_abstraction(index, equivalence_relation, verbosity);
-        return false;
-    }
-    
-    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity) const  {
+    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem & fts,
+                                                         Verbosity verbosity, int  check_only_index) const  {
+
         int old_index = 0;
         int new_index = 0;
         vector<int> initial_state_values;
@@ -60,42 +52,48 @@ namespace task_transformation {
         vector<StateEquivalenceRelation> equivalences (fts.get_size());
         vector<int> equivalences_to_apply;
         vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction;
-          
+
+
       for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
-                unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
                 initial_state_values.push_back(fts.get_ts(index).get_init_state());
                 
-                equivalences[old_index] = ((perform_sg_shrinking ?
-                                            tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
-                                            tau_graph->compute_own_label_shrinking()));
+                if (check_only_index == -1 || index == check_only_index) {
+                    unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
+
+                    equivalences[old_index] = ((perform_sg_shrinking ?
+                                                tau_graph->compute_own_label_plus_sg_shrinking(fts, index) :
+                                                tau_graph->compute_own_label_shrinking()));
 
 
-                size_t old_size = fts.get_ts(index).get_size();
-                if (equivalences[old_index].size() < old_size) {
+                    size_t old_size = fts.get_ts(index).get_size();
+                    if (equivalences[old_index].size() < old_size) {
 
-                    int succ_index = -1;
-                    if (equivalences[old_index].size() > 1) {
-                        equivalences_to_apply.push_back(old_index);
-                        succ_index = new_index++;
-                    } else{
-                        assert (equivalences[old_index].size() == 1); 
-                        exclude_transition_systems.insert(index);
-                    }
+                        int succ_index = -1;
+                        if (equivalences[old_index].size() > 1) {
+                            equivalences_to_apply.push_back(old_index);
+                            succ_index = new_index++;
+                        } else{
+                            assert (equivalences[old_index].size() == 1); 
+                            exclude_transition_systems.insert(index);
+                        }
 
-                    vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[old_index]);
+                        vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[old_index]);
 
-                    unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
+                        unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
                                                          
-                    tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
-                                                                                                 move(abstraction_mapping),
-                                                                                                 unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
+                        tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
+                                                                                                     move(abstraction_mapping),
+                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
+                    } else {
+                        new_index ++;
+                    }
                 } else {
-                    new_index ++;
+                    new_index++;
                 }
                 old_index ++;
             }
-        }
+      }
 
         bool changes = exclude_transition_systems.empty();
         if (!equivalences_to_apply.empty() || !exclude_transition_systems.empty() ){ 
@@ -131,6 +129,11 @@ namespace task_transformation {
 
         }
         return changes;
+    }
+    
+    bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity) const  {
+
+        return apply_shrinking_transformation(fts, verbosity, -1);
     }
 
 

@@ -387,33 +387,34 @@ void MergeAndShrinkAlgorithm::main_loop(
             print_time(timer, "after shrinking");
         }
 
-        if (exclude_if_too_many_transitions()) {
-            allowed_indices.erase(merge_index1);
-            allowed_indices.erase(merge_index2);
-            int num_trans = fts.get_ts(merged_index).compute_total_transitions();
-            if (num_trans <= num_transitions_to_exclude) {
-                allowed_indices.insert(merged_index);
-            } else {
-                if (verbosity >= Verbosity::NORMAL) {
-                    cout << fts.get_ts(merged_index).tag()
-                         << "too many number of transitions, excluding "
-                            "from further consideration." << endl;
-                }
-            }
-            if (allowed_indices.size() <= 1) {
-                if (verbosity >= Verbosity::NORMAL) {
-                    cout << "Not enough factors remaining with a low enough "
-                            "number of transitions, stopping computation."
-                         << endl;
-                    cout << endl;
-                }
-                break;
-            }
-        }
+        // if (exclude_if_too_many_transitions()) {
+        //     allowed_indices.erase(merge_index1);
+        //     allowed_indices.erase(merge_index2);
+        //     int num_trans = fts.get_ts(merged_index).compute_total_transitions();
+        //     if (num_trans <= num_transitions_to_exclude) {
+        //         allowed_indices.insert(merged_index);
+        //     } else {
+        //         if (verbosity >= Verbosity::NORMAL) {
+        //             cout << fts.get_ts(merged_index).tag()
+        //                  << "too many number of transitions, excluding "
+        //                     "from further consideration." << endl;
+        //         }
+        //     }
+        //     if (allowed_indices.size() <= 1) {
+        //         if (verbosity >= Verbosity::NORMAL) {
+        //             cout << "Not enough factors remaining with a low enough "
+        //                     "number of transitions, stopping computation."
+        //                  << endl;
+        //             cout << endl;
+        //         }
+        //         break;
+        //     }
+        // }
 
-        if (ran_out_of_time(timer) || too_many_transitions(fts, merged_index)) {
-            break;
-        }
+        // assert (merged_index < fts.get_size());
+        // if (ran_out_of_time(timer) || too_many_transitions(fts, merged_index)) {
+        //     break;
+        // }
 
         // End-of-iteration output.
         if (verbosity >= Verbosity::VERBOSE) {
@@ -423,11 +424,11 @@ void MergeAndShrinkAlgorithm::main_loop(
             cout << endl;
         }
 
-        if (fts.get_ts(merged_index).get_size() > max_states) {
-            cout << "Merged factor is too large even after shrinking, "
-                    "stopping the merge-and-shrink algorithm." << endl;
-            break;
-        }
+        // if (fts.get_ts(merged_index).get_size() > max_states) {
+        //     cout << "Merged factor is too large even after shrinking, "
+        //             "stopping the merge-and-shrink algorithm." << endl;
+        //     break;
+        // }
 
         ++iteration_counter;
     }

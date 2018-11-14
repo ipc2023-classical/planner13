@@ -46,6 +46,8 @@ class TauShrinking {
     
     bool is_target(int s, int label, int abstract_target) const;
 
+
+    int get_concrete_target(int s, int label, int abstract_target) const;
     
     void reconstruct_step(int source, const std::vector<bool> & target, 
                           std::vector<int> & new_label_path,
@@ -67,7 +69,7 @@ public:
     void apply_label_mapping(const LabelMapping & label_mapping);
 
         
-    void reconstruct_step(int label, const PlanState & target,
+    void reconstruct_step(int label, const PlanState & abstract_target, PlanState & concrete_target,
                           std::vector<int> & new_label_path,
                           std::vector<PlanState> & new_traversed_states) const ;
 
