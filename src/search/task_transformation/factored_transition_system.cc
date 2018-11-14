@@ -330,12 +330,8 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
    
     bool FactoredTransitionSystem::is_tau_label (int ts_index, LabelID label) const{
         assert(label >= 0);
-        cout << "CHECKING TAU " << ts_index << " " << label << endl;
         for (size_t index = 0; index < transition_systems.size(); ++index) {
-            cout << index << endl;
-            cout << (index != (size_t)ts_index) << endl;
-            cout <<  (transition_systems[index] && (index != (size_t)ts_index)) << endl;
-            
+           
             if (transition_systems[index] && (index != (size_t)ts_index)) {
                 if(!(transition_systems[index]->is_selfloop_everywhere(label))) {
                     // cout << label << " is not tau for " << ts_index << " because of " << index <<endl;
