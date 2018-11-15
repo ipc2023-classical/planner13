@@ -62,7 +62,7 @@ public:
     }
 
     int operator[](int var) const {
-        return (*this)[var];
+        return values[var];
     }
 
     inline FTSTask get_task() const;
