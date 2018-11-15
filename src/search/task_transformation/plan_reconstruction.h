@@ -17,6 +17,10 @@ public:
     // Given a sequence of actions that is a plan for the successor task, retrieve a plan
     // for the predecessor task. Directly modifies the contents of plan and traversed_states
     virtual void reconstruct_plan(Plan & plan) const = 0;
+    virtual void print(std::ostream& ) const { /* do your stuff */ }
+
+    friend std::ostream& operator<<(std::ostream& o, const PlanReconstruction& b);
+
 };
 
 class PlanReconstructionSequence : public PlanReconstruction {
@@ -29,6 +33,13 @@ public:
     virtual void reconstruct_plan(Plan & plan) const override {
         for (const auto & pr : plan_reconstructions) {
             pr->reconstruct_plan(plan);
+        }
+    }
+
+    virtual void print(std::ostream& o) const override {
+        for (const auto & pr : plan_reconstructions) {
+            pr->print(o);
+            o << " ---> ";
         }
     }
 };

@@ -67,7 +67,7 @@ public:
     std::shared_ptr<SearchTask> get_search_task(bool print_time = false) const;
 
     void dump() const;
-    
+    friend std::ostream &operator<<(std::ostream &os, const FTSTask &task);    
 };
 }
 

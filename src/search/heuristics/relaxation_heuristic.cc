@@ -75,6 +75,8 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
     int prop_id = 0;
     propositions_per_var.resize(task->get_size());
 
+    int num_auxiliary_operators = 0;
+    int num_transition_operators = 0;
     // auxiliary propositions represent a disjunction of facts that is used for (a)
     // goal condition (b) label precondition of labels with a precondition on more
     // than 2 variables
@@ -99,10 +101,11 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
         }
 
         //TODO: make parameter
-        if (ts_with_multiple_pre.size() > 1 && num_multiplied_operators > 100) { 
+        if (ts_with_multiple_pre.size() > 1 && num_multiplied_operators > 100) {
+           // cout << label_no << " has multiple pre and " << num_multiplied_operators << endl;
             for (int pre_ts : ts_with_multiple_pre) {
                 const auto & precond = task->get_ts(pre_ts).get_label_precondition(label_no);
-                if (precond.size() > 2) { // TODO: make parameter
+                if (precond.size() > 1) { // TODO: make parameter
                     auxiliary_subsets_per_var[pre_ts].insert(precond);
                 }
             }
@@ -121,7 +124,6 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
         for (int s = 0; s < ts.get_size(); ++s) {
             propositions.push_back(Proposition(prop_id++));
         }
-
         for (const vector<int> & set_of_states : auxiliary_subsets_per_var[lts_id]) {
             propositions.push_back(Proposition(prop_id++));
             Proposition * aux_prop = &(propositions.back());
@@ -131,6 +133,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
             for (const auto & s : set_of_states) {
 		vector<Proposition *> precondition;
                 precondition.push_back(&(propositions[s]));
+                num_auxiliary_operators ++;
 		unary_operators.push_back(UnaryOperator(precondition, aux_prop, RelaxedPlanStep(), 0));
             }
             
@@ -189,6 +192,8 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 		    insert_all_combinations(LabelID(l), task.get(), pre_per_ts, outside_conditions);
 		}
             }
+
+            //cout << "Multiplying: " << outside_conditions.size() << " times " << sources_by_target.size()  << endl;
             
             for (const auto & item  : sources_by_target) {
                 int target = item.first;
@@ -196,6 +201,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                 for (const auto & outside_condition : outside_conditions) {
 		    RelaxedPlanStep rs_step (outside_condition.second, FactPair(lts_id, target));
                     if ((int)(sources.size()) == ts.get_size() - 1 ) {
+                        num_transition_operators++;
                         unary_operators.push_back(UnaryOperator(outside_condition.first,
                                                                 &(propositions_per_var[lts_id][target]),
                                                                 rs_step,
@@ -210,6 +216,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 			    assert (src != target);
                             //set dummy 
                             pre[pre.size() -1] = &(propositions_per_var[lts_id][src]);
+                            num_transition_operators++;
                             unary_operators.push_back(UnaryOperator(pre,
                                                                     &(propositions_per_var[lts_id][target]),
                                                                     rs_step,
@@ -226,7 +233,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
         }
     }
 
-    
+    cout << "transition: " << num_transition_operators << " auxiliary: " << num_auxiliary_operators << endl;
     // Simplify unary operators.
     simplify();
 

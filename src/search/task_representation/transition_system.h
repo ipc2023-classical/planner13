@@ -10,6 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <set>
 
 namespace task_transformation {
 class Distances;
@@ -197,6 +198,8 @@ public:
 
     bool remove_labels(const std::vector<LabelID> & labels);
 
+    bool remove_labels(const std::set<LabelID> & labels);
+
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,
                                transitions_by_group_id,
@@ -275,7 +278,10 @@ public:
     bool is_selfloop_everywhere(LabelID label) const;
 
     const std::vector<Transition> &get_transitions_with_label(int label_id) const ;
-    
+
+    friend std::ostream &operator<<(std::ostream &os, const TransitionSystem &tr);
+
+    void check_dead_labels(std::set<LabelID> & dead_labels) const;
 };
 }
 

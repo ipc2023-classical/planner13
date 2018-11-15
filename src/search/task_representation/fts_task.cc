@@ -31,9 +31,7 @@ namespace task_representation {
         : transition_systems(move(transition_systems_)),
           labels(move(labels)) {
 
-        cout << "Constructing FTS Task with " << transition_systems.size()
-             << " variables and " << this->labels->get_size() << " labels"
-             << endl;
+        cout << "Constructing " << *this;
 #ifndef NDEBUG
         for (int label = 0; label < this->labels->get_size(); ++label) {
             assert(this->labels->is_current_label(label));
@@ -152,4 +150,16 @@ vector<int> FTSTask::get_initial_state() const {
                 ); 
     }
 
+
+
+    ostream &operator<<(ostream &os, const FTSTask &task) {
+        os << "FTSTask with " << task.transition_systems.size()
+           << " variables and " << task.labels->get_size() << " labels"
+           << endl;
+        
+        for (auto & ts : task.transition_systems) {
+            os << "   " << *ts << endl;
+        }
+        return os;
+    }
 }

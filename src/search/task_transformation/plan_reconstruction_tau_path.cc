@@ -158,4 +158,8 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
 }
 
 
+    void PlanReconstructionTauPath::print(std::ostream& o) const  {
+        o << "Tau";
+    }
+
 }

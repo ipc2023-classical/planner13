@@ -690,5 +690,37 @@ const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int 
     return transitions_by_group_id[label_equivalence_relation->get_group_id(label_id)];
 }
 
+    ostream &operator<<(ostream &os, const TransitionSystem &tr) {
+        int count_transitions = 0;
+        int count_groups = 0;
+        for (const GroupAndTransitions &gat : tr) {
+            count_groups ++;
+            count_transitions += gat.transitions.size();
+        }
 
+        os << tr.num_states << "  states " << count_groups << " groups " << count_transitions << " transitions";
+
+ /*       os << endl;
+        for (const GroupAndTransitions &gat : tr) {
+            int num = 0;
+            for (auto  & l: gat.label_group){
+                (void)l;
+                num++;
+            }
+            os << "            " << gat.transitions.size() << " transitions  " << num <<  " labels" << endl;
+        }
+*/
+        return os;
+    }
+
+    void TransitionSystem::check_dead_labels(std::set<LabelID> & dead_labels) const{
+        for (const GroupAndTransitions &gat : *this) {
+            if (gat.transitions.empty()) {
+                for (int l : gat.label_group) {
+                    dead_labels.insert(LabelID(l));
+                }
+            }
+        }
+
+    }
 }

@@ -102,7 +102,14 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
     cout << "M&S reconstruction of plan with " << label_path.size() << " steps for task with " << predecessor_task->get_size() << " variables"   << endl;
     
-    // cout << *label_map << endl;
+
+    // cout << traversed_states[0];
+    //  for(size_t step = 0; step < label_path.size(); ++step) {
+    //     cout << " --" << label_path[step] << "--> " << traversed_states[step+1];
+    // }
+    // cout << endl;
+
+// cout << *label_map << endl;
     assert(label_path.size() + 1 == traversed_states.size());
     
     std::vector<int> new_label_path;
@@ -111,7 +118,7 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
     new_traversed_states.push_back(state_registry.get_initial_state());
 
     for(size_t step = 0; step < label_path.size(); ++step) {
-        //cout << "Step: " << step << endl;
+        // cout << "Step: " << step << endl;
         int label = label_path[step];
         assert(step + 1 < traversed_states.size());
         const PlanState & target = traversed_states[step+1];
@@ -133,6 +140,11 @@ void PlanReconstructionMergeAndShrink::reconstruct_plan(Plan & plan) const {
 
     plan.set_plan(move(plan_states), move(new_label_path));
 }
+
+
+    void PlanReconstructionMergeAndShrink::print(std::ostream& o) const  {
+        o << "MS";
+    }
 
 
 }

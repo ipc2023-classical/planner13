@@ -194,7 +194,10 @@ public:
     bool is_active(int index) const;
 
     bool  is_irrelevant_label (task_representation::LabelID label) const;
+
+    
     bool remove_irrelevant_labels();
+    std::vector<int> remove_labels(const std::vector<task_representation::LabelID> & labels);
     bool remove_irrelevant_transition_systems(Verbosity verbosity);
     
     bool is_tau_label(int index, task_representation::LabelID label) const;

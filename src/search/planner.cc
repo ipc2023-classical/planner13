@@ -113,7 +113,9 @@ int main(int argc, const char **argv) {
 
         if (transformer) {
             utils::Timer reconstruct_timer;
+            cout << "Plan reconstruction " << *g_plan_reconstruction << endl;
             g_plan_reconstruction->reconstruct_plan(plan);
+            
             cout << "Plan reconstruction time: " << reconstruct_timer << endl;
         }
 

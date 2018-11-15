@@ -266,6 +266,20 @@ bool FactoredTransitionSystem::is_active(int index) const {
 }
   
 
+vector<int> FactoredTransitionSystem::remove_labels(const std::vector<LabelID> & labels_to_remove) {
+    std::vector<int> may_require_pruning;
+    labels->remove_labels(labels_to_remove);
+    
+    for (size_t i = 0; i < transition_systems.size(); ++i) {
+        if (transition_systems[i]) {
+            if(transition_systems[i]->remove_labels(labels_to_remove)) {
+                may_require_pruning.push_back(i);
+            }
+        }
+    }
+    return may_require_pruning;
+}
+
 bool FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity verbosity) {
     bool removed_tr = false;
     for (size_t index = 0; index < transition_systems.size(); ++index) {
@@ -282,7 +296,7 @@ bool FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity ve
     }
     return removed_tr;
 }
-    
+
     bool  FactoredTransitionSystem::is_irrelevant_label (LabelID label) const {
         for (const auto & ts : transition_systems) {
             if(ts && ts->is_relevant_label(label)) {
@@ -299,17 +313,10 @@ bool FactoredTransitionSystem::remove_irrelevant_labels () {
             irrelevant_labels.push_back(label_no);
         }
     }
-    
-    labels->remove_labels(irrelevant_labels);
 
-    bool may_require_pruning = false;
-    for (size_t i = 0; i < transition_systems.size(); ++i) {
-        if (transition_systems[i]) {
-            may_require_pruning |= transition_systems[i]->remove_labels(irrelevant_labels);
-        }
-    }
+    auto may_require_pruning = remove_labels (irrelevant_labels);
 
-    assert(!may_require_pruning);
+    assert(may_require_pruning.empty());
 
     return !irrelevant_labels.empty();
 }

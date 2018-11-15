@@ -335,6 +335,7 @@ bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
             return false;
         }
     }
+
     // TODO: This is not implemented yet
 
     cerr << "SearchTask::is_applicable not implemented yet" << endl;

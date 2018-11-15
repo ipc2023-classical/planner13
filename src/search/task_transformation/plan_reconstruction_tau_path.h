@@ -92,6 +92,8 @@ PlanReconstructionTauPath(const FTSMapping & fts_mapping, PlanState initial_stat
     
     virtual ~PlanReconstructionTauPath() = default;
     virtual void reconstruct_plan(Plan &plan) const override;
+
+    virtual void print(std::ostream& o) const override;
 };
 }
 #endif

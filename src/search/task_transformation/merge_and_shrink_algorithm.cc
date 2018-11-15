@@ -212,6 +212,7 @@ bool MergeAndShrinkAlgorithm::prune_fts(
    */
    bool pruned = false;
    bool unsolvable = false;
+   set<LabelID> dead_labels;
    for (int index = 0; index < fts.get_size(); ++index) {
        if (prune_unreachable_states || prune_irrelevant_states) {
            bool pruned_factor = prune_step(
@@ -220,6 +221,10 @@ bool MergeAndShrinkAlgorithm::prune_fts(
                prune_unreachable_states,
                prune_irrelevant_states,
                verbosity);
+
+           if (pruned_factor) {
+               fts.get_ts(index).check_dead_labels(dead_labels);
+           }
            pruned = pruned || pruned_factor;
        }
        if (!fts.is_factor_solvable(index)) {
@@ -227,6 +232,37 @@ bool MergeAndShrinkAlgorithm::prune_fts(
            break;
        }
    }
+
+   while(!dead_labels.empty()) {
+       vector<int> ts_to_check = fts.remove_labels(vector<LabelID>(dead_labels.begin(), dead_labels.end()));
+
+       dead_labels.clear();
+       for (int index : ts_to_check) {
+           if (prune_unreachable_states || prune_irrelevant_states) {
+               bool pruned_factor = prune_step(
+                   fts,
+                   index,
+                   prune_unreachable_states,
+                   prune_irrelevant_states,
+                   verbosity);
+
+               if (pruned_factor) {
+                   fts.get_ts(index).check_dead_labels(dead_labels);
+               }
+               pruned = pruned || pruned_factor;
+           }
+           if (!fts.is_factor_solvable(index)) {
+               unsolvable = true;
+               break;
+           }
+
+
+           
+       }
+   }
+
+   
+   
    if (verbosity >= Verbosity::NORMAL && pruned) {
        print_time(timer, "after pruning atomic factors");
    }
@@ -359,6 +395,8 @@ void MergeAndShrinkAlgorithm::main_loop(
 
         fts.remove_irrelevant_transition_systems(verbosity);
 
+        fts.remove_irrelevant_labels();
+
         if (ran_out_of_time(timer)) {
             break;
         }
@@ -377,7 +415,6 @@ void MergeAndShrinkAlgorithm::main_loop(
 
 
         // Shrinking
-        unique_ptr<PlanReconstruction> plan_reconstruction;
         bool shrunk = shrink_strategy->
             apply_shrinking_transformation(fts, verbosity, merged_index);
 
@@ -527,6 +564,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             }
         }
 
+        
         has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
 
         has_simplified |= fts.remove_irrelevant_labels();

@@ -10,4 +10,10 @@ PlanReconstructionSequence::PlanReconstructionSequence(
 
     std::reverse(plan_reconstructions.begin(), plan_reconstructions.end());
 }
+
+    std::ostream& operator<<(std::ostream& o, const PlanReconstruction& b) {
+        b.print(o);
+        return o;
+    }
+
 }

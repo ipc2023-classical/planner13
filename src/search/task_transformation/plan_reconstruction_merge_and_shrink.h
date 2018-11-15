@@ -51,6 +51,8 @@ public:
         std::unique_ptr<LabelMap> label_map);
     virtual ~PlanReconstructionMergeAndShrink() = default;
     virtual void reconstruct_plan(Plan &plan) const override;
+
+    virtual void print(std::ostream& o) const override;
 };
 }
 #endif
