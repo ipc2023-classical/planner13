@@ -263,6 +263,7 @@ void SearchTask::create_fts_operators() {
 // We only need predecessor to access certain variables' values.
 void SearchTask::apply_operator(
     const GlobalState &predecessor, OperatorID op_id, PackedStateBin *buffer) {
+    // Ideally, we would assert that the operator is applicable.
     const FTSOperator &fts_op = operators[op_id.get_index()];
 
     // Effects on deterministic TS
@@ -335,11 +336,6 @@ bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {
             return false;
         }
     }
-
-    // TODO: This is not implemented yet
-
-    cerr << "SearchTask::is_applicable not implemented yet" << endl;
-    utils::exit_with(utils::ExitCode::UNSUPPORTED);
     return true;
 }
 
