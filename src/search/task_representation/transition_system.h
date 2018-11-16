@@ -198,8 +198,6 @@ public:
 
     bool remove_labels(const std::vector<LabelID> & labels);
 
-    bool remove_labels(const std::set<LabelID> & labels);
-
     TSConstIterator begin() const {
         return TSConstIterator(*label_equivalence_relation,
                                transitions_by_group_id,
