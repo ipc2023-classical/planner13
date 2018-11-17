@@ -16,6 +16,16 @@ using namespace task_transformation;
 
 namespace task_representation {
 
+    FTSTask::FTSTask(const FTSTask & other, OperatorCost cost_type) {
+        labels = utils::make_unique_ptr<Labels> (*other.labels, cost_type);
+
+        for (const auto & ts : other.transition_systems) {
+            transition_systems.push_back(utils::make_unique_ptr<TransitionSystem> (*ts,
+                                                                                   *labels));
+
+        }
+    }
+
     FTSTask::FTSTask(
         const std::vector<std::unique_ptr<TransitionSystem>> &transition_systems_,
         const std::unique_ptr<Labels> & labels_) {

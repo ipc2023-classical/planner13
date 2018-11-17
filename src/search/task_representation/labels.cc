@@ -12,6 +12,16 @@
 using namespace std;
 using namespace task_transformation;
 namespace task_representation {
+
+    Label::Label(const Label & other, OperatorCost cost_type) :
+        cost (get_adjusted_action_cost(other.cost, cost_type)) {
+    }
+
+    Labels::Labels(const Labels & other, OperatorCost cost_type) {
+        for (auto & l  : other.labels) {
+            labels.push_back(utils::make_unique_ptr<Label>(*l, cost_type));
+        }
+    }
 Labels::Labels(
     vector<unique_ptr<Label>> &&labels,
     int max_size)
