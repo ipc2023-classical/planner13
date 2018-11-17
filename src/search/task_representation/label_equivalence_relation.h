@@ -62,7 +62,6 @@ class LabelEquivalenceRelation {
       TransitionSystem to group locally equivalent labels. Label groups
       have implicit IDs defined by their index in grouped_labels.
     */
-
     const Labels &labels;
 
     /*
@@ -82,6 +81,7 @@ public:
       the public add_label_group method below.
     */
     explicit LabelEquivalenceRelation(const Labels &labels);
+    LabelEquivalenceRelation(const Labels &labels, std::vector<std::vector<int>> & label_groups);
     LabelEquivalenceRelation(const LabelEquivalenceRelation &other);
     /*
       NOTE: we need a custom copy constructor here because we need to fill

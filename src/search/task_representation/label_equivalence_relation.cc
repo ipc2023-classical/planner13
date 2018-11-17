@@ -22,6 +22,17 @@ LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels)
     label_to_positions.resize(labels.get_max_size());
 }
 
+    LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels,
+                                                       vector<vector<int>> & label_groups)
+    : labels(labels) {
+    grouped_labels.reserve(labels.get_max_size());
+    label_to_positions.resize(labels.get_max_size());
+
+    for (const auto & group : label_groups) {
+        add_label_group(group);
+    }
+}
+
 LabelEquivalenceRelation::LabelEquivalenceRelation(
     const LabelEquivalenceRelation &other)
     : labels(other.labels),
@@ -115,6 +126,7 @@ void LabelEquivalenceRelation::add_label_to_group(LabelGroupID group_id,
 void LabelEquivalenceRelation::apply_label_mapping(
     const vector<pair<int, vector<int>>> &label_mapping,
     const unordered_set<LabelGroupID> *affected_group_ids) {
+    
     for (const pair<int, vector<int>> &mapping : label_mapping) {
         int new_label_no = mapping.first;
         const vector<int> &old_label_nos = mapping.second;
@@ -152,6 +164,7 @@ void LabelEquivalenceRelation::apply_label_mapping(
             }
         }
     }
+
 }
 
 void LabelEquivalenceRelation::apply_label_mapping(
