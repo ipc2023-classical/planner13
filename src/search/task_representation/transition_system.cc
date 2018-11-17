@@ -417,6 +417,10 @@ void TransitionSystem::apply_label_reduction(
             int new_label_no = label_and_transitions.first;
             vector<Transition> &transitions = label_and_transitions.second;
             int new_group_id = label_equivalence_relation->get_group_id(new_label_no);
+            if ((size_t)new_group_id >= transitions_by_group_id.size()) {
+                transitions_by_group_id.resize(new_group_id+1);                
+            }
+            assert((size_t)new_group_id < transitions_by_group_id.size());
             transitions_by_group_id[new_group_id] = move(transitions);
         }
 

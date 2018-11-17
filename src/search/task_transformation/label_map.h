@@ -27,7 +27,10 @@ LabelMapping(std::vector<int> old_to_new_labels, int num_new_labels) :
     int operator[](int var) const {
         return old_to_new_labels[var];
     }
-        
+
+    int get_num_new_labels() const {
+        return num_new_labels;
+    }        
 };
 
 class LabelMap{
