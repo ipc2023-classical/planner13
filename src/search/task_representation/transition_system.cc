@@ -305,6 +305,7 @@ void TransitionSystem::apply_abstraction(
         }
     }
     goal_states = move(new_goal_states);
+    goal_state_list.clear();
 
     // Update all transitions.
     for (vector<Transition> &transitions : transitions_by_group_id) {
@@ -577,6 +578,7 @@ void TransitionSystem::statistics() const {
 
 
 const vector<int> & TransitionSystem::get_goal_states() const {
+
     if (goal_state_list.empty()) {
         for(size_t i = 0; i < goal_states.size(); ++i) {
             if (goal_states[i]) {
@@ -599,6 +601,7 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
                 }
                 label_group_precondition[group_id].reserve(sources.size());
                 for (int source : sources) {
+                    assert(source < get_size());
                     label_group_precondition[group_id].push_back(source);
                 }
             }
