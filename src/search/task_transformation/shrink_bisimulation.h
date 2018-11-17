@@ -23,7 +23,10 @@ class ShrinkBisimulation : public ShrinkStrategy {
 
     const bool greedy;
     const AtLimit at_limit;
+    const int max_size_after_shrink;
+    const int min_size_to_shrink;
 
+    
     void compute_abstraction(
         const TransitionSystem &ts,
         const Distances &distances,

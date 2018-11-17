@@ -141,6 +141,7 @@ fast_downward_plugin(
         task_transformation/shrink_strategy
         task_transformation/state_mapping
         task_transformation/task_transformation
+        task_transformation/task_transformation_cost
         task_transformation/task_transformation_merge_and_shrink
         task_transformation/task_transformation_tau_path
         task_transformation/tau_graph

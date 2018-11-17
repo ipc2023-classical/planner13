@@ -62,9 +62,7 @@ string ShrinkComposite::name() const {
      bool ShrinkComposite::apply_shrinking_transformation(FactoredTransitionSystem &fts,
                                                 Verbosity verbosity, int & index) const  {
         bool changes = false;
-        cout << "ID: " << index << endl;
         for (auto & st : strategies) {
-            cout << "ID2 "  << index << endl;
             assert(index >= 0);
             changes |= st->apply_shrinking_transformation(fts, verbosity, index);
             if (index== -1) {

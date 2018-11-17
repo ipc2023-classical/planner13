@@ -5,6 +5,7 @@
 #include <vector>
 #include "types.h"
 #include "../task_transformation/label_map.h"
+#include "../operator_cost.h"
 
 namespace task_representation {
 class SASTask;
@@ -19,6 +20,8 @@ public:
     explicit Label(int cost_)
         : cost(cost_) {
     }
+
+    Label(const Label & other, OperatorCost cost_type);
     Label(const Label &other) = default;
     ~Label() {}
     int get_cost() const {
@@ -39,7 +42,9 @@ public:
     Labels(
         std::vector<std::unique_ptr<Label>> &&labels,
         int max_size);
-    
+
+    Labels(const Labels & other, OperatorCost cost_type);
+
     task_transformation::LabelMapping  cleanup();
         
 //        std::vector<std::vector<int>> &&sas_op_indices_by_label);

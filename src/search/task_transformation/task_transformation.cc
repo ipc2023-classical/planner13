@@ -2,6 +2,7 @@
 
 #include "../options/plugin.h"
 #include "../plugin.h"
+#include "plan_reconstruction.h"
 
 using namespace std;
 
@@ -14,7 +15,8 @@ NoTransformation::transform_task(const std::shared_ptr<task_representation::FTST
 
     
     return make_pair(std::shared_ptr<task_representation::FTSTask>(fts_task),
-                     std::shared_ptr<PlanReconstruction>());
+                      std::make_shared<PlanReconstructionSequence>(
+                          vector<shared_ptr<PlanReconstruction>>()));
 
 }
 

@@ -1,6 +1,7 @@
 #ifndef TASK_TRANSFORMATION_MERGE_AND_SHRINK_ALGORITHM_H
 #define TASK_TRANSFORMATION_MERGE_AND_SHRINK_ALGORITHM_H
 
+#include "../operator_cost.h"
 #include <memory>
 
 namespace options {
@@ -50,8 +51,12 @@ class MergeAndShrinkAlgorithm {
     const int num_transitions_to_abort;
     const int num_transitions_to_exclude;
 
+    const OperatorCost cost_type;
+    
     //std::unique_ptr<task_transformation::LabelMap> label_map;
     long starting_peak_memory;
+
+
 
     bool ran_out_of_time(const utils::Timer &timer) const;
     bool too_many_transitions(const FactoredTransitionSystem &fts, int index) const;

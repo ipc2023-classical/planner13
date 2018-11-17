@@ -4,6 +4,9 @@
 #include <memory>
 #include <vector>
 
+
+#include "../operator_cost.h"
+
 class GlobalState;
 
 namespace int_packer {
@@ -37,6 +40,10 @@ public:
     FTSTask(
         std::vector<std::unique_ptr<TransitionSystem>> &&transition_systems,
         std::unique_ptr<Labels> labels);
+
+
+    FTSTask(const FTSTask & other, OperatorCost cost_type);
+
     ~FTSTask();
     FTSTask(FTSTask &&other) = delete;
     FTSTask(const FTSTask &other) = delete;
