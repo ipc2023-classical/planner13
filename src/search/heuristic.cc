@@ -21,7 +21,8 @@ using namespace task_representation;
 Heuristic::Heuristic(const Options &opts)
     : description(opts.get_unparsed_config()),
       heuristic_cache(HEntry(NO_VALUE, true)), //TODO: is true really a good idea here?
-      cache_h_values(opts.get<bool>("cache_estimates")) {
+      cache_h_values(opts.get<bool>("cache_estimates")),
+      cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))) {
     auto transformation_method =
         opts.get<shared_ptr<task_transformation::TaskTransformation>> ("transform");
 
@@ -62,6 +63,8 @@ void Heuristic::add_options_to_parser(OptionParser &parser) {
         "Optional task transformation for the heuristic.",
         "none()");
     parser.add_option<bool>("cache_estimates", "cache heuristic estimates", "true");
+
+    add_cost_type_option_to_parser(parser);
 }
 
 // This solution to get default values seems nonoptimal.
@@ -71,7 +74,10 @@ Options Heuristic::default_options() {
     opts.set<bool>("cache_estimates", false);
     return opts;
 }
-
+int Heuristic::get_label_cost(int label) const {
+    return get_adjusted_action_cost(task->get_label_cost(label), cost_type);
+}
+    
 EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
     EvaluationResult result;
 

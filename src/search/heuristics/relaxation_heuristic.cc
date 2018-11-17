@@ -25,15 +25,15 @@ using task_representation::FactPair;
 namespace relaxation_heuristic {
 
 
-    void insert_outside_condition(LabelID l, const FTSTask * task,
+    void RelaxationHeuristic::insert_outside_condition(LabelID l, 
 				  std::map<std::vector<Proposition *>, LabelID> & result,
-				  const std::vector<Proposition * > & new_outside_condition){
+				  const std::vector<Proposition * > & new_outside_condition) const {
 
 	auto pos = result.lower_bound(new_outside_condition);
 
 	if(pos != result.end() && !(result.key_comp()(new_outside_condition, pos->first))) {
 	    // key already exists, update if the new label has lower cost
-	    if (task->get_label_cost(pos->second)  > task->get_label_cost(l)) {
+	    if (get_label_cost(pos->second)  > get_label_cost(l)) {
 		pos->second = l;
 	    }
 	} else {
@@ -41,30 +41,30 @@ namespace relaxation_heuristic {
 	}	
     }
     //Auxiliary function to compute all combinations of preconditions. 
-    void insert_all_combinations_recursive (LabelID l, const FTSTask * task, 
+    void RelaxationHeuristic::insert_all_combinations_recursive (LabelID l, 
 					    const std::vector<std::vector<Proposition * > > & psets,
 					    std::vector<Proposition * > & new_combination,
-					    std::map<std::vector<Proposition *>, LabelID> & result) {
+					    std::map<std::vector<Proposition *>, LabelID> & result) const{
 
         const auto &  pset = psets[new_combination.size()];
         for (Proposition * p : pset) {
             new_combination.push_back(p);
             if(new_combination.size() == psets.size()) {
-		insert_outside_condition(l, task, result, new_combination);
+		insert_outside_condition(l,  result, new_combination);
 	    } else {
-                insert_all_combinations_recursive(l, task, psets, new_combination, result);
+                insert_all_combinations_recursive(l,  psets, new_combination, result);
             }
             new_combination.pop_back();
         }        
     }
     
-    void insert_all_combinations (LabelID l, FTSTask * task,
+    void RelaxationHeuristic::insert_all_combinations (LabelID l, 
 				  const std::vector<std::vector<Proposition * > > & psets,
-                                  std::map<std::vector<Proposition *> , LabelID> & result) {
+                                  std::map<std::vector<Proposition *> , LabelID> & result) const {
 	assert(!psets.empty()) ;
 	std::vector<Proposition * > new_combination;
 	new_combination.reserve(psets.size());
-	insert_all_combinations_recursive(l, task, psets, new_combination, result);    
+	insert_all_combinations_recursive(l, psets, new_combination, result);    
     }
 
     
@@ -170,7 +170,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 
 		if (pre_transition_systems.empty() ||
 		    (pre_transition_systems.size() == 1 && pre_transition_systems[0] == lts_id)) {
-		    insert_outside_condition(LabelID(l), task.get(), outside_conditions, std::vector<Proposition *>());
+		    insert_outside_condition(LabelID(l), outside_conditions, std::vector<Proposition *>());
 		} else {
 		    for (int pre_ts : pre_transition_systems) {
 			if (pre_ts == lts_id) {
@@ -189,7 +189,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
 			}
 		    }
                 
-		    insert_all_combinations(LabelID(l), task.get(), pre_per_ts, outside_conditions);
+		    insert_all_combinations(LabelID(l), pre_per_ts, outside_conditions);
 		}
             }
 
@@ -205,7 +205,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                         unary_operators.push_back(UnaryOperator(outside_condition.first,
                                                                 &(propositions_per_var[lts_id][target]),
                                                                 rs_step,
-								task->get_label_cost(outside_condition.second)));
+								get_label_cost(outside_condition.second)));
 			// for (OperatorID op_id : rs_step.get_operator_ids()) {
 			//     unary_operators_per_operator_id[op_id].push_back(&(unary_operators.back()));
 			// }
@@ -220,7 +220,7 @@ RelaxationHeuristic::RelaxationHeuristic(const options::Options &opts)
                             unary_operators.push_back(UnaryOperator(pre,
                                                                     &(propositions_per_var[lts_id][target]),
                                                                     rs_step,
-								    task->get_label_cost(outside_condition.second)));
+								    get_label_cost(outside_condition.second)));
 
 			    // for (OperatorID op_id : rs_step.get_operator_ids()) {
 			    // 	unary_operators_per_operator_id[op_id].push_back(&(unary_operators.back()));

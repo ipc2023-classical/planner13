@@ -3,8 +3,10 @@
 
 #include "../heuristic.h"
 #include "../task_representation/fact.h"
+#include "../task_representation/labels.h"
 
 #include <vector>
+#include <map>
 
 class GlobalState;
 
@@ -57,6 +59,21 @@ struct Proposition {
 
 class RelaxationHeuristic : public Heuristic {
     void simplify();
+
+    void insert_outside_condition(task_representation::LabelID l, 
+				  std::map<std::vector<Proposition *>, task_representation::LabelID> & result,
+                                  const std::vector<Proposition * > & new_outside_condition) const;
+
+
+    void insert_all_combinations (task_representation::LabelID l, 
+				  const std::vector<std::vector<Proposition * > > & psets,
+                                  std::map<std::vector<Proposition *> , task_representation::LabelID> & result) const ;
+
+    void insert_all_combinations_recursive (task_representation::LabelID l, 
+					    const std::vector<std::vector<Proposition * > > & psets,
+					    std::vector<Proposition * > & new_combination,
+					    std::map<std::vector<Proposition *>,
+                                            task_representation::LabelID> & result) const;
 protected:
     std::vector<UnaryOperator> unary_operators;
     std::vector<std::vector<Proposition>> propositions_per_var;

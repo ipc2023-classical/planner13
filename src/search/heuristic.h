@@ -69,7 +69,8 @@ protected:
     std::shared_ptr<task_representation::FTSTask> task;
     std::shared_ptr<task_transformation::StateMapping> state_mapping;
     std::shared_ptr<task_representation::SearchTask> search_task;
-	
+
+    OperatorCost cost_type;
 
     enum {DEAD_END = -1, NO_VALUE = -2};
 
@@ -100,6 +101,8 @@ public:
         hset.insert(this);
     }
 
+    int get_label_cost(int label) const;
+    
     static void add_options_to_parser(options::OptionParser &parser);
     static options::Options default_options();
 
