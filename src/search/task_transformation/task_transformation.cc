@@ -2,6 +2,7 @@
 
 #include "../options/plugin.h"
 #include "../plugin.h"
+#include "plan_reconstruction.h"
 
 using namespace std;
 

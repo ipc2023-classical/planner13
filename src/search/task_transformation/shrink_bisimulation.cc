@@ -96,7 +96,9 @@ struct Signature {
 ShrinkBisimulation::ShrinkBisimulation(const Options &opts)
     : ShrinkStrategy(),
       greedy(opts.get<bool>("greedy")),
-      at_limit(AtLimit(opts.get_enum("at_limit"))) {
+      at_limit(AtLimit(opts.get_enum("at_limit"))),
+      max_size_after_shrink(opts.get<int>("max_size_after_shrink")),
+      min_size_to_shrink(opts.get<int>("min_size_to_shrink")){
 }
 
 int ShrinkBisimulation::initialize_groups(
@@ -242,8 +244,12 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
         const FactoredTransitionSystem &fts,
         int index,
         int target_size) const {
-
+    if (max_size_after_shrink) {
+        target_size  = std::min(target_size, max_size_after_shrink);
+    }
     const TransitionSystem &ts = fts.get_ts(index);
+
+    
     const Distances &distances = fts.get_distances(index);
 
     int num_states = ts.get_size();
@@ -366,6 +372,9 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
      bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int & index) const  {
          assert(index >= 0);
          assert(fts.is_active(index));
+         if (fts.get_ts(index).get_size() < min_size_to_shrink) {
+             return false;
+         }
         StateEquivalenceRelation equivalence_relation =
             compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
         return fts.apply_abstraction(index, equivalence_relation, verbosity);
@@ -377,6 +386,9 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
         bool changes = false;
         for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
+                if (fts.get_ts(index).get_size() < min_size_to_shrink) {
+                    continue;
+                }
                 StateEquivalenceRelation equivalence_relation =
                     compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
                 changes |= fts.apply_abstraction(index, equivalence_relation, verbosity);
@@ -447,6 +459,14 @@ static shared_ptr<ShrinkStrategy>_parse(OptionParser &parser) {
         "at_limit", at_limit,
         "what to do when the size limit is hit", "RETURN");
 
+    parser.add_option<int>("max_size_after_shrink", "sets a maximum target size", "infinity");
+
+    
+    parser.add_option<int>(
+        "min_size_to_shrink",
+        "A limit on the size of the transition systems to apply shrinking on them"
+        "0");
+
     Options opts = parser.parse();
 
     if (parser.help_mode())
@@ -462,6 +482,8 @@ static shared_ptr<ShrinkStrategy>_parse(OptionParser &parser) {
         Options opts; 
         opts.set<bool> ("greedy", false);
         opts.set<int>("at_limit", static_cast<int> (RETURN));
+        opts.set<int>("max_size_after_shrink", std::numeric_limits<int>::max());
+        opts.set<int>("min_size_to_shrink", 0);
 
         return make_shared<ShrinkBisimulation>(opts);
     }

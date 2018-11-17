@@ -690,6 +690,7 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "further considerations of the algorithm.",
         "infinity",
         Bounds("0", "infinity"));
+
 }
 void add_transition_system_size_limit_options_to_parser(OptionParser &parser) {
     parser.add_option<int>(
