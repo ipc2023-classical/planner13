@@ -9,6 +9,8 @@
 
 #include "../task_transformation/label_map.h"
 
+#include "../algorithms/segmented_vector.h"
+
 namespace task_representation {
 class Labels;
 
@@ -70,7 +72,7 @@ class LabelEquivalenceRelation {
       resized, these iterators may become invalid. In the constructor, we
       make sure to reserve enough memory so reallocation is never needed.
     */
-    std::vector<LabelGroup> grouped_labels;
+    segmented_vector::SegmentedVector<LabelGroup> grouped_labels;
     // maps each label to its group's ID and its iterator within the group.
     std::vector<std::pair<LabelGroupID, LabelIter>> label_to_positions;
 
@@ -128,7 +130,7 @@ public:
     }
 
     const LabelGroup &get_group(LabelGroupID group_id) const {
-        return grouped_labels.at(group_id);
+        return grouped_labels[group_id];
     }
 };
 }
