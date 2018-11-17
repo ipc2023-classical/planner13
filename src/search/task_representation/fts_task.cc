@@ -31,7 +31,6 @@ namespace task_representation {
         : transition_systems(move(transition_systems_)),
           labels(move(labels)) {
 
-        cout << "Constructing " << *this;
 #ifndef NDEBUG
         for (int label = 0; label < this->labels->get_size(); ++label) {
             assert(this->labels->is_current_label(label));

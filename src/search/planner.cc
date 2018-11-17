@@ -68,7 +68,7 @@ int main(int argc, const char **argv) {
     }
     cout << "Transform time: " << transform_timer << endl;
 
-    //g_main_task->dump();
+    cout << "Main task: " << *g_main_task << endl;
     if (g_main_task->trivially_solved()) {
         cout << "Task solved without search" << endl;
         Plan plan (g_main_task.get());

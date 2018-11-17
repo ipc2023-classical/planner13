@@ -139,6 +139,7 @@ fast_downward_plugin(
         task_transformation/shrink_own_labels
         task_transformation/shrink_composite
         task_transformation/shrink_strategy
+        task_transformation/state_mapping
         task_transformation/task_transformation
         task_transformation/task_transformation_merge_and_shrink
         task_transformation/task_transformation_tau_path

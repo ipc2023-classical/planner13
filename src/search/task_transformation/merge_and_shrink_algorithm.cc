@@ -478,7 +478,7 @@ void MergeAndShrinkAlgorithm::main_loop(
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
-    const std::shared_ptr<task_representation::FTSTask> &fts_task) {
+    const std::shared_ptr<task_representation::FTSTask> &fts_task, bool lossy_mapping) {
     if (starting_peak_memory) {
         cerr << "Calling build_factored_transition_system twice is not "
              << "supported!" << endl;
@@ -532,7 +532,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
         move(distances),
         compute_init_distances,
         compute_goal_distances,
-        verbosity);
+        verbosity,
+        lossy_mapping);
 
     bool unsolvable = prune_fts(fts, timer);
     if (unsolvable) {

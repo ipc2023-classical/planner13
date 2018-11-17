@@ -8,6 +8,8 @@
 
 #include "task_representation/state.h"
 #include "task_representation/fts_task.h"
+#include "task_transformation/task_transformation.h"
+#include "task_transformation/state_mapping.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -19,11 +21,17 @@ using namespace task_representation;
 Heuristic::Heuristic(const Options &opts)
     : description(opts.get_unparsed_config()),
       heuristic_cache(HEntry(NO_VALUE, true)), //TODO: is true really a good idea here?
-      cache_h_values(opts.get<bool>("cache_estimates")),
-      task(g_main_task),
-      // HACK: true means to dump the construction time of the search task.
-      search_task(task->get_search_task(true)) {
-    //opts.get<shared_ptr<FTSTaskTransformation>>("transform")
+      cache_h_values(opts.get<bool>("cache_estimates")) {
+    auto transformation_method =
+        opts.get<shared_ptr<task_transformation::TaskTransformation>> ("transform");
+
+    
+    auto transformation = transformation_method->transform_task_lossy(g_main_task);
+    task = transformation.first;
+    state_mapping = transformation.second;
+    search_task = task->get_search_task(true);
+    
+    cout << "Heuristic task: " <<  *task << endl;
 }
 
 Heuristic::~Heuristic() {
@@ -41,15 +49,18 @@ bool Heuristic::notify_state_transition(
 }
 
 State Heuristic::convert_global_state(const GlobalState &global_state) const {
-    return State(*g_main_task, global_state.get_values());
+    if (state_mapping) {
+        return State(*task, state_mapping->convert_state(global_state));
+    }else {
+        return State(*task, global_state.get_values());
+    }
 }
 
 void Heuristic::add_options_to_parser(OptionParser &parser) {
-    // parser.add_option<shared_ptr<FTSTask>>(
-    //     "transform",
-    //     "Optional task transformation for the heuristic."
-    //     " Currently, adapt_costs() and no_transform() are available.",
-    //     "no_transform()");
+    parser.add_option<shared_ptr<task_transformation::TaskTransformation>>(
+        "transform",
+        "Optional task transformation for the heuristic.",
+        "none()");
     parser.add_option<bool>("cache_estimates", "cache heuristic estimates", "true");
 }
 
@@ -77,6 +88,7 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
         result.set_count_evaluation(false);
     } else {
         heuristic = compute_heuristic(state);
+    
         if (cache_h_values) {
             heuristic_cache[state] = HEntry(heuristic, false);
         }

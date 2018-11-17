@@ -23,6 +23,9 @@ class State;
 class SearchTask;
 }
 
+namespace task_transformation {
+    class StateMapping;
+}
 
 class Heuristic : public Evaluator {
     struct HEntry {
@@ -63,8 +66,9 @@ protected:
     bool cache_h_values;
 
     // Hold a reference to the task implementation and pass it to objects that need it.
-    const std::shared_ptr<task_representation::FTSTask> task;
-    const std::shared_ptr<task_representation::SearchTask> search_task;
+    std::shared_ptr<task_representation::FTSTask> task;
+    std::shared_ptr<task_transformation::StateMapping> state_mapping;
+    std::shared_ptr<task_representation::SearchTask> search_task;
 	
 
     enum {DEAD_END = -1, NO_VALUE = -2};

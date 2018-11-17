@@ -15,6 +15,7 @@
 #include "../utils/system.h"
 
 #include "label_map.h"
+#include "state_mapping.h"
 
 #include <cassert>
 
@@ -49,7 +50,7 @@ FactoredTransitionSystem::FactoredTransitionSystem(
     vector<unique_ptr<Distances>> &&distances,
     const bool compute_init_distances,
     const bool compute_goal_distances,
-    Verbosity verbosity)
+    Verbosity verbosity, const bool lossy)
     : labels(move(labels_)),
       transition_systems(move(transition_systems)),
       mas_representations(move(mas_representations)),
@@ -58,7 +59,8 @@ FactoredTransitionSystem::FactoredTransitionSystem(
       compute_init_distances(compute_init_distances),
       compute_goal_distances(compute_goal_distances),
       num_active_entries(this->transition_systems.size()),
-      predecessor_fts_task (fts_task){
+      predecessor_fts_task (fts_task),
+      lossy_mapping (lossy) {
     for (size_t index = 0; index < this->transition_systems.size(); ++index) {
         if (compute_init_distances || compute_goal_distances) {
             this->distances[index]->compute_distances(
@@ -76,7 +78,8 @@ FactoredTransitionSystem::FactoredTransitionSystem(FactoredTransitionSystem &&ot
       distances(move(other.distances)),
       compute_init_distances(move(other.compute_init_distances)),
       compute_goal_distances(move(other.compute_goal_distances)),
-      num_active_entries(move(other.num_active_entries)) {
+      num_active_entries(move(other.num_active_entries)),
+      lossy_mapping (other.lossy_mapping){
     /*
       This is just a default move constructor. Unfortunately Visual
       Studio does not support "= default" for move construction or
@@ -380,7 +383,6 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         }
         cout << endl;
         }
-
         
         std::vector<int> transition_system_mapping (num_active_entries, -1);
         std::vector<int> transition_system_all_mapping (transition_systems.size(), -1);
@@ -410,6 +412,9 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         transition_systems.swap(new_transition_systems);
         distances.swap(new_distances);
+        if (lossy_mapping) {
+            mas_representations.swap(old_mas_representations);
+        }
         cout << "Done renumbering factors." << endl;
         //Renumber labels consecutively
         auto label_mapping = labels->cleanup();
@@ -430,7 +435,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         assert((size_t)num_active_entries == transition_systems.size());
 
-        if (predecessor_fts_task){
+        if (!lossy_mapping &&  predecessor_fts_task){
             plan_reconstruction_steps.push_back(
                 make_shared<PlanReconstructionMergeAndShrink>(
                     predecessor_fts_task, move(old_mas_representations), move(label_map)));
@@ -441,15 +446,20 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
 
     void FactoredTransitionSystem::reinitialize_predecessor_task() {
-        mas_representations.clear();
-        for (size_t index = 0; index < transition_systems.size(); ++index) {
-            mas_representations.push_back(
-                utils::make_unique_ptr<MergeAndShrinkRepresentationLeaf>
-                (index, transition_systems[index]->get_size()));
+        if (lossy_mapping) {
+            return;
         }
 
-        label_map.reset(new LabelMap (labels->get_size()));
+            mas_representations.clear();
+            for (size_t index = 0; index < transition_systems.size(); ++index) {
+                mas_representations.push_back(
+                    utils::make_unique_ptr<MergeAndShrinkRepresentationLeaf>
+                    (index, transition_systems[index]->get_size()));
+            }
 
+            label_map.reset(new LabelMap (labels->get_size()));
+        
+        
         if(!transition_systems.empty()) {
             //Making copy of transition systems and labels 
             predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
@@ -475,4 +485,10 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
     std::shared_ptr<task_representation::FTSTask> FactoredTransitionSystem::get_transformed_fts_task() {
         return make_shared<task_representation::FTSTask> (move(transition_systems), move(labels));
     }
+
+    std::shared_ptr<StateMapping> FactoredTransitionSystem::get_state_mapping() {
+        return make_shared<StateMapping> (move(mas_representations));
+    }
+
+
 }

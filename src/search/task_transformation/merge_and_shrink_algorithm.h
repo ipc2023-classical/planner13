@@ -70,7 +70,7 @@ public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;
     void warn_on_unusual_options() const;
-    FactoredTransitionSystem build_factored_transition_system(const std::shared_ptr<task_representation::FTSTask> &fts_task);
+    FactoredTransitionSystem build_factored_transition_system(const std::shared_ptr<task_representation::FTSTask> &fts_task, bool lossy_mapping);
 };
 
 extern void add_merge_and_shrink_algorithm_options_to_parser(options::OptionParser &parser);

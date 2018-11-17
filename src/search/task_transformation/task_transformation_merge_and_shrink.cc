@@ -28,14 +28,29 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
     MergeAndShrinkAlgorithm mas_algorithm(options);
     
     FactoredTransitionSystem fts =
-        mas_algorithm.build_factored_transition_system(fts_task);
-
+        mas_algorithm.build_factored_transition_system(fts_task, false);
 
     fts.cleanup();
-    
     return make_pair(fts.get_transformed_fts_task(), fts.get_plan_reconstruction());
 }
+    
 
+    std::pair<std::shared_ptr<task_representation::FTSTask>, 
+              std::shared_ptr<StateMapping> >
+TaskTransformationMergeAndShrink::transform_task_lossy(
+    const std::shared_ptr<task_representation::FTSTask> &fts_task) {
+    
+    MergeAndShrinkAlgorithm mas_algorithm(options);
+    
+    FactoredTransitionSystem fts =
+        mas_algorithm.build_factored_transition_system(fts_task, true);
+    
+    fts.cleanup();
+
+    return make_pair(fts.get_transformed_fts_task(), fts.get_state_mapping());
+
+}
+    
 static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {
     add_merge_and_shrink_algorithm_options_to_parser(parser);
     options::Options opts = parser.parse();

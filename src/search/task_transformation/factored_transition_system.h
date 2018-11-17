@@ -21,6 +21,7 @@ class FactoredTransitionSystem;
 class MergeAndShrinkRepresentation;
 class LabelMap;
 class PlanReconstruction;
+class StateMapping;
 
 class FTSConstIterator {
     /*
@@ -79,6 +80,9 @@ class FactoredTransitionSystem {
     std::vector<std::shared_ptr<PlanReconstruction>> plan_reconstruction_steps;
 
     std::shared_ptr<task_representation::FTSTask> predecessor_fts_task;
+
+    const bool lossy_mapping;
+
     /*
       Assert that the factor at the given index is in a consistent state, i.e.
       that there is a transition system, a distances object, and an MSR.
@@ -101,7 +105,8 @@ public:
         std::vector<std::unique_ptr<Distances>> &&distances,
         const bool compute_init_distances,
         const bool compute_goal_distances,
-        Verbosity verbosity);
+        Verbosity verbosity, 
+        const bool lossy);
     FactoredTransitionSystem(FactoredTransitionSystem &&other);
     ~FactoredTransitionSystem();
 
@@ -213,15 +218,13 @@ public:
 
     void reinitialize_predecessor_task ();
 
-
-    
-
-
     void add_plan_reconstruction(std::shared_ptr<PlanReconstruction> plan_reconstruction) {
         plan_reconstruction_steps.push_back(plan_reconstruction);
     }
     std::shared_ptr<PlanReconstruction> get_plan_reconstruction();
     std::shared_ptr<task_representation::FTSTask> get_transformed_fts_task();
+    std::shared_ptr<StateMapping> get_state_mapping();
+        
 
 };
 }
