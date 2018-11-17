@@ -59,6 +59,7 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
     max_time(opts.get<double>("max_time")),
     num_transitions_to_abort(opts.get<int>("num_transitions_to_abort")),
     num_transitions_to_exclude(opts.get<int>("num_transitions_to_exclude")),
+    cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
     starting_peak_memory(0) {
     assert(num_states_to_trigger_shrinking > 0);
     assert(max_states > 0);
@@ -499,7 +500,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
     warn_on_unusual_options();
     cout << endl;
 
-    std::unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(fts_task->get_labels());
+    std::unique_ptr<Labels> labels = utils::make_unique_ptr<Labels>(fts_task->get_labels(),
+                                                                    cost_type);
     int num_vars = fts_task->get_size();
     assert(num_vars);
     std::vector<std::unique_ptr<TransitionSystem>> transition_systems;
@@ -594,6 +596,8 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 }
 
 void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
+    add_cost_type_option_to_parser(parser);
+    
     // Merge strategy option.
     parser.add_option<shared_ptr<MergeStrategyFactory>>(
         "merge_strategy",
