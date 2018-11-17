@@ -17,7 +17,8 @@ namespace task_representation {
         cost (get_adjusted_action_cost(other.cost, cost_type)) {
     }
 
-    Labels::Labels(const Labels & other, OperatorCost cost_type) {
+    Labels::Labels(const Labels & other, OperatorCost cost_type) :
+        max_size(other.max_size) {
         for (auto & l  : other.labels) {
             labels.push_back(utils::make_unique_ptr<Label>(*l, cost_type));
         }
