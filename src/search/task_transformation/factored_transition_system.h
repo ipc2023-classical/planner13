@@ -52,10 +52,13 @@ public:
 class FTSMapping {
 public:
     std::vector<int> transition_system_mapping;
+    std::vector<int> transition_system_all_mapping;
+    
     LabelMapping label_mapping;
 
-FTSMapping(std::vector<int> && ts_mapping, LabelMapping && lm)  :
+FTSMapping(std::vector<int> && ts_mapping, std::vector<int> && ts_all_mapping,LabelMapping && lm)  :
     transition_system_mapping(std::move(ts_mapping)),
+        transition_system_all_mapping(std::move(ts_all_mapping)),
         label_mapping(std::move(lm)){
         
     }

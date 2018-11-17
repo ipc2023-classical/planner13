@@ -47,7 +47,7 @@ public:
 
     virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity) const = 0;
     
-    virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int index) const = 0;
+    virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int & index) const = 0;
 
     virtual bool requires_init_distances() const = 0;
     virtual bool requires_goal_distances() const = 0;

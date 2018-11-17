@@ -41,7 +41,8 @@ namespace task_transformation {
 
     
     bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem & fts,
-                                                         Verbosity verbosity, int  check_only_index) const  {
+                                                         Verbosity verbosity,
+                                                         int &  check_only_index) const  {
 
         int old_index = 0;
         int new_index = 0;
@@ -95,7 +96,7 @@ namespace task_transformation {
             }
       }
 
-        bool changes = exclude_transition_systems.empty();
+        bool changes = !(exclude_transition_systems.empty());
         if (!equivalences_to_apply.empty() || !exclude_transition_systems.empty() ){ 
             cout << "OwnLabelShrinking applicable in " <<
                 (equivalences_to_apply.size() + exclude_transition_systems.size())  << " out of " << old_index << " systems" << endl;
@@ -109,7 +110,10 @@ namespace task_transformation {
            }
             assert(fts.get_size() == new_index);
 
-            
+
+            if (check_only_index >= 0) {
+                check_only_index = fts_m.transition_system_all_mapping[check_only_index];
+            }
             
             // 2) Add tau plan reconstruction step 
             fts.add_plan_reconstruction(
@@ -133,7 +137,8 @@ namespace task_transformation {
     
     bool ShrinkOwnLabels::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity) const  {
 
-        return apply_shrinking_transformation(fts, verbosity, -1);
+        int index = -1;
+        return apply_shrinking_transformation(fts, verbosity, index);
     }
 
 
@@ -303,6 +308,7 @@ namespace task_transformation {
     shared_ptr<ShrinkStrategy> ShrinkOwnLabels::create_default() {
         Options opts; 
         opts.set<bool> ("goal_shrinking", true);
+        opts.set<bool> ("preserve_optimality", false);
 
         return make_shared<ShrinkOwnLabels>(opts);
 

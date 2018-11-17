@@ -383,6 +383,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
 
         
         std::vector<int> transition_system_mapping (num_active_entries, -1);
+        std::vector<int> transition_system_all_mapping (transition_systems.size(), -1);
         
         // 1) Construct plan reconstruction object       
         vector<unique_ptr<TransitionSystem> > new_transition_systems;
@@ -397,6 +398,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
                 old_mas_representations.push_back(extract_mas_representation(ts_index));
                 if (!exclude_transition_systems.count(ts_index)) {
                     transition_system_mapping[old_active_entries] = num_active_entries;
+                    transition_system_all_mapping[ts_index] = num_active_entries;
                     num_active_entries ++;
                     new_transition_systems.push_back(move(transition_systems[ts_index]));
                     new_distances.push_back(move(distances[ts_index]));
@@ -434,7 +436,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
                     predecessor_fts_task, move(old_mas_representations), move(label_map)));
         }
 
-        return FTSMapping (move(transition_system_mapping), move(label_mapping));
+        return FTSMapping (move(transition_system_mapping), move(transition_system_all_mapping), move(label_mapping));
     }
 
 

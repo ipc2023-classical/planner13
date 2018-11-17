@@ -363,7 +363,9 @@ StateEquivalenceRelation ShrinkBisimulation::compute_equivalence_relation(
 }
 
 
-     bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int index) const  {
+     bool ShrinkBisimulation::apply_shrinking_transformation(FactoredTransitionSystem &fts, Verbosity verbosity, int & index) const  {
+         assert(index >= 0);
+         assert(fts.is_active(index));
         StateEquivalenceRelation equivalence_relation =
             compute_equivalence_relation(fts, index, std::numeric_limits<int>::max());
         return fts.apply_abstraction(index, equivalence_relation, verbosity);
@@ -455,6 +457,14 @@ static shared_ptr<ShrinkStrategy>_parse(OptionParser &parser) {
     else
         return make_shared<ShrinkBisimulation>(opts);
 }
+
+    shared_ptr<ShrinkStrategy> ShrinkBisimulation::create_default_perfect() {
+        Options opts; 
+        opts.set<bool> ("greedy", false);
+        opts.set<int>("at_limit", static_cast<int> (RETURN));
+
+        return make_shared<ShrinkBisimulation>(opts);
+    }
 
 static PluginShared<ShrinkStrategy> _plugin("shrink_bisimulation", _parse);
 }

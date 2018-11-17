@@ -56,7 +56,7 @@ public:
                                                 Verbosity verbosity) const override;
     
     virtual bool apply_shrinking_transformation(FactoredTransitionSystem &fts,
-                                                Verbosity verbosity, int index) const override;
+                                                Verbosity verbosity, int & index) const override;
 
     virtual bool requires_init_distances() const override {
         return false;
@@ -65,6 +65,8 @@ public:
     virtual bool requires_goal_distances() const override {
         return true;
     }
+
+    static std::shared_ptr<ShrinkStrategy> create_default_perfect();
 };
 }
 
