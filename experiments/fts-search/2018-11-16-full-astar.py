@@ -27,6 +27,9 @@ def main(revisions=None):
         IssueConfig('astar-blind-transform-full-bisim-labelreduction-dfp1k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(blind)"]),
         IssueConfig('astar-blind-transform-full-bisim-labelreduction-miasm1k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),sf_miasm(shrink_strategy=shrink_bisimulation(greedy=false),max_states=1000,threshold_before_merge=1),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(blind)"]),
 
+        IssueConfig('astar-hmax-transform-full-bisim-labelreduction-dfp1k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(hmax)"]),
+        IssueConfig('astar-hmax-transform-full-bisim-labelreduction-miasm1k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),sf_miasm(shrink_strategy=shrink_bisimulation(greedy=false),max_states=1000,threshold_before_merge=1),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(hmax)"]),
+
         IssueConfig('astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(merge_and_shrink(shrink_strategy=mas_shrink_bisimulation(greedy=false),merge_strategy=mas_merge_stateless(merge_selector=mas_score_based_filtering(scoring_functions=[mas_goal_relevance,mas_dfp,mas_total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=mas_exact(before_shrinking=true,before_merging=false),max_states=50000,threshold_before_merge=1))"]),
         IssueConfig('astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1k-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),sf_miasm(shrink_strategy=shrink_bisimulation(greedy=false),max_states=1000,threshold_before_merge=1),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(merge_and_shrink(shrink_strategy=mas_shrink_bisimulation(greedy=false),merge_strategy=mas_merge_stateless(merge_selector=mas_score_based_filtering(scoring_functions=[mas_goal_relevance,mas_dfp,mas_total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=mas_exact(before_shrinking=true,before_merging=false),max_states=50000,threshold_before_merge=1))"]),
 
@@ -74,6 +77,8 @@ def main(revisions=None):
     exp.add_absolute_report_step(attributes=attributes, filter_algorithm=[
         '{}-astar-blind-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION),
         '{}-astar-blind-transform-full-bisim-labelreduction-miasm1k-t900'.format(REVISION),
+        '{}-astar-hmax-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION),
+        '{}-astar-hmax-transform-full-bisim-labelreduction-miasm1k-t900'.format(REVISION),
         '{}-astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION),
         '{}-astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1k-t900'.format(REVISION),
         '{}-astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION),
@@ -83,6 +88,7 @@ def main(revisions=None):
     BASELINE_REV = 'fts-search-base'
     exp.add_fetcher('data/2018-11-05-regular-baselines-eval', filter_algorithm=[
         '{}-astar-blind'.format(BASELINE_REV),
+        '{}-astar-hmax'.format(BASELINE_REV),
     ],merge=True)
 
     BASELINE_REV_MAS = 'fts-search-base-mas'
@@ -97,6 +103,8 @@ def main(revisions=None):
             algorithm_pairs=[
                 ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION)),
                 ('{}-astar-blind'.format(BASELINE_REV), '{}-astar-blind-transform-full-bisim-labelreduction-miasm1k-t900'.format(REVISION)),
+                ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION)),
+                ('{}-astar-hmax'.format(BASELINE_REV), '{}-astar-hmax-transform-full-bisim-labelreduction-miasm1k-t900'.format(REVISION)),
                 ('{}-astar-masdfpbisim50k'.format(BASELINE_REV_MAS), '{}-astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION)),
                 ('{}-astar-masdfpbisim50k'.format(BASELINE_REV_MAS), '{}-astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1k-t900'.format(REVISION)),
                 ('{}-astar-masmiasmbisim50k'.format(BASELINE_REV_MAS), '{}-astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1k-t900'.format(REVISION)),
