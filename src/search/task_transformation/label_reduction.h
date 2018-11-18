@@ -63,6 +63,8 @@ class LabelReduction {
     };
     LabelReductionMethod lr_method;
     LabelReductionSystemOrder lr_system_order;
+    const int max_time;
+
     std::shared_ptr<utils::RandomNumberGenerator> rng;
 
     bool initialized() const;

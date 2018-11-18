@@ -464,7 +464,7 @@ static shared_ptr<ShrinkStrategy>_parse(OptionParser &parser) {
     
     parser.add_option<int>(
         "min_size_to_shrink",
-        "A limit on the size of the transition systems to apply shrinking on them"
+        "A limit on the size of the transition systems to apply shrinking on them",
         "0");
 
     Options opts = parser.parse();

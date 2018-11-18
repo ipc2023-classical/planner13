@@ -10,6 +10,7 @@
 
 #include "../option_parser.h"
 #include "../plugin.h"
+#include "../utils/timer.h"
 
 #include "../algorithms/equivalence_relation.h"
 #include "../utils/collections.h"
@@ -35,6 +36,7 @@ LabelReduction::LabelReduction(const Options &options)
       lr_before_merging(options.get<bool>("before_merging")),
       lr_method(LabelReductionMethod(options.get_enum("method"))),
       lr_system_order(LabelReductionSystemOrder(options.get_enum("system_order"))),
+      max_time(options.get<int>("max_time")),
       rng(utils::parse_rng_from_options(options)) {
 }
 
@@ -149,6 +151,7 @@ bool LabelReduction::reduce(
     const pair<int, int> &next_merge,
     FactoredTransitionSystem &fts,
     Verbosity verbosity) const {
+    utils::Timer timer;
     assert(initialized());
     assert(reduce_before_shrinking() || reduce_before_merging());
     int num_transition_systems = fts.get_size();
@@ -222,7 +225,7 @@ bool LabelReduction::reduce(
       we only need to consider all remaining transitions systems, but not the
       one itself again.
     */
-    for (int i = 0; i < max_iterations; ++i) {
+    for (int i = 0; i < max_iterations && timer() < max_time; ++i) {
         int ts_index = transition_system_order[tso_index];
 
         vector<pair<int, vector<int>>> label_mapping;
@@ -263,6 +266,11 @@ bool LabelReduction::reduce(
             }
         }
     }
+
+    if (verbosity >= Verbosity::NORMAL && timer() > max_time ) {
+        cout << "Ran out of time, stopping computation." << endl  << endl;
+    }
+
     return reduced;
 }
 
@@ -324,6 +332,11 @@ static shared_ptr<LabelReduction>_parse(OptionParser &parser) {
                             "apply label reduction before shrinking");
     parser.add_option<bool>("before_merging",
                             "apply label reduction before merging");
+
+
+    parser.add_option<int>("max_time",
+                            "maximum time for label reduction",
+                            "infinity");
 
     vector<string> label_reduction_method;
     vector<string> label_reduction_method_doc;

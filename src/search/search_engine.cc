@@ -27,7 +27,7 @@ SearchEngine::SearchEngine(const Options &opts)
     : status(IN_PROGRESS),
       solution_found(false),
       plan(g_main_task.get()),
-      state_registry(g_main_task->get_search_task()),
+      state_registry(g_main_task->get_search_task(true)),
       search_space(state_registry,
                    static_cast<OperatorCost>(opts.get_enum("cost_type"))),
       cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
