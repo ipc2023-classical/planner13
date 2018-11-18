@@ -47,13 +47,10 @@ def main(revisions=None):
         environment = LocalEnvironment(processes=4)
 
     configs = {
-        # atomic
-        IssueConfig('lazy-ff-atomic', ["--search", "lazy_greedy([ff()])"]),
-        IssueConfig('lazy-ff-transform-atomic-bisimown-labelreduction', ['--transform', 'transform_merge_and_shrink(shrink_strategy=shrink_own_bisimulation(),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false,max_time=900,cost_type=one)', '--search',  'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)', "--search", "lazy_greedy([ff()])"]),
-
-        # full
-        IssueConfig('lazy-ff-transform-full-bisimown-labelreduction-miasm1k-t900', ["--transform", 'transform_merge_and_shrink(shrink_strategy=shrink_own_bisimulation(),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),sf_miasm(shrink_strategy=shrink_own_bisimulation,threshold_before_merge=1,max_states=1000),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900,cost_type=one)', '--search',  'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)', "--search", "lazy_greedy([ff()])"]),
-        IssueConfig('lazy-ff-transform-full-bisimown-labelreduction-miasm10k-t900', ["--transform", 'transform_merge_and_shrink(shrink_strategy=shrink_own_bisimulation(),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(10000),sf_miasm(shrink_strategy=shrink_own_bisimulation,threshold_before_merge=1,max_states=10000),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900,cost_type=one)', '--search',  'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)', "--search", "lazy_greedy([ff()])"]),
+        IssueConfig('lazy-ffwithbisim-atomic', ["--search", 'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)']),
+        IssueConfig('lazy-ffwithbisim-transform-atomic-bisimown-labelreduction', ['--transform', 'transform_merge_and_shrink(shrink_strategy=shrink_own_bisimulation(),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false,max_time=900,cost_type=one)', '--search',  'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)']),
+        IssueConfig('lazy-ffwithbisim-transform-full-bisimown-labelreduction-miasm1k-t900', ["--transform", 'transform_merge_and_shrink(shrink_strategy=shrink_own_bisimulation(),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),sf_miasm(shrink_strategy=shrink_own_bisimulation,threshold_before_merge=1,max_states=1000),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900,cost_type=one)', '--search',  'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)']),
+        IssueConfig('lazy-ffwithbisim-transform-full-bisimown-labelreduction-miasm10k-t900', ["--transform", 'transform_merge_and_shrink(shrink_strategy=shrink_own_bisimulation(),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(10000),sf_miasm(shrink_strategy=shrink_own_bisimulation,threshold_before_merge=1,max_states=10000),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900,cost_type=one)', '--search',  'lazy_greedy([ff(cost_type=one,transform=transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false, max_size_after_shrink=100, min_size_to_shrink=100, at_limit=use_up),shrink_atomic_fts=true, run_main_loop=false))], cost_type=one)']),
     }
 
     exp = IssueExperiment(
@@ -94,10 +91,10 @@ def main(revisions=None):
     exp.add_fetcher(name='fetch')
 
     exp.add_absolute_report_step(attributes=attributes, filter_algorithm=[
-        '{}-lazy-ff-atomic'.format(REVISION),
-        '{}-lazy-ff-transform-atomic-bisimown-labelreduction'.format(REVISION),
-        '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm1k-t900'.format(REVISION),
-        '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm10k-t900'.format(REVISION),
+        '{}-lazy-ffwithbisim-atomic'.format(REVISION),
+        '{}-lazy-ffwithbisim-transform-atomic-bisimown-labelreduction'.format(REVISION),
+        '{}-lazy-ffwithbisim-transform-full-bisimown-labelreduction-miasm1k-t900'.format(REVISION),
+        '{}-lazy-ffwithbisim-transform-full-bisimown-labelreduction-miasm10k-t900'.format(REVISION),
     ])
 
     BASELINE_REV = 'fts-search-base'
@@ -109,10 +106,10 @@ def main(revisions=None):
     exp.add_report(
         ComparativeReport(
             algorithm_pairs=[
-                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-atomic'.format(REVISION)),
-                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-atomic-bisimown-labelreduction'.format(REVISION)),
-                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm1k-t900'.format(REVISION)),
-                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm10k-t900'.format(REVISION)),
+                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ffwithbisim-atomic'.format(REVISION)),
+                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ffwithbisim-transform-atomic-bisimown-labelreduction'.format(REVISION)),
+                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ffwithbisim-transform-full-bisimown-labelreduction-miasm1k-t900'.format(REVISION)),
+                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ffwithbisim-transform-full-bisimown-labelreduction-miasm10k-t900'.format(REVISION)),
             ],
             format='html',
             attributes=attributes,
