@@ -13,7 +13,6 @@ class GlobalState;
 namespace relaxation_heuristic {
 struct Proposition;
 struct UnaryOperator;
-
 struct RelaxedPlanStep {
     int label;
     task_representation::FactPair effect;

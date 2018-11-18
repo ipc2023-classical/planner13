@@ -19,8 +19,11 @@ int EvaluationResult::get_h_value() const {
     return h_value;
 }
 
-const vector<OperatorID> &EvaluationResult::get_preferred_operators() const {
-    return preferred_operators;
+void EvaluationResult::get_preferred_operators(const GlobalState & state, const task_representation::SearchTask & search_task,
+                                               const std::vector<OperatorID> & applicable_operators,
+                                               ordered_set::OrderedSet<OperatorID> & result_preferred_operators) const {
+    preferred_operators.get_preferred_operators(state, search_task,
+                                                applicable_operators, result_preferred_operators);
 }
 
 bool EvaluationResult::get_count_evaluation() const {
@@ -32,7 +35,7 @@ void EvaluationResult::set_h_value(int value) {
 }
 
 void EvaluationResult::set_preferred_operators(
-    vector<OperatorID> &&preferred_ops) {
+    PreferredOperatorsInfo &&preferred_ops) {
     preferred_operators = move(preferred_ops);
 }
 

@@ -119,7 +119,7 @@ SearchStatus EagerSearch::step() {
     // This evaluates the expanded state (again) to get preferred ops
     EvaluationContext eval_context(s, node.get_g(), false, &statistics, true);
     ordered_set::OrderedSet<OperatorID> preferred_operators =
-        collect_preferred_operators(eval_context, preferred_operator_heuristics);
+        collect_preferred_operators(*task, eval_context, applicable_ops, preferred_operator_heuristics);
 
     for (OperatorID op_id : applicable_ops) {
         int cost = task->get_operator_cost(op_id);

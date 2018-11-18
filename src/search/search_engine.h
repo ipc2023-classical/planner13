@@ -8,6 +8,7 @@
 #include "state_registry.h"
 #include "operator_id.h"
 #include "plan.h"
+#include "preferred_operators_info.h"
 
 #include <vector>
 
@@ -79,7 +80,8 @@ public:
 extern void print_initial_h_values(const EvaluationContext &eval_context);
 
 extern ordered_set::OrderedSet<OperatorID> collect_preferred_operators(
-    EvaluationContext &eval_context,
+    const task_representation::SearchTask & search_task,
+    EvaluationContext &eval_context,const std::vector<OperatorID> & applicable_operators, 
     const std::vector<Heuristic *> &preferred_operator_heuristics);
 
 #endif

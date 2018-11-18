@@ -11,6 +11,9 @@ class Evaluator;
 class GlobalState;
 class SearchStatistics;
 
+namespace task_representation {
+    class SearchTask;
+}
 /*
   TODO: Now that we have an explicit EvaluationResult class, it's
   perhaps not such a great idea to duplicate all its access methods
@@ -110,8 +113,11 @@ public:
     bool is_heuristic_infinite(Evaluator *heur);
     int get_heuristic_value(Evaluator *heur);
     int get_heuristic_value_or_infinity(Evaluator *heur);
-    const std::vector<OperatorID> &get_preferred_operators(
-        Evaluator *heur);
+    void get_preferred_operators(
+        const task_representation::SearchTask & search_task,
+        const std::vector<OperatorID> & applicable_operators,
+        Evaluator *heur,
+        ordered_set::OrderedSet<OperatorID> & preferred_operators);
     bool get_calculate_preferred() const;
 };
 

@@ -67,6 +67,7 @@ fast_downward_plugin(
         per_state_information
         plan
         plugin
+        preferred_operators_info
         pruning_method
         search_engine
         search_node_info

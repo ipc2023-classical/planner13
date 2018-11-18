@@ -30,7 +30,7 @@ public:
 
     //We do not care about plan reconstruction 
     virtual std::pair<std::shared_ptr<task_representation::FTSTask>, 
-        std::shared_ptr<StateMapping> > transform_task_lossy(
+        Mapping> transform_task_lossy(
             const std::shared_ptr<task_representation::FTSTask> &fts_task)  override;
 
 };

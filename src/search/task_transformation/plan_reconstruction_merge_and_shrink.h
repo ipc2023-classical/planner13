@@ -28,7 +28,7 @@ class PlanReconstructionMergeAndShrink : public PlanReconstruction {
 
     // We need a LabelMap from labels in the predecessor_task to labels in the task where
     // the plan was found.
-    std::unique_ptr<LabelMap> label_map;
+    std::shared_ptr<LabelMap> label_map;
 
 
     // This is the set of tau_labels, that we can use. 
@@ -48,7 +48,7 @@ public:
     PlanReconstructionMergeAndShrink(
         const std::shared_ptr<task_representation::FTSTask> &predecessor_task,
         std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> &&merge_and_shrink_representations,
-        std::unique_ptr<LabelMap> label_map);
+        std::shared_ptr<LabelMap> label_map);
     virtual ~PlanReconstructionMergeAndShrink() = default;
     virtual void reconstruct_plan(Plan &plan) const override;
 

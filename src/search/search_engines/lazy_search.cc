@@ -61,54 +61,81 @@ void LazySearch::initialize() {
     }
 }
 
-vector<OperatorID> LazySearch::get_successor_operators(
-    const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
-    vector<OperatorID> applicable_operators;
-    task->generate_applicable_ops(current_state, applicable_operators);
+// vector<OperatorID> LazySearch::get_successor_operators(
+//     const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
+//     vector<OperatorID> applicable_operators;
+//     task->generate_applicable_ops(current_state, applicable_operators);
+
+//     if (randomize_successors) {
+//         rng->shuffle(applicable_operators);
+//     }
+
+//     if (preferred_successors_first) {
+//         ordered_set::OrderedSet<OperatorID> successor_operators;
+//         for (OperatorID op_id : preferred_operators) {
+//             successor_operators.insert(op_id);
+//         }
+//         for (OperatorID op_id : applicable_operators) {
+//             successor_operators.insert(op_id);
+//         }
+//         return successor_operators.pop_as_vector();
+//     } else {
+//         return applicable_operators;
+//     }
+// }
+
+    vector<OperatorID> LazySearch::get_successor_operators(
+        vector<OperatorID> & applicable_operators,
+        const ordered_set::OrderedSet<OperatorID> &preferred_operators) const {
+
 
     if (randomize_successors) {
         rng->shuffle(applicable_operators);
     }
 
+    
     if (preferred_successors_first) {
         ordered_set::OrderedSet<OperatorID> successor_operators;
         for (OperatorID op_id : preferred_operators) {
             successor_operators.insert(op_id);
         }
+    
         for (OperatorID op_id : applicable_operators) {
             successor_operators.insert(op_id);
         }
         return successor_operators.pop_as_vector();
-    } else {
+            } else {
         return applicable_operators;
-    }
+            }
 }
 
 void LazySearch::generate_successors() {
+    vector<OperatorID> applicable_operators;
+    task->generate_applicable_ops(current_state, applicable_operators);
+
     ordered_set::OrderedSet<OperatorID> preferred_operators =
-        collect_preferred_operators(
-            current_eval_context, preferred_operator_heuristics);
+        collect_preferred_operators(*task,current_eval_context, applicable_operators,
+                                    preferred_operator_heuristics);
     if (randomize_successors) {
         preferred_operators.shuffle(*rng);
-    }
+}
 
     vector<OperatorID> successor_operators =
-        get_successor_operators(preferred_operators);
+        get_successor_operators(applicable_operators, preferred_operators);
 
     statistics.inc_generated(successor_operators.size());
-
-    for (OperatorID op_id : successor_operators) {
-        int operator_cost = task->get_operator_cost(op_id);
-        int new_g = current_g + get_adjusted_cost(operator_cost);
-        int new_real_g = current_real_g + operator_cost;
+        for (OperatorID op_id : successor_operators) {
+            int operator_cost = task->get_operator_cost(op_id);
+            int new_g = current_g + get_adjusted_cost(operator_cost);
+            int new_real_g = current_real_g + operator_cost;
         bool is_preferred = preferred_operators.contains(op_id);
-        if (new_real_g < bound) {
-            EvaluationContext new_eval_context(
+            if (new_real_g < bound) {
+                EvaluationContext new_eval_context(
                 current_eval_context.get_cache(), new_g, is_preferred, nullptr);
-            open_list->insert(new_eval_context, make_pair(current_state.get_id(), op_id.get_index()));
+                open_list->insert(new_eval_context, make_pair(current_state.get_id(), op_id.get_index()));
+            }
         }
     }
-}
 
 SearchStatus LazySearch::fetch_next_state() {
     if (open_list->empty()) {

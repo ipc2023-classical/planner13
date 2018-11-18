@@ -260,9 +260,38 @@ void SearchTask::create_fts_operators() {
      return fts_task.is_goal_state(state);
  }
 
+    
+bool SearchTask::has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const {
+    // Ideally, we would assert that the operator is applicable.
+    const FTSOperator &fts_op = operators[op_id.get_index()];
+
+    // Effects on non-deterministic TS
+    for (const FactPair &effect : fts_op.get_effects()) {
+        if (effect == fact) {
+            return true;
+        }
+    }
+    
+    // Effects on deterministic TS
+    LabelID label = fts_op.get_label();
+    const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
+    const vector<unordered_map<int, int>> &src_to_target_by_ts_index = label_to_info[label].src_to_target_by_ts_index;
+    for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
+        int var = det_ts[ts_index];
+        if (var == fact.var &&
+            src_to_target_by_ts_index[ts_index].at(predecessor[var]) == fact.value) {
+            return true;
+        }
+    }
+
+    return false;
+    
+//    axiom_evaluator.evaluate(buffer, *state_packer);
+}
+
 // We only need predecessor to access certain variables' values.
 void SearchTask::apply_operator(
-    const GlobalState &predecessor, OperatorID op_id, PackedStateBin *buffer) {
+    const GlobalState &predecessor, OperatorID op_id, PackedStateBin *buffer) const {
     // Ideally, we would assert that the operator is applicable.
     const FTSOperator &fts_op = operators[op_id.get_index()];
 
@@ -281,6 +310,29 @@ void SearchTask::apply_operator(
         state_packer->set(buffer, effect.var, effect.value);
     }
 //    axiom_evaluator.evaluate(buffer, *state_packer);
+}
+
+// We only need predecessor to access certain variables' values.
+void SearchTask::apply_operator(
+    const GlobalState &predecessor, OperatorID op_id, vector<int> & buffer) const {
+    // Ideally, we would assert that the operator is applicable.
+    const FTSOperator &fts_op = operators[op_id.get_index()];
+
+    // Effects on deterministic TS
+    LabelID label = fts_op.get_label();
+    const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
+    const vector<unordered_map<int, int>> &src_to_target_by_ts_index =
+        label_to_info[label].src_to_target_by_ts_index;
+    for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
+        int var = det_ts[ts_index];
+        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[ts_index];
+        buffer[var] = src_to_target.at(predecessor[var]);
+    }
+
+    // Effects on non-deterministic TS
+    for (const FactPair &effect : fts_op.get_effects()) {
+        buffer[effect.var] = effect.value;
+    }
 }
 
 void SearchTask::generate_applicable_ops(

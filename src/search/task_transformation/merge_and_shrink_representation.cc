@@ -59,6 +59,11 @@ int MergeAndShrinkRepresentationLeaf::get_value(const State &state) const {
     return lookup_table[value];
 }
 
+int MergeAndShrinkRepresentationLeaf::get_value(const std::vector<int> &state) const {
+    int value = state[var_id];
+    return lookup_table[value];
+}
+
 int MergeAndShrinkRepresentationLeaf::get_value(const GlobalState &state) const {
     int value = state[var_id];
     return lookup_table[value];
@@ -113,6 +118,16 @@ void MergeAndShrinkRepresentationMerge::apply_abstraction_to_lookup_table(
         }
     }
     domain_size = new_domain_size;
+}
+
+    int MergeAndShrinkRepresentationMerge::get_value(
+        const std::vector<int> &state) const {
+    int state1 = left_child->get_value(state);
+    int state2 = right_child->get_value(state);
+    if (state1 == PRUNED_STATE ||
+        state2 == PRUNED_STATE)
+        return PRUNED_STATE;
+    return lookup_table[state1][state2];
 }
 
 int MergeAndShrinkRepresentationMerge::get_value(

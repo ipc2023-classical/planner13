@@ -70,7 +70,7 @@ class FactoredTransitionSystem {
     // Entries with nullptr have been merged.
     std::vector<std::unique_ptr<task_representation::TransitionSystem>> transition_systems;
     std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> mas_representations;
-    std::unique_ptr<task_transformation::LabelMap> label_map;
+    std::shared_ptr<task_transformation::LabelMap> label_map;
     std::vector<std::unique_ptr<Distances>> distances;
     
     const bool compute_init_distances;
@@ -223,7 +223,7 @@ public:
     }
     std::shared_ptr<PlanReconstruction> get_plan_reconstruction();
     std::shared_ptr<task_representation::FTSTask> get_transformed_fts_task();
-    std::shared_ptr<StateMapping> get_state_mapping();
+    Mapping get_mapping();
         
 
 };

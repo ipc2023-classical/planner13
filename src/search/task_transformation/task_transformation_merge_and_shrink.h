@@ -15,8 +15,8 @@ public:
         std::shared_ptr<PlanReconstruction>> transform_task(
             const std::shared_ptr<task_representation::FTSTask> &fts_task) override;
 
-        virtual std::pair<std::shared_ptr<task_representation::FTSTask>, 
-        std::shared_ptr<StateMapping> > transform_task_lossy(
+        virtual std::pair<std::shared_ptr<task_representation::FTSTask>, Mapping >
+            transform_task_lossy(
             const std::shared_ptr<task_representation::FTSTask> &fts_task) override;
 
 };

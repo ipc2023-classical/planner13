@@ -87,6 +87,7 @@ int FFHeuristic::compute_heuristic(const GlobalState &global_state) {
 	// }
     } else {   
 	for (const auto & step : relaxed_plan) {
+            set_preferred(step.label, step.effect);
 	    h_ff += task->get_label_cost (step.label);
 	}
     }
