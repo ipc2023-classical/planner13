@@ -15,7 +15,7 @@ namespace task_transformation {
 PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
     const shared_ptr<task_representation::FTSTask> &predecessor_task,
     vector<unique_ptr<MergeAndShrinkRepresentation>> &&merge_and_shrink_representations,
-    unique_ptr<LabelMap> label_map)
+    shared_ptr<LabelMap> label_map)
     : predecessor_task(predecessor_task),
       state_registry(predecessor_task->get_search_task()),
       search_space(state_registry,OperatorCost::NORMAL), 

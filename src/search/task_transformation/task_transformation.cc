@@ -21,11 +21,12 @@ NoTransformation::transform_task(const std::shared_ptr<task_representation::FTST
 }
 
     //We do not care about plan reconstruction 
- std::pair<std::shared_ptr<task_representation::FTSTask>, std::shared_ptr<StateMapping> >
+ std::pair<std::shared_ptr<task_representation::FTSTask>, Mapping >
  NoTransformation::transform_task_lossy(
     const std::shared_ptr<task_representation::FTSTask> &fts_task)   {
-    return make_pair(std::shared_ptr<task_representation::FTSTask>(fts_task),
-                     std::shared_ptr<StateMapping>());
+    return make_pair(
+        std::shared_ptr<task_representation::FTSTask>(fts_task),
+        Mapping());
 }
 
 static options::PluginTypePlugin<TaskTransformation> _type_plugin(

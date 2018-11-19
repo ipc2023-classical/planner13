@@ -78,9 +78,12 @@ int EvaluationContext::get_heuristic_value_or_infinity(Evaluator *heur) {
     return get_result(heur).get_h_value();
 }
 
-const vector<OperatorID> &
-EvaluationContext::get_preferred_operators(Evaluator *heur) {
-    return get_result(heur).get_preferred_operators();
+void
+EvaluationContext::get_preferred_operators(const task_representation::SearchTask & search_task,
+                                           const std::vector<OperatorID> & applicable_operators,
+                                           Evaluator *heur,
+                                           ordered_set::OrderedSet<OperatorID> & preferred_operators) {
+    get_result(heur).get_preferred_operators(heur->mapping, cache.get_state(), search_task, applicable_operators, preferred_operators);
 }
 
 

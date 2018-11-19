@@ -10,6 +10,7 @@ class Heuristic;
 
 class Evaluator {
 public:
+    task_transformation::Mapping mapping;
     Evaluator() = default;
     virtual ~Evaluator() = default;
 

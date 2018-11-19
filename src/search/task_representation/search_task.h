@@ -157,8 +157,11 @@ public:
 
     bool is_goal_state(const GlobalState &state) const;
 
+    bool has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const; 
     void apply_operator(
-        const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer);
+        const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer) const;
+    void apply_operator(
+        const GlobalState &predecessor, OperatorID op, std::vector<int> & buffer) const;
 
     void generate_applicable_ops(
         const GlobalState &state,

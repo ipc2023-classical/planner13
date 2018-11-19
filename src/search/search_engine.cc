@@ -163,7 +163,8 @@ static PluginTypePlugin<SearchEngine> _type_plugin(
 
 
 ordered_set::OrderedSet<OperatorID> collect_preferred_operators(
-    EvaluationContext &eval_context,
+    const task_representation::SearchTask & search_task,
+    EvaluationContext &eval_context, const std::vector<OperatorID> & applicable_operators,
     const vector<Heuristic *> &preferred_operator_heuristics) {
     ordered_set::OrderedSet<OperatorID> preferred_operators;
     for (Heuristic *heuristic : preferred_operator_heuristics) {
@@ -173,9 +174,8 @@ ordered_set::OrderedSet<OperatorID> collect_preferred_operators(
           heuristics.
         */
         if (!eval_context.is_heuristic_infinite(heuristic)) {
-            for (OperatorID op_id : eval_context.get_preferred_operators(heuristic)) {
-                preferred_operators.insert(op_id);
-            }
+            eval_context.get_preferred_operators(search_task, applicable_operators,
+                                                 heuristic, preferred_operators);
         }
     }
     return preferred_operators;

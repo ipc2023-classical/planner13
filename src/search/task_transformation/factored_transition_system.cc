@@ -486,8 +486,9 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         return make_shared<task_representation::FTSTask> (move(transition_systems), move(labels));
     }
 
-    std::shared_ptr<StateMapping> FactoredTransitionSystem::get_state_mapping() {
-        return make_shared<StateMapping> (move(mas_representations));
+    Mapping FactoredTransitionSystem::get_mapping() {
+        return Mapping (make_shared<StateMapping> (move(mas_representations)),
+                        label_map);
     }
 
 

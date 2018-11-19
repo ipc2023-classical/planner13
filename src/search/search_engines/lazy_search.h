@@ -50,7 +50,10 @@ protected:
 
     void reward_progress();
 
+    void insert_operators(const std::vector<OperatorID> & successor_operators,
+                          std::function<bool(OperatorID)> is_preferred);
     std::vector<OperatorID> get_successor_operators(
+        std::vector<OperatorID> & applicable_operators,
         const ordered_set::OrderedSet<OperatorID> &preferred_operators) const;
 
     // TODO: Move into SearchEngine?

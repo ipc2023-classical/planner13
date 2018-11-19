@@ -39,7 +39,7 @@ class LabelMap{
 public:
     explicit LabelMap(int num_labels);
     LabelMap(const LabelMap & ) = default;
-
+    
     void update(const LabelMapping &old_to_new_labels);
     void update(const std::vector<int> &old_to_new_labels);
 

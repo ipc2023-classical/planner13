@@ -35,8 +35,7 @@ pair<shared_ptr<task_representation::FTSTask>, shared_ptr<PlanReconstruction>>
 }
     
 
-    std::pair<std::shared_ptr<task_representation::FTSTask>, 
-              std::shared_ptr<StateMapping> >
+std::pair<std::shared_ptr<task_representation::FTSTask>, Mapping >
 TaskTransformationMergeAndShrink::transform_task_lossy(
     const std::shared_ptr<task_representation::FTSTask> &fts_task) {
     
@@ -47,8 +46,7 @@ TaskTransformationMergeAndShrink::transform_task_lossy(
     
     fts.cleanup();
 
-    return make_pair(fts.get_transformed_fts_task(), fts.get_state_mapping());
-
+    return make_pair(fts.get_transformed_fts_task(), fts.get_mapping());
 }
     
 static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {

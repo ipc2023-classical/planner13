@@ -29,17 +29,17 @@ Heuristic::Heuristic(const Options &opts)
     
     auto transformation = transformation_method->transform_task_lossy(g_main_task);
     task = transformation.first;
-    state_mapping = transformation.second;
+    mapping = transformation.second;
     search_task = task->get_search_task(true);
-    
+
     cout << "Heuristic task: " <<  *task << endl;
 }
 
 Heuristic::~Heuristic() {
 }
 
-void Heuristic::set_preferred(const OperatorID op) {
-    preferred_operators.insert(op);
+ void Heuristic::set_preferred(int label, const FactPair & fact) {
+     preferred_operators.set_preferred(label, fact);
 }
 
 bool Heuristic::notify_state_transition(
@@ -50,8 +50,8 @@ bool Heuristic::notify_state_transition(
 }
 
 State Heuristic::convert_global_state(const GlobalState &global_state) const {
-    if (state_mapping) {
-        return State(*task, state_mapping->convert_state(global_state));
+    if (mapping.state_mapping) {
+        return State(*task, mapping.state_mapping->convert_state(global_state));
     }else {
         return State(*task, global_state.get_values());
     }
@@ -126,7 +126,7 @@ EvaluationResult Heuristic::compute_result(EvaluationContext &eval_context) {
 // #endif
 
     result.set_h_value(heuristic);
-    result.set_preferred_operators(preferred_operators.pop_as_vector());
+    result.set_preferred_operators(std::move(preferred_operators));
     assert(preferred_operators.empty());
 
     return result;

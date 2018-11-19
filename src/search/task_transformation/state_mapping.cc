@@ -19,6 +19,9 @@ namespace task_transformation {
             }
         }
         return values;
+    }
 
+    int StateMapping::get_value_abstract_variable(const std::vector<int> & state, int var) const {
+        return merge_and_shrink_representations[var]->get_value(state);
     }
 }

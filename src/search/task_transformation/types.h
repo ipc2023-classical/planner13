@@ -3,6 +3,7 @@
 
 #include <forward_list>
 #include <vector>
+#include <memory>
 
 namespace task_transformation {
 // Positive infinity. The name "INFINITY" is taken by an ISO C99 macro.
@@ -20,6 +21,21 @@ extern const int PRUNED_STATE;
 */
 using StateEquivalenceClass = std::forward_list<int>;
 using StateEquivalenceRelation = std::vector<StateEquivalenceClass>;
+
+class StateMapping;
+class LabelMap;
+
+struct Mapping {
+    std::shared_ptr<StateMapping> state_mapping;
+    std::shared_ptr<LabelMap> label_mapping;
+
+    Mapping() = default;
+
+    Mapping (std::shared_ptr<StateMapping> sm,
+             std::shared_ptr<LabelMap>  lm) :
+    state_mapping (sm), label_mapping(lm) {
+    }
+};
 
 enum class Verbosity {
     SILENT,

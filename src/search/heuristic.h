@@ -23,9 +23,6 @@ class State;
 class SearchTask;
 }
 
-namespace task_transformation {
-    class StateMapping;
-}
 
 class Heuristic : public Evaluator {
     struct HEntry {
@@ -42,18 +39,7 @@ class Heuristic : public Evaluator {
 
     std::string description;
 
-    /*
-      TODO: We might want to get rid of the preferred_operators
-      attribute. It is currently only used by compute_result() and the
-      methods it calls (compute_heuristic() directly, further methods
-      indirectly), and we could e.g. change this by having
-      compute_heuristic return an EvaluationResult object.
-
-      If we do this, we should be mindful of the cost incurred by not
-      being able to reuse the data structure from one iteration to the
-      next, but this seems to be the only potential downside.
-    */
-    ordered_set::OrderedSet<OperatorID> preferred_operators;
+    PreferredOperatorsInfo preferred_operators;
 
 protected:
     /*
@@ -67,7 +53,6 @@ protected:
 
     // Hold a reference to the task implementation and pass it to objects that need it.
     std::shared_ptr<task_representation::FTSTask> task;
-    std::shared_ptr<task_transformation::StateMapping> state_mapping;
     std::shared_ptr<task_representation::SearchTask> search_task;
 
     OperatorCost cost_type;
@@ -82,7 +67,8 @@ protected:
       is OK -- it will only appear once in the list of preferred
       operators for this heuristic.
     */
-    void set_preferred(const OperatorID op);
+    void set_preferred(int label, const task_representation::FactPair & fact);
+    
 
     task_representation::State convert_global_state(const GlobalState &global_state) const;
 

@@ -24,11 +24,11 @@ CostTransformation::transform_task(const std::shared_ptr<task_representation::FT
 }
 
     //We do not care about plan reconstruction 
-std::pair<std::shared_ptr<task_representation::FTSTask>, std::shared_ptr<StateMapping> >
+std::pair<std::shared_ptr<task_representation::FTSTask>, Mapping >
     CostTransformation::transform_task_lossy(
     const std::shared_ptr<task_representation::FTSTask> &fts_task)   {
     return make_pair(std::make_shared<task_representation::FTSTask>(*fts_task, cost_type),
-                     std::shared_ptr<StateMapping>());
+                     Mapping());
 }
 
     static shared_ptr<TaskTransformation> _parse(options::OptionParser &parser) {

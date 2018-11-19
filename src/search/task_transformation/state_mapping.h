@@ -18,6 +18,7 @@ public:
     StateMapping(std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> && merge_and_shrink_representations_) ;
 
     std::vector<int> convert_state(const GlobalState & state) const;
+    int get_value_abstract_variable(const std::vector<int> & state, int var) const;
     
 };
 
