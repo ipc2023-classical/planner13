@@ -1,6 +1,7 @@
 #include "label_equivalence_relation.h"
 
 #include "labels.h"
+#include "../utils/collections.h"
 
 #include "../task_transformation/types.h"
 
@@ -18,15 +19,15 @@ LabelGroup::LabelGroup() : cost(task_transformation::INF) {
 
 LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels)
     : labels(labels) {
-    grouped_labels.reserve(labels.get_max_size());
-    label_to_positions.resize(labels.get_max_size());
+    // grouped_labels.reserve(labels.get_max_size());
+    // label_to_positions.resize(labels.get_max_size());
 }
 
     LabelEquivalenceRelation::LabelEquivalenceRelation(const Labels &labels,
                                                        vector<vector<int>> & label_groups)
     : labels(labels) {
-    grouped_labels.reserve(labels.get_max_size());
-    label_to_positions.resize(labels.get_max_size());
+    // grouped_labels.reserve(labels.get_max_size());
+    // label_to_positions.resize(labels.get_max_size());
 
     for (const auto & group : label_groups) {
         add_label_group(group);
@@ -44,7 +45,7 @@ LabelEquivalenceRelation::LabelEquivalenceRelation(
       ensure that no move occurs in grouped_labels. Otherwise, iterators to
       elements of list<int> of LabelGroup could become invalid!
     */
-    grouped_labels.reserve(labels.get_max_size());
+    // grouped_labels.reserve(labels.get_max_size());
     for (size_t other_group_id = 0;
          other_group_id < other.grouped_labels.size();
          ++other_group_id) {
@@ -84,7 +85,7 @@ LabelEquivalenceRelation::LabelEquivalenceRelation(
       ensure that no move occurs in grouped_labels. Otherwise, iterators to
       elements of list<int> of LabelGroup could become invalid!
     */
-    grouped_labels.reserve(labels.get_max_size());
+    //grouped_labels.reserve(labels.get_max_size());
     for (size_t other_group_id = 0;
          other_group_id < other.grouped_labels.size();
          ++other_group_id) {
@@ -115,7 +116,13 @@ LabelEquivalenceRelation::LabelEquivalenceRelation(
 
 void LabelEquivalenceRelation::add_label_to_group(LabelGroupID group_id,
                                                   int label_no) {
+    assert(utils::in_bounds(group_id, grouped_labels));
     LabelIter label_it = grouped_labels[group_id].insert(label_no);
+
+    if (label_no >= (int)label_to_positions.size()) {
+        label_to_positions.resize (label_no + 1);
+    }
+    assert(utils::in_bounds(label_no, label_to_positions));
     label_to_positions[label_no] = make_pair(group_id, label_it);
 
     int label_cost = labels.get_label_cost(label_no);
@@ -173,7 +180,7 @@ void LabelEquivalenceRelation::apply_label_mapping(
     const vector<int> & old_to_new_labels = label_mapping.get_old_to_new_labels();
     // old_to_new_labels has to map to *all* new label numbers, i.e., the
     // renumbering must be complete (a surjective function).
-    vector<pair<LabelGroupID, LabelIter>> new_label_to_positions(labels.get_max_size());
+    vector<pair<LabelGroupID, LabelIter>> new_label_to_positions(label_mapping.get_num_new_labels());
     for (size_t old_label_no = 0; old_label_no < old_to_new_labels.size(); ++old_label_no) {
         int new_label_no = old_to_new_labels[old_label_no];
         if (new_label_no == -1) {
@@ -187,6 +194,7 @@ void LabelEquivalenceRelation::apply_label_mapping(
             LabelIter label_it = label_to_positions[old_label_no].second;
             grouped_labels[group_id].erase(label_it);
             LabelIter new_label_it = grouped_labels[group_id].insert(new_label_no);
+            assert(utils::in_bounds(new_label_no, new_label_to_positions));
             new_label_to_positions[new_label_no] = make_pair(group_id, new_label_it);
         }
     }

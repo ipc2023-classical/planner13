@@ -94,6 +94,17 @@ public:
         }
     }
 
+    void swap (SegmentedVector & other) {
+        EntryAllocator tmp_entry_allocator = entry_allocator;
+        size_t tmp_the_size = the_size;
+        segments.swap(other.segments);
+        
+        the_size = other.the_size;
+        other.the_size = tmp_the_size;
+        entry_allocator = other.entry_allocator;
+        other.entry_allocator = tmp_entry_allocator;
+    }
+
     Entry &operator[](size_t index) {
         assert(index < the_size);
         size_t segment = get_segment(index);
@@ -110,6 +121,10 @@ public:
 
     size_t size() const {
         return the_size;
+    }
+
+     Entry & back() {
+         return (*this)[the_size-1];
     }
 
     void push_back(const Entry &entry) {
@@ -208,6 +223,10 @@ public:
         for (size_t i = 0; i < segments.size(); ++i) {
             element_allocator.deallocate(segments[i], elements_per_segment);
         }
+    }
+
+    Element & back() {
+        return *this[size()];
     }
 
     Element *operator[](size_t index) {
