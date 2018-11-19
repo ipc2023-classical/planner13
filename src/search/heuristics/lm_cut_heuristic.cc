@@ -24,7 +24,11 @@ LandmarkCutHeuristic::~LandmarkCutHeuristic() {
 }
 
 int LandmarkCutHeuristic::compute_heuristic(const GlobalState &global_state) {
-    State state = convert_global_state(global_state);
+    auto state = convert_global_state(global_state);
+    if (state.is_dead_end()) {
+        return DEAD_END;
+    }
+    
     return compute_heuristic(state);
 }
 

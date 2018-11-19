@@ -18,12 +18,14 @@
 namespace task_representation {
 class State {
     const FTSTask *task;
-    std::vector<int> values;
+    std::vector<int> values; // We represent dead end states by an empty vector of values.
 public:
-    State(const FTSTask &task, std::vector<int> &&values)
-        : task(&task), values(std::move(values)) {
-        assert(static_cast<int>(size()) == this->task->get_size());
+State(const FTSTask &task, std::vector<int> &&values)
+    : task(&task), values(std::move(values)) {
+        assert(is_dead_end() || static_cast<int>(size()) == this->task->get_size());
     }
+
+
     ~State() = default;
     State(const State &) = default;
 
@@ -53,21 +55,28 @@ public:
         return hasher(values);
     }
 
+    bool is_dead_end() const {
+        return values.empty();
+    }
     std::size_t size() const {
+        assert(!is_dead_end());
         return values.size();
     }
 
     int operator[](std::size_t var_id) const {
+        assert(!is_dead_end());
         return values[var_id];
     }
 
     int operator[](int var) const {
+        assert(!is_dead_end());        
         return values[var];
     }
 
     inline FTSTask get_task() const;
 
     const std::vector<int> &get_values() const {
+        assert(!is_dead_end());
         return values;
     }
 

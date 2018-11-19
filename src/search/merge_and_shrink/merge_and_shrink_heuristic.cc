@@ -82,7 +82,11 @@ MergeAndShrinkHeuristic::MergeAndShrinkHeuristic(const options::Options &opts)
 }
 
 int MergeAndShrinkHeuristic::compute_heuristic(const GlobalState &global_state) {
-    task_representation::State state = convert_global_state(global_state);
+    auto state = convert_global_state(global_state);
+    if (state.is_dead_end()) {
+        return DEAD_END;
+    }
+
     int cost = mas_representation->get_value(state);
     if (cost == PRUNED_STATE || cost == INF) {
         // If state is unreachable or irrelevant, we encountered a dead end.

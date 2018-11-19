@@ -13,6 +13,10 @@ namespace task_transformation {
         vector<int> values(merge_and_shrink_representations.size());
         for (size_t var = 0; var < merge_and_shrink_representations.size(); ++var) {
             values[var] =  merge_and_shrink_representations[var]->get_value(state);
+            if (values[var] == -1) {
+                values.clear(); //dead end states are represented by an empty vector
+                return values;
+            }
         }
         return values;
 
