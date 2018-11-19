@@ -94,6 +94,7 @@ def main(revisions=None):
     exp.add_absolute_report_step(attributes=attributes, filter_algorithm=[
         '{}-lazy-ff-atomic'.format(REVISION),
         '{}-lazy-ff-transform-atomic-bisimown-labelreduction'.format(REVISION),
+        '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm100-t900'.format(REVISION),
         '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm1k-t900'.format(REVISION),
         '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm10k-t900'.format(REVISION),
     ])
@@ -109,6 +110,7 @@ def main(revisions=None):
             algorithm_pairs=[
                 ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-atomic'.format(REVISION)),
                 ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-atomic-bisimown-labelreduction'.format(REVISION)),
+                ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm100-t900'.format(REVISION)),
                 ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm1k-t900'.format(REVISION)),
                 ('{}-lazy-ff'.format(BASELINE_REV), '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm10k-t900'.format(REVISION)),
             ],
