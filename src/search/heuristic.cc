@@ -29,11 +29,9 @@ Heuristic::Heuristic(const Options &opts)
     
     auto transformation = transformation_method->transform_task_lossy(g_main_task);
     task = transformation.first;
-    auto mapping = transformation.second;
-    state_mapping = mapping.state_mapping;
+    mapping = transformation.second;
     search_task = task->get_search_task(true);
-    
-    preferred_operators.set_mapping(mapping);
+
     cout << "Heuristic task: " <<  *task << endl;
 }
 
@@ -52,8 +50,8 @@ bool Heuristic::notify_state_transition(
 }
 
 State Heuristic::convert_global_state(const GlobalState &global_state) const {
-    if (state_mapping) {
-        return State(*task, state_mapping->convert_state(global_state));
+    if (mapping.state_mapping) {
+        return State(*task, mapping.state_mapping->convert_state(global_state));
     }else {
         return State(*task, global_state.get_values());
     }

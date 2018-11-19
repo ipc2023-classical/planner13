@@ -5,6 +5,7 @@
 #include "task_transformation/state_mapping.h"
 
 using namespace task_representation;
+using namespace task_transformation;
 using namespace std;
 
 void PreferredOperatorsInfo::clear() {
@@ -15,7 +16,8 @@ void PreferredOperatorsInfo::set_preferred(int label, const task_representation:
     preferred_effects_by_label[label].push_back(fact);
 }
 
-void PreferredOperatorsInfo::get_preferred_operators(const GlobalState & state,
+void PreferredOperatorsInfo::get_preferred_operators(const Mapping & mapping,
+                                                     const GlobalState & state,
                                                      const SearchTask & search_task, 
                                                      const std::vector<OperatorID> & applicable_operators,
                                                      ordered_set::OrderedSet<OperatorID> & preferred_operators) const{

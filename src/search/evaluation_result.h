@@ -49,7 +49,8 @@ public:
     int get_h_value() const;
     bool get_count_evaluation() const;
 
-    void get_preferred_operators(const GlobalState & state,
+    void get_preferred_operators(const task_transformation::Mapping & mapping,
+                                 const GlobalState & state,
                                  const task_representation::SearchTask & search_task,
                                  const std::vector<OperatorID> & applicable_operators,
                                  ordered_set::OrderedSet<OperatorID> & preferred_operators) const;

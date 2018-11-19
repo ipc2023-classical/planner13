@@ -19,10 +19,11 @@ int EvaluationResult::get_h_value() const {
     return h_value;
 }
 
-void EvaluationResult::get_preferred_operators(const GlobalState & state, const task_representation::SearchTask & search_task,
+void EvaluationResult::get_preferred_operators(const task_transformation::Mapping & mapping,
+                                               const GlobalState & state, const task_representation::SearchTask & search_task,
                                                const std::vector<OperatorID> & applicable_operators,
                                                ordered_set::OrderedSet<OperatorID> & result_preferred_operators) const {
-    preferred_operators.get_preferred_operators(state, search_task,
+    preferred_operators.get_preferred_operators(mapping, state, search_task,
                                                 applicable_operators, result_preferred_operators);
 }
 
