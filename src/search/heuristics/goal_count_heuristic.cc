@@ -16,7 +16,10 @@ GoalCountHeuristic::~GoalCountHeuristic() {
 }
 
 int GoalCountHeuristic::compute_heuristic(const GlobalState &global_state) {
-    const State state = convert_global_state(global_state);
+    auto state = convert_global_state(global_state);
+    if (state.is_dead_end()) {
+        return DEAD_END;
+    }
     int unsatisfied_goal_count = 0;
 
     for (FactProxy goal : task_proxy.get_goals()) {

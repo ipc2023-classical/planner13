@@ -36,6 +36,7 @@ class AdditiveHeuristic : public relaxation_heuristic::RelaxationHeuristic {
 
     void enqueue_if_necessary(Proposition *prop, int cost, UnaryOperator *op) {
         assert(cost >= 0);
+        assert (prop);
         if (prop->cost == -1 || prop->cost > cost) {
             prop->cost = cost;
             prop->reached_by = op;

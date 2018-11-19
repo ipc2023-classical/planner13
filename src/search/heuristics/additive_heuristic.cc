@@ -60,6 +60,9 @@ void AdditiveHeuristic::setup_exploration_queue() {
 
 void AdditiveHeuristic::setup_exploration_queue_state(const State &state) {
     for (size_t var = 0; var < propositions_per_var.size(); ++var) {
+        assert(propositions_per_var.size() == state.size());
+        assert (utils::in_bounds(var, propositions_per_var));
+        assert (utils::in_bounds(state[var], propositions_per_var[var]));
         Proposition *init_prop = &(propositions_per_var[var][state[var]]);
         enqueue_if_necessary(init_prop, 0, 0);
     }
@@ -143,7 +146,11 @@ int AdditiveHeuristic::compute_heuristic(const State &state) {
 }
 
 int AdditiveHeuristic::compute_heuristic(const GlobalState &global_state) {
-    return compute_heuristic(convert_global_state(global_state));
+    auto state = convert_global_state(global_state);
+    if (state.is_dead_end()) {
+        return DEAD_END;
+    }
+    return compute_heuristic(state);
 }
 
 static Heuristic *_parse(OptionParser &parser) {

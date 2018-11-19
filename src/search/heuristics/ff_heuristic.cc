@@ -35,8 +35,11 @@ void FFHeuristic::relaxed_plan_extraction(Proposition *goal) {
     }
 }
 
-int FFHeuristic::compute_heuristic(const GlobalState &global_state) {
-    task_representation::State state = convert_global_state(global_state);
+    int FFHeuristic::compute_heuristic(const GlobalState &global_state) {
+        auto state = convert_global_state(global_state);
+        if (state.is_dead_end()) {
+            return DEAD_END;
+        }
     
     int h_add = compute_add_and_ff(state);
     if (h_add == DEAD_END)
