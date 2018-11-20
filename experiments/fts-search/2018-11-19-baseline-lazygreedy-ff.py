@@ -38,7 +38,7 @@ def main(revisions=None):
     'transport-sat14-strips', 'trucks-strips', 'visitall-sat11-strips',
     'visitall-sat14-strips', 'woodworking-sat08-strips',
     'woodworking-sat11-strips', 'zenotravel']
-    environment = BaselSlurmEnvironment(email="silvan.sievers@unibas.ch", export=["PATH"])
+    environment = BaselSlurmEnvironment(email="silvan.sievers@unibas.ch", export=["PATH"], partition='infai_1')
 
     if is_test_run():
         suite = ['gripper:prob01.pddl', 'depot:p01.pddl', 'mystery:prob07.pddl']
@@ -46,7 +46,7 @@ def main(revisions=None):
 
     configs = {
         IssueConfig('lazy-ff', ["--search", "lazy_greedy([ff(adapt_costs(cost_type=one))], cost_type=one)"]),
-        IssueConfig('lazy-ff-pref', ["--heuristic", "hff=ff(adapt_costs(cost_type=one))", "--search", "lazy_greedy([hff], preferred=[hff], cost_type=one)"]),
+        IssueConfig('lazy-ffpref', ["--heuristic", "hff=ff(adapt_costs(cost_type=one))", "--search", "lazy_greedy([hff], preferred=[hff], cost_type=one)"]),
     }
 
     exp = IssueExperiment(
