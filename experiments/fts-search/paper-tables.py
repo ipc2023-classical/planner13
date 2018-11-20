@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import logging
 import numpy
 import os
 
@@ -11,10 +12,11 @@ from downward.experiment import FastDownwardExperiment
 from downward.reports import PlanningReport
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
-from downward.reports.comparison import ComparisonReport # custom comparison report
 from downward.reports.scatter import ScatterPlotReport
 
 from lab.reports import Attribute, geometric_mean
+
+from lab import tools
 
 from common_setup import IssueExperiment
 
@@ -106,7 +108,88 @@ exp.add_report(
     outfile=os.path.join(exp.eval_dir, 'astar-blind-bisim-comparison.html'),
 )
 
-# some example plot
+class OracleScatterPlotReport(ScatterPlotReport):
+    """
+    A bad copy of ScatterPlotReport that computes the min over the second and
+    third given algorithm.
+    """
+    def __init__(self, take_first_as_third_algo=False, **kwargs):
+        ScatterPlotReport.__init__(self, **kwargs)
+        self.take_first_as_third_algo = take_first_as_third_algo
+
+    def _fill_categories(self, runs):
+        # We discard the *runs* parameter.
+        # Map category names to value tuples
+        categories = defaultdict(list)
+        for (domain, problem), runs in self.problem_runs.items():
+            if self.take_first_as_third_algo:
+                if len(runs) != 2:
+                    continue
+                run1, run2 = runs
+                assert (run1['algorithm'] == self.algorithms[0] and
+                        run2['algorithm'] == self.algorithms[1])
+                val1 = run1.get(self.attribute)
+                val2 = run2.get(self.attribute)
+                if val1 is None and val2 is None:
+                    continue
+                if val1 is None:
+                    oracle_val = val2
+                elif val2 is None:
+                    oracle_val = val1
+                else:
+                    oracle_val = min(val1, val2)
+                category = self.get_category(run1, run2)
+                categories[category].append((val1, oracle_val))
+            else:
+                if len(runs) != 3:
+                    continue
+                run1, run2, run3 = runs
+                assert (run1['algorithm'] == self.algorithms[0] and
+                        run2['algorithm'] == self.algorithms[1] and
+                        run3['algorithm'] == self.algorithms[2])
+                val1 = run1.get(self.attribute)
+                val2 = run2.get(self.attribute)
+                val3 = run3.get(self.attribute)
+                if val1 is None and val2 is None and val3 is None:
+                    continue
+                if val2 is None:
+                    oracle_val = val3
+                elif val3 is None:
+                    oracle_val = val2
+                else:
+                    oracle_val = min(val2, val3)
+                category = self.get_category(run1, run2)
+                categories[category].append((val1, oracle_val))
+        return categories
+
+    def write(self):
+        if (self.take_first_as_third_algo and not len(self.algorithms) == 2) or (not self.take_first_as_third_algo and not len(self.algorithms) == 3):
+            logging.critical(
+                'Oracle Scatter plots need exactly 2 algorithms if take_first_as_third_algo is true, otherwise 3: %s' % self.algorithms)
+        self.xlabel = self.xlabel or self.algorithms[0]
+        self.ylabel = 'oracle'
+
+        suffix = '.' + self.output_format
+        if not self.outfile.endswith(suffix):
+            self.outfile += suffix
+        tools.makedirs(os.path.dirname(self.outfile))
+        self._write_plot(self.runs.values(), self.outfile)
+
+### Latex reports
+
+exp.add_report(
+    ScatterPlotReport(
+        filter_algorithm=[
+            'astar-blind',
+            'astar-blind-transform-atomic-bisim-labelreduction',
+        ],
+        # get_category=lambda run1, run2: run1['domain'],
+        attributes=['expansions_until_last_jump'],
+        format='tex',
+    ),
+    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-atomic-bisim-labelreduction'),
+)
+
 exp.add_report(
     ScatterPlotReport(
         filter_algorithm=[
@@ -115,9 +198,51 @@ exp.add_report(
         ],
         # get_category=lambda run1, run2: run1['domain'],
         attributes=['expansions_until_last_jump'],
-        format='png',
+        format='tex',
     ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900.png'),
+    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
+)
+
+exp.add_report(
+    OracleScatterPlotReport(
+        filter_algorithm=[
+            'astar-blind',
+            'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
+            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
+        ],
+        # get_category=lambda run1, run2: run1['domain'],
+        attributes=['expansions_until_last_jump'],
+        format='tex',
+    ),
+    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-oracle-over-dfp1000-and-miasm1000'),
+)
+
+
+exp.add_report(
+    ScatterPlotReport(
+        filter_algorithm=[
+            'astar-blind-transform-atomic-bisim-labelreduction',
+            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
+        ],
+        # get_category=lambda run1, run2: run1['domain'],
+        attributes=['expansions_until_last_jump'],
+        format='tex',
+    ),
+    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-atomic-bisim-labelreduction-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
+)
+
+exp.add_report(
+    OracleScatterPlotReport(
+        take_first_as_third_algo=True,
+        filter_algorithm=[
+            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
+            'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
+        ],
+        # get_category=lambda run1, run2: run1['domain'],
+        attributes=['expansions_until_last_jump'],
+        format='tex',
+    ),
+    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900-vs-oracle-over-dfp1000-and-miasm1000'),
 )
 
 exp.run_steps()
