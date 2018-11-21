@@ -73,6 +73,8 @@ def main(revisions=None):
     exp.add_step('start', exp.start_runs)
     exp.add_fetcher(name='fetch')
 
+    exp.add_parse_again_step()
+
     exp.add_absolute_report_step(attributes=attributes, filter_algorithm=[
         '{}-astar-blind-atomic'.format(REVISION),
         '{}-astar-blind-transform-atomic-labelreduction'.format(REVISION),

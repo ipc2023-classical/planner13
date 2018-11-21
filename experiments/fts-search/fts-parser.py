@@ -15,6 +15,11 @@ def check_flags(content, props):
     for line in content.split('\n'):
         if line == 'Main task constructed':
             atomic_task_constructed = True
+        if line == 'Task solved without search':
+            assert 'expansions_until_last_jump' not in props
+            props['search_time'] = 0
+            props['expansions'] = 0
+            props['expansions_until_last_jump'] = 0
     props['atomic_task_constructed'] = atomic_task_constructed
 
 parser.add_function(check_flags)
