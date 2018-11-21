@@ -39,11 +39,6 @@ exp.add_fetcher('data/2018-11-05-regular-baselines-eval',filter=[remove_revision
 exp.add_fetcher('data/2018-11-19-astar-blind-bisim-eval',filter=[remove_revision],merge=True)
 exp.add_fetcher('data/2018-11-19-astar-blind-ownbisim-eval',filter=[remove_revision],merge=True)
 
-exp.add_fetcher('data/2018-11-15-baseline-mas-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-hmax-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-masmiasm-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-masdfp-eval',filter=[remove_revision],merge=True)
-
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_memory_delta = Attribute('ms_memory_delta', absolute=False, min_wins=True)
