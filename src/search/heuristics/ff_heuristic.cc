@@ -91,7 +91,7 @@ void FFHeuristic::relaxed_plan_extraction(Proposition *goal) {
     } else {   
 	for (const auto & step : relaxed_plan) {
             set_preferred(step.label, step.effect);
-	    h_ff += task->get_label_cost (step.label);
+	    h_ff += get_label_cost (step.label);
 	}
     }
     relaxed_plan.clear();
