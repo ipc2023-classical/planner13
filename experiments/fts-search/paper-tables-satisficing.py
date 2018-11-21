@@ -23,10 +23,9 @@ from common_setup import IssueExperiment
 exp = FastDownwardExperiment()
 
 REVISIONS = [
-    '01551daf787f', # 11-19 astar-*, lazygreedy-ff, baseline lazygreedy-ff*
-    'fts-search-base', # 11-05 baseline astar-blind/hmax
-    'fts-search-base-mas', # 11-15 baseline  astar-mas
-    'todo', # 11-20 lazygreedy-ff-pref
+    '01551daf787f', # 11-19 lazygreedy-ff*
+    'fts-search-base', # 11-05 baseline lazygreedy-ff*, baseline lama-first
+    '1c30b6e32d54', # 11-20 lazygreedy-ff-pref
 ]
 
 def remove_revision(run):
@@ -36,15 +35,10 @@ def remove_revision(run):
     run['algorithm'] = algo
     return run
 
-exp.add_fetcher('data/2018-11-05-regular-baselines-eval',filter=[remove_revision])
-exp.add_fetcher('data/2018-11-15-baseline-mas-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-blind-bisim-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-blind-ownbisim-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-blind-hmax-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2018-11-19-astar-blind-masmiasm-eval',filter=[remove_revision],merge=True)
 exp.add_fetcher('data/2018-11-19-lazygreedy-ff-eval',filter=[remove_revision],merge=True)
 exp.add_fetcher('data/2018-11-19-baseline-lazygreedy-ff-eval',filter=[remove_revision],merge=True)
 exp.add_fetcher('data/2018-11-19-baseline-lama-first-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2018-11-20-lazygreedy-ffpref-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
@@ -68,44 +62,59 @@ attributes.extend(extra_attributes)
 
 ## HTML reports
 
-# exp.add_report(AbsoluteReport(attributes=attributes))
+# exp.add_report(AbsoluteReport(attributes=['coverage']))
 
 exp.add_report(
     AbsoluteReport(
         filter_algorithm=[
-            'astar-blind-atomic',
-            'astar-blind-transform-atomic-labelreduction',
-            'astar-blind-transform-atomic-bisim-labelreduction',
-            'astar-blind-transform-full-bisim-labelreduction-dfp100-t900',
-            'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
-            'astar-blind-transform-full-bisim-labelreduction-dfp10000-t900',
-            'astar-blind-transform-full-bisim-labelreduction-miasm100-t900',
-            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
-            'astar-blind-transform-full-bisim-labelreduction-miasm10000-t900',
+            'lazy-ff-atomic',
+            'lazy-ff-transform-atomic-labelreduction',
+            'lazy-ff-transform-atomic-bisimown-labelreduction',
+            'lazy-ff-transform-full-bisimown-labelreduction-dfp100-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-dfp1000-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-dfp10000-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-miasm100-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-miasm1000-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-miasm10000-t900',
+
+            'lazy-ffpref-atomic',
+            'lazy-ffpref-transform-atomic-labelreduction',
+            'lazy-ffpref-transform-atomic-bisimown-labelreduction',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-dfp100-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-dfp1000-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-dfp10000-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-miasm100-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-miasm1000-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-miasm10000-t900',
+
+            'lazy-ff',
+            'lazy-ffpref',
+            'lama-first',
         ],
         format='html',
-        attributes=attributes,
+        # attributes=attributes,
+        attributes=['coverage'],
     ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-bisim.html'),
+    outfile=os.path.join(exp.eval_dir, 'lazy-ff-ffpref-ownbisim.html'),
 )
 
 exp.add_report(
     ComparativeReport(
         algorithm_pairs=[
-            ('astar-blind', 'astar-blind-atomic'),
-            ('astar-blind', 'astar-blind-transform-atomic-labelreduction'),
-            ('astar-blind', 'astar-blind-transform-atomic-bisim-labelreduction'),
-            ('astar-blind', 'astar-blind-transform-full-bisim-labelreduction-dfp100-t900'),
-            ('astar-blind', 'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900'),
-            ('astar-blind', 'astar-blind-transform-full-bisim-labelreduction-dfp10000-t900'),
-            ('astar-blind', 'astar-blind-transform-full-bisim-labelreduction-miasm100-t900'),
-            ('astar-blind', 'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
-            ('astar-blind', 'astar-blind-transform-full-bisim-labelreduction-miasm10000-t900'),
+            ('lazy-ff', 'lazy-ff-atomic'),
+            ('lazy-ff', 'lazy-ff-transform-atomic-labelreduction'),
+            ('lazy-ff', 'lazy-ff-transform-atomic-bisim-labelreduction'),
+            ('lazy-ff', 'lazy-ff-transform-full-bisimown-labelreduction-dfp100-t900'),
+            ('lazy-ff', 'lazy-ff-transform-full-bisimown-labelreduction-dfp1000-t900'),
+            ('lazy-ff', 'lazy-ff-transform-full-bisimown-labelreduction-dfp10000-t900'),
+            ('lazy-ff', 'lazy-ff-transform-full-bisimown-labelreduction-miasm100-t900'),
+            ('lazy-ff', 'lazy-ff-transform-full-bisimown-labelreduction-miasm1000-t900'),
+            ('lazy-ff', 'lazy-ff-transform-full-bisimown-labelreduction-miasm10000-t900'),
         ],
         format='html',
         attributes=attributes,
     ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-bisim-comparison.html'),
+    outfile=os.path.join(exp.eval_dir, 'lazy-ff-ownbisim-comparison.html'),
 )
 
 class OracleScatterPlotReport(ScatterPlotReport):
@@ -177,80 +186,11 @@ class OracleScatterPlotReport(ScatterPlotReport):
 
 ### Latex reports
 
-## expansion plots for bisim
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-atomic-bisim-labelreduction',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-atomic-bisim-labelreduction'),
-)
-
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
-)
-
-exp.add_report(
-    OracleScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
-            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-oracle-over-dfp1000-and-miasm1000-transform-full-bisim-labelreduction-t900'),
-)
-
-
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind-transform-atomic-bisim-labelreduction',
-            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-atomic-bisim-labelreduction-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
-)
-
-exp.add_report(
-    OracleScatterPlotReport(
-        take_first_as_third_algo=True,
-        filter_algorithm=[
-            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
-            'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900-vs-oracle-over-dfp1000-and-miasm1000-transform-full-bisim-labelreduction-t900'),
-)
-
 ## expansion plots for ownbisim
 exp.add_report(
     ScatterPlotReport(
         filter_algorithm=[
-            'astar-blind',
+            'lazy-ff', # 'lazy-ffpref'
             'astar-blind-transform-atomic-ownbisim-labelreduction',
         ],
         # get_category=lambda run1, run2: run1['domain'],
