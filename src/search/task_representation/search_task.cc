@@ -174,15 +174,30 @@ void SearchTask::create_fts_operators() {
             if (is_label_group_relevant(ts.get_size(), transitions)) {
                 bool deterministic = are_transitions_deterministic(transitions);
                 if (deterministic) {
+                    int single_target = -1;
+                    bool is_single_target = true;
                     unordered_map<int, int> src_to_target;
                     for (const Transition &t : transitions) {
                         assert(!src_to_target.count(t.src));
                         src_to_target[t.src] = t.target;
+                        if (single_target == -1) {
+                            single_target = t.target;
+                        } else if (single_target != t.target) {
+                            is_single_target = false;
+                        }
                     }
-                    for (int label_id : label_group) {
-                        label_to_info[label_id].relevant_deterministic_transition_systems.push_back(var);
-                        label_to_info[label_id].src_to_target_by_ts_index.push_back(src_to_target);
+                    if (is_single_target) {
+                        assert(single_target >= 0);
+                        for (int label_id : label_group) {
+                            label_to_info[label_id].static_effects.push_back(FactPair(var, single_target));
+                        }
+                    } else {
+                        for (int label_id : label_group) {
+                            label_to_info[label_id].relevant_deterministic_transition_systems.push_back(var);
+                            label_to_info[label_id].src_to_target_by_ts_index.push_back(src_to_target);
+                        }
                     }
+
                 } else {
                     set<int> targets;
                     unordered_map<int, vector<int>> target_to_sources;
@@ -260,7 +275,7 @@ void SearchTask::create_fts_operators() {
      return fts_task.is_goal_state(state);
  }
 
-    
+
 bool SearchTask::has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const {
     // Ideally, we would assert that the operator is applicable.
     const FTSOperator &fts_op = operators[op_id.get_index()];
@@ -271,7 +286,7 @@ bool SearchTask::has_effect(const GlobalState &predecessor, OperatorID op_id, co
             return true;
         }
     }
-    
+
     // Effects on deterministic TS
     LabelID label = fts_op.get_label();
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
@@ -285,7 +300,7 @@ bool SearchTask::has_effect(const GlobalState &predecessor, OperatorID op_id, co
     }
 
     return false;
-    
+
 //    axiom_evaluator.evaluate(buffer, *state_packer);
 }
 
@@ -295,8 +310,13 @@ void SearchTask::apply_operator(
     // Ideally, we would assert that the operator is applicable.
     const FTSOperator &fts_op = operators[op_id.get_index()];
 
-    // Effects on deterministic TS
     LabelID label = fts_op.get_label();
+    // Static Effects
+    for (const auto  & eff : label_to_info[label].static_effects) {
+        state_packer->set(buffer, eff.var, eff.value);
+    }
+
+    // Effects on deterministic TS
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
     const vector<unordered_map<int, int>> &src_to_target_by_ts_index = label_to_info[label].src_to_target_by_ts_index;
     for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
@@ -318,8 +338,13 @@ void SearchTask::apply_operator(
     // Ideally, we would assert that the operator is applicable.
     const FTSOperator &fts_op = operators[op_id.get_index()];
 
-    // Effects on deterministic TS
     LabelID label = fts_op.get_label();
+    // Static Effects
+    for (const auto  & eff : label_to_info[label].static_effects) {
+        buffer[eff.var] = eff.value;
+    }
+
+    // Effects on deterministic TS
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
     const vector<unordered_map<int, int>> &src_to_target_by_ts_index =
         label_to_info[label].src_to_target_by_ts_index;
@@ -338,46 +363,49 @@ void SearchTask::apply_operator(
 void SearchTask::generate_applicable_ops(
     const GlobalState &state, vector<OperatorID> &applicable_ops) const {
     size_t var = 0;
+
     boost::dynamic_bitset<> activated_labels = activated_labels_by_var_by_state[var][state[var]];
     for (var = 1; var < activated_labels_by_var_by_state.size(); ++var) {
         activated_labels &= activated_labels_by_var_by_state[var][state[var]];
     }
 
-    for (LabelID label(0); label < static_cast<int>(activated_labels.size()); ++label) {
-        if (activated_labels[label]) {
-            const vector<OperatorID> &label_operators = label_to_info[label].fts_operators;
-            if (label_operators.size() == 1) {
-                OperatorID op_id = label_operators[0];
-                assert(operators[op_id.get_index()].get_effects().empty());
-                applicable_ops.push_back(op_id);
-            } else {
-                const vector<int> &non_det_ts =
-                    label_to_info[label].relevant_non_deterministic_transition_systems;
-                assert(!non_det_ts.empty());
-                const vector<vector<boost::dynamic_bitset<>>>
-                    &applicable_fts_ops_by_ts_index_by_state =
-                        label_to_info[label].applicable_ops_by_ts_index_by_state;
+    size_t label_pos = activated_labels.find_first();
 
-                size_t ts_index = 0;
-                int var = non_det_ts[ts_index];
-                boost::dynamic_bitset<> applicable_fts_ops =  applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
-                for (ts_index = 1;
-                     ts_index < applicable_fts_ops_by_ts_index_by_state.size(); ++ts_index) {
-                    var = non_det_ts[ts_index];
-                    applicable_fts_ops &=
-                        applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
-                }
+    while(label_pos != boost::dynamic_bitset<>::npos) {
+        LabelID label (label_pos);
+        const vector<OperatorID> &label_operators = label_to_info[label].fts_operators;
+        if (label_operators.size() == 1) {
+            OperatorID op_id = label_operators[0];
+            assert(operators[op_id.get_index()].get_effects().empty());
+            applicable_ops.push_back(op_id);
+        } else {
+            const vector<int> &non_det_ts =
+                label_to_info[label].relevant_non_deterministic_transition_systems;
+            assert(!non_det_ts.empty());
+            const vector<vector<boost::dynamic_bitset<>>>
+                &applicable_fts_ops_by_ts_index_by_state =
+                label_to_info[label].applicable_ops_by_ts_index_by_state;
 
-                for (boost::dynamic_bitset<>::size_type op_index = 0;
-                     op_index < applicable_fts_ops.size(); ++op_index) {
-                    if (applicable_fts_ops[op_index]) {
-                        applicable_ops.push_back(label_operators[op_index]);
-                    }
-                }
-
+            size_t ts_index = 0;
+            int var = non_det_ts[ts_index];
+            boost::dynamic_bitset<> applicable_fts_ops =  applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
+            for (ts_index = 1;
+                 ts_index < applicable_fts_ops_by_ts_index_by_state.size(); ++ts_index) {
+                var = non_det_ts[ts_index];
+                applicable_fts_ops &=
+                    applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
             }
+
+            size_t op_index = applicable_fts_ops.find_first();
+            while(op_index != boost::dynamic_bitset<>::npos) {
+                applicable_ops.push_back(label_operators[op_index]);
+                op_index = applicable_fts_ops.find_next(op_index);
+            }
+
         }
+        label_pos = activated_labels.find_next(label_pos);
     }
+
 }
 
 bool SearchTask::is_applicable(const GlobalState &state, OperatorID op) const {

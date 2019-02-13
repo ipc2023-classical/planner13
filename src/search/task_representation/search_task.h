@@ -118,6 +118,9 @@ private:
     //std::vector<OperatorTree> operator_tree;
 
     struct LabelInformation {
+        // The set of static effects of the label
+        std::vector<FactPair> static_effects;
+
         // The set of transition systems (ids) in which the label is relevant
         // and deterministic.
         std::vector<int> relevant_deterministic_transition_systems;
@@ -157,7 +160,7 @@ public:
 
     bool is_goal_state(const GlobalState &state) const;
 
-    bool has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const; 
+    bool has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const;
     void apply_operator(
         const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer) const;
     void apply_operator(
@@ -173,7 +176,7 @@ public:
     int num_variables() const {
         return initial_state.size();
     }
-    
+
     int num_operators() const {
         return operators.size();
     }
@@ -201,7 +204,7 @@ public:
     LabelID get_label(OperatorID op) const {
         assert(std::find(label_to_info[operators[op.get_index()].get_label()].fts_operators.begin(), label_to_info[operators[op.get_index()].get_label()].fts_operators.end(), op) != label_to_info[operators[op.get_index()].get_label()].fts_operators.end());
 
-            
+
         return operators[op.get_index()].get_label();
     }
 };
