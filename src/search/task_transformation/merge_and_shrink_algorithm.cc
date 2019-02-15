@@ -258,12 +258,12 @@ bool MergeAndShrinkAlgorithm::prune_fts(
            }
 
 
-           
+
        }
    }
 
-   
-   
+
+
    if (verbosity >= Verbosity::NORMAL && pruned) {
        print_time(timer, "after pruning atomic factors");
    }
@@ -543,7 +543,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
     }
 
-    bool has_simplified; 
+    bool has_simplified;
     do {
         has_simplified = false;
         // Label reduction of atomic FTS.
@@ -567,7 +567,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             }
         }
 
-        
+
         has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
 
         has_simplified |= fts.remove_irrelevant_labels();
@@ -597,7 +597,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
 
 void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
     add_cost_type_option_to_parser(parser);
-    
+
     // Merge strategy option.
     parser.add_option<shared_ptr<MergeStrategyFactory>>(
         "merge_strategy",
@@ -667,7 +667,7 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "verbosity",
         verbosity_levels,
         "Option to specify the level of verbosity.",
-        "verbose",
+        "normal",
         verbosity_level_docs);
 
     parser.add_option<bool>(

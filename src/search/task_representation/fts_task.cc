@@ -107,7 +107,7 @@ const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
             }
         }
     }
-    
+
     assert(label >= 0 && label < static_cast<int>(label_preconditions.size()));
     return label_preconditions[label];
 }
@@ -139,7 +139,7 @@ void FTSTask::dump() const {
     }
 }
 
-    
+
 vector<int> FTSTask::get_initial_state() const {
     vector<int> res;
     res.reserve(transition_systems.size());
@@ -148,7 +148,7 @@ vector<int> FTSTask::get_initial_state() const {
     }
     return res;
 }
-    
+
     bool FTSTask::trivially_solved() const {
         return transition_systems.size() == 0 ||
             std::all_of (transition_systems.begin(),
@@ -156,19 +156,30 @@ vector<int> FTSTask::get_initial_state() const {
                          [] (const unique_ptr<TransitionSystem> & ts) {
                              return ts->is_goal_state(ts->get_init_state());
                          }
-                ); 
+                );
     }
 
 
 
     ostream &operator<<(ostream &os, const FTSTask &task) {
-        os << "FTSTask with " << task.transition_systems.size()
-           << " variables and " << task.labels->get_size() << " labels"
-           << endl;
-        
+
+        int total_transitions = 0;
+        int total_facts = 0;
         for (auto & ts : task.transition_systems) {
-            os << "   " << *ts << endl;
+            total_transitions += ts->compute_total_transitions();
+            total_facts += ts->get_size();
         }
+
+
+        os << "FTSTask with " << task.transition_systems.size()
+           << " variables, " << task.labels->get_size() << " labels, "
+           << total_facts << " facts, "
+           << total_transitions << " transitions"
+           << endl;
+
+        // for (auto & ts : task.transition_systems) {
+        //     os << "   " << *ts << endl;
+        // }
         return os;
     }
 }
