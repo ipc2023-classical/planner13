@@ -3,7 +3,9 @@
 
 from __future__ import print_function
 
+import os
 import sys
+import traceback
 
 def python_version_supported():
     major, minor = sys.version_info[:2]
@@ -25,6 +27,7 @@ import options
 import pddl
 import pddl_parser
 import sas_tasks
+import signal
 import simplify
 import timers
 import tools
@@ -41,6 +44,12 @@ import variable_order
 # non-derived).
 
 DEBUG = False
+
+
+## For a full list of exit codes, please see driver/returncodes.py. Here,
+## we only list codes that are used by the translator component of the planner.
+TRANSLATE_OUT_OF_MEMORY = 20
+TRANSLATE_OUT_OF_TIME = 21
 
 simplified_effect_condition_counter = 0
 added_implied_precondition_counter = 0
@@ -554,7 +563,15 @@ def pddl_to_sas(task):
         implied_facts = {}
 
     with timers.timing("Building mutex information", block=True):
-        mutex_key = build_mutex_key(strips_to_sas, mutex_groups)
+        if options.use_partial_encoding:
+            mutex_key = build_mutex_key(strips_to_sas, mutex_groups)
+        else:
+            # With our current representation, emitting complete mutex
+            # information for the full encoding can incur an
+            # unacceptable (quadratic) blowup in the task representation
+            #size. See issue771 for details.
+            print("using full encoding: between-variable mutex information skipped.")
+            mutex_key = []
 
     with timers.timing("Translating task", block=True):
         sas_task = translate_task(
@@ -587,13 +604,15 @@ def pddl_to_sas(task):
 
 
 def build_mutex_key(strips_to_sas, groups):
+    assert options.use_partial_encoding
     group_keys = []
     for group in groups:
         group_key = []
         for fact in group:
-            if strips_to_sas.get(fact):
-                for var, val in strips_to_sas[fact]:
-                    group_key.append((var, val))
+            represented_by = strips_to_sas.get(fact)
+            if represented_by:
+                assert len(represented_by) == 1
+                group_key.append(represented_by[0])
             else:
                 print("not in strips_to_sas, left out:", fact)
         group_keys.append(group_key)
@@ -687,10 +706,37 @@ def main():
     dump_statistics(sas_task)
 
     with timers.timing("Writing output"):
-        with open("output.sas", "w") as output_file:
+        with open(options.sas_file, "w") as output_file:
             sas_task.output(output_file)
     print("Done! %s" % timer)
 
 
+def handle_sigxcpu(signum, stackframe):
+    print()
+    print("Translator hit the time limit")
+    # sys.exit() is not safe to be called from within signal handlers, but
+    # os._exit() is.
+    os._exit(TRANSLATE_OUT_OF_TIME)
+
+
 if __name__ == "__main__":
-    main()
+    try:
+        signal.signal(signal.SIGXCPU, handle_sigxcpu)
+    except AttributeError:
+        print("Warning! SIGXCPU is not available on your platform. "
+            "This means that the planner cannot be gracefully terminated "
+            "when using a time limit, which, however, is probably "
+            "supported on your platform anyway.")
+    try:
+        # Reserve about 10 MB (in Python 2) of emergency memory.
+        # https://stackoverflow.com/questions/19469608/
+        emergency_memory = "x" * 10**7
+        main()
+    except MemoryError:
+        emergency_memory = ""
+        print()
+        print("Translator ran out of memory, traceback:")
+        print("=" * 79)
+        traceback.print_exc(file=sys.stdout)
+        print("=" * 79)
+        sys.exit(TRANSLATE_OUT_OF_MEMORY)
