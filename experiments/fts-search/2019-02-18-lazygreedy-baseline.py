@@ -38,7 +38,7 @@ def main(revisions=None):
     'transport-sat14-strips', 'trucks-strips', 'visitall-sat11-strips',
     'visitall-sat14-strips', 'woodworking-sat08-strips',
     'woodworking-sat11-strips', 'zenotravel']
-    environment = BaselSlurmEnvironment(email="silvan.sievers@unibas.ch", export=["PATH"], partition='infai_1')
+    environment = BaselSlurmEnvironment(email="silvan.sievers@unibas.ch", export=["PATH"], partition='infai_2')
 
     if is_test_run():
         suite = ['gripper:prob01.pddl', 'depot:p01.pddl', 'mystery:prob07.pddl']
