@@ -396,6 +396,11 @@ void MergeAndShrinkAlgorithm::main_loop(
 
         fts.remove_irrelevant_transition_systems(verbosity);
 
+        if (!fts.is_active(merged_index)) {
+            // The just merged transition system was irrelevant and removed.
+            continue;
+        }
+
         fts.remove_irrelevant_labels();
 
         if (ran_out_of_time(timer)) {
