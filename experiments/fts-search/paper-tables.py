@@ -20,6 +20,8 @@ from lab import tools
 
 from common_setup import IssueExperiment
 
+from domain_comparison import DomainComparisonReport
+
 exp = FastDownwardExperiment()
 
 REVISIONS = [
@@ -96,7 +98,7 @@ attributes.extend(extra_attributes)
 'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900',
 'astar-hmax-transform-full-bisim-labelreduction-miasm10000-t900',
 
-'astar-masdfpbisim50k',
+'mas-astar-masdfpbisim50k',
 'astar-masdfpbisim50k-atomic',
 'astar-masdfpbisim50k-transform-atomic-labelreduction',
 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction',
@@ -107,7 +109,7 @@ attributes.extend(extra_attributes)
 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
 
-'astar-masmiasmbisim50k',
+'mas-astar-masmiasmbisim50k',
 'astar-masmiasmbisim50k-atomic',
 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
 'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
@@ -314,6 +316,144 @@ exp.add_report(
         attributes=['coverage'],
     ),
     outfile=os.path.join(exp.eval_dir, 'coverage.tex'),
+)
+
+algo_to_print = {
+    'astar-hmax': 'FD',
+    'astar-hmax-atomic': 'a',
+    'astar-hmax-transform-atomic-bisim-labelreduction': 'a-l-b',
+    'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900': 'f-d',
+    'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900': 'f-m',
+    'mas-astar-masdfpbisim50k': 'FD',
+    'astar-masdfpbisim50k-atomic': 'a',
+    'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction': 'a-l-b',
+    'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': 'f-d',
+    'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': 'f-m',
+    'mas-astar-masmiasmbisim50k': 'FD',
+    'astar-masmiasmbisim50k-atomic': 'a',
+    'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction': 'a-l-b',
+    'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': 'f-d',
+    'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': 'f-m',
+    'lazy-ff': 'FD',
+    'lazy-ff-atomic': 'a',
+    'lazy-ff-transform-atomic-bisimown-labelreduction': 'a-l-o',
+    'lazy-ff-transform-full-bisimown-labelreduction-dfp1000-t900': 'f-d',
+    'lazy-ff-transform-full-bisimown-labelreduction-miasm1000-t900': 'f-m',
+    'lazy-ffpref': 'FD',
+    'lazy-ffpref-atomic': 'a',
+    'lazy-ffpref-transform-atomic-bisimown-labelreduction': 'a-l-o',
+    'lazy-ffpref-transform-full-bisimown-labelreduction-dfp1000-t900': 'f-d',
+    'lazy-ffpref-transform-full-bisimown-labelreduction-miasm1000-t900': 'f-m',
+}
+
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'astar-hmax',
+            'astar-hmax-atomic',
+            # 'astar-hmax-transform-atomic-labelreduction',
+            'astar-hmax-transform-atomic-bisim-labelreduction',
+            # 'astar-hmax-transform-full-bisim-labelreduction-dfp100-t900',
+            'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900',
+            # 'astar-hmax-transform-full-bisim-labelreduction-dfp10000-t900',
+            # 'astar-hmax-transform-full-bisim-labelreduction-miasm100-t900',
+            'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900',
+            # 'astar-hmax-transform-full-bisim-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-astar-hmax.tex'),
+)
+
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'mas-astar-masdfpbisim50k',
+            'astar-masdfpbisim50k-atomic',
+            # 'astar-masdfpbisim50k-transform-atomic-labelreduction',
+            'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction',
+            # 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
+            'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900',
+            # 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp10000-t900',
+            # 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm100-t900',
+            'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
+            # 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-astar-masdfpbisim50k.tex'),
+)
+
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'mas-astar-masmiasmbisim50k',
+            'astar-masmiasmbisim50k-atomic',
+            # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
+            'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
+            'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp10000-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm100-t900',
+            'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-astar-masmiasmbisim50k.tex'),
+)
+
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'lazy-ff',
+            'lazy-ff-atomic',
+            # 'lazy-ff-transform-atomic-labelreduction',
+            'lazy-ff-transform-atomic-bisimown-labelreduction',
+            # 'lazy-ff-transform-full-bisimown-labelreduction-dfp100-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-dfp1000-t900',
+            # 'lazy-ff-transform-full-bisimown-labelreduction-dfp10000-t900',
+            # 'lazy-ff-transform-full-bisimown-labelreduction-miasm100-t900',
+            'lazy-ff-transform-full-bisimown-labelreduction-miasm1000-t900',
+            # 'lazy-ff-transform-full-bisimown-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-lazy-ff.tex'),
+)
+
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'lazy-ffpref',
+            'lazy-ffpref-atomic',
+            # 'lazy-ffpref-transform-atomic-labelreduction',
+            'lazy-ffpref-transform-atomic-bisimown-labelreduction',
+            # 'lazy-ffpref-transform-full-bisimown-labelreduction-dfp100-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-dfp1000-t900',
+            # 'lazy-ffpref-transform-full-bisimown-labelreduction-dfp10000-t900',
+            # 'lazy-ffpref-transform-full-bisimown-labelreduction-miasm100-t900',
+            'lazy-ffpref-transform-full-bisimown-labelreduction-miasm1000-t900',
+            # 'lazy-ffpref-transform-full-bisimown-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-lazy-ffpref.tex'),
 )
 
 exp.run_steps()
