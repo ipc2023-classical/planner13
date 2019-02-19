@@ -38,7 +38,7 @@ int main(int argc, const char **argv) {
             move(labels_and_transition_systems.first));
         cout << "Main task constructed" << endl;
     }
-    
+
     shared_ptr<TaskTransformation> transformer;
 
     // The command line is parsed twice: once in dry-run mode, to check for simple input
@@ -81,7 +81,7 @@ int main(int argc, const char **argv) {
         cout << "Total time: " << utils::g_timer << endl;
         utils::exit_with(ExitCode::PLAN_FOUND);
     }
-        
+
     shared_ptr<SearchEngine> engine;
 
     // The command line is parsed twice: once in dry-run mode, to
@@ -115,7 +115,7 @@ int main(int argc, const char **argv) {
             utils::Timer reconstruct_timer;
             cout << "Plan reconstruction " << *g_plan_reconstruction << endl;
             g_plan_reconstruction->reconstruct_plan(plan);
-            
+
             cout << "Plan reconstruction time: " << reconstruct_timer << endl;
         }
 

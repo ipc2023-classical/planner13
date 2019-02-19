@@ -54,14 +54,14 @@ class FTSMapping {
 public:
     std::vector<int> transition_system_mapping;
     std::vector<int> transition_system_all_mapping;
-    
+
     LabelMapping label_mapping;
 
 FTSMapping(std::vector<int> && ts_mapping, std::vector<int> && ts_all_mapping,LabelMapping && lm)  :
     transition_system_mapping(std::move(ts_mapping)),
         transition_system_all_mapping(std::move(ts_all_mapping)),
         label_mapping(std::move(lm)){
-        
+
     }
 };
 
@@ -72,7 +72,7 @@ class FactoredTransitionSystem {
     std::vector<std::unique_ptr<MergeAndShrinkRepresentation>> mas_representations;
     std::shared_ptr<task_transformation::LabelMap> label_map;
     std::vector<std::unique_ptr<Distances>> distances;
-    
+
     const bool compute_init_distances;
     const bool compute_goal_distances;
     int num_active_entries;
@@ -105,7 +105,7 @@ public:
         std::vector<std::unique_ptr<Distances>> &&distances,
         const bool compute_init_distances,
         const bool compute_goal_distances,
-        Verbosity verbosity, 
+        Verbosity verbosity,
         const bool lossy);
     FactoredTransitionSystem(FactoredTransitionSystem &&other);
     ~FactoredTransitionSystem();
@@ -201,13 +201,14 @@ public:
 
     bool is_active(int index) const;
 
-    bool  is_irrelevant_label (task_representation::LabelID label) const;
+    bool is_irrelevant_label(task_representation::LabelID label) const;
+    bool is_externally_relevant_label(task_representation::LabelID label, int index) const;
 
-    
+
     bool remove_irrelevant_labels();
     std::vector<int> remove_labels(const std::vector<task_representation::LabelID> & labels);
     bool remove_irrelevant_transition_systems(Verbosity verbosity);
-    
+
     bool is_tau_label(int index, task_representation::LabelID label) const;
     std::vector<task_representation::LabelID> get_tau_labels(int index) const;
 
@@ -224,7 +225,7 @@ public:
     std::shared_ptr<PlanReconstruction> get_plan_reconstruction();
     std::shared_ptr<task_representation::FTSTask> get_transformed_fts_task();
     Mapping get_mapping();
-        
+
 
 };
 }

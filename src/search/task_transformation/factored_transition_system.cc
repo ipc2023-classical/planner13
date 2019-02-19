@@ -43,7 +43,7 @@ void FTSConstIterator::operator++() {
 
 
 FactoredTransitionSystem::FactoredTransitionSystem(
-    std::shared_ptr<task_representation::FTSTask> fts_task, 
+    std::shared_ptr<task_representation::FTSTask> fts_task,
     unique_ptr<Labels> labels_,
     vector<unique_ptr<TransitionSystem>> &&transition_systems,
     vector<unique_ptr<MergeAndShrinkRepresentation>> &&mas_representations,
@@ -94,7 +94,7 @@ bool FactoredTransitionSystem::apply_abstraction(
     int index,
     const StateEquivalenceRelation &state_equivalence_relation,
     Verbosity verbosity, bool ignore_mas_representation) {
-    
+
     if (!ignore_mas_representation) {
         assert(is_component_valid(index));
     }
@@ -176,7 +176,7 @@ void FactoredTransitionSystem::apply_label_mapping(
 
     assert(label_map);
     label_map->update(old_to_new_labels);
-    
+
     for (size_t i = 0; i < transition_systems.size(); ++i) {
         if (transition_systems[i]) {
             transition_systems[i]->apply_label_reduction(
@@ -267,12 +267,12 @@ bool FactoredTransitionSystem::is_active(int index) const {
     assert_index_valid(index);
     return transition_systems[index] != nullptr;
 }
-  
+
 
 vector<int> FactoredTransitionSystem::remove_labels(const std::vector<LabelID> & labels_to_remove) {
     std::vector<int> may_require_pruning;
     labels->remove_labels(labels_to_remove);
-    
+
     for (size_t i = 0; i < transition_systems.size(); ++i) {
         if (transition_systems[i]) {
             if(transition_systems[i]->remove_labels(labels_to_remove)) {
@@ -300,18 +300,33 @@ bool FactoredTransitionSystem::remove_irrelevant_transition_systems(Verbosity ve
     return removed_tr;
 }
 
-    bool  FactoredTransitionSystem::is_irrelevant_label (LabelID label) const {
-        for (const auto & ts : transition_systems) {
-            if(ts && ts->is_relevant_label(label)) {
-                return false;
+bool  FactoredTransitionSystem::is_irrelevant_label (LabelID label) const {
+    for (const auto & ts : transition_systems) {
+        if(ts && ts->is_relevant_label(label)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool  FactoredTransitionSystem::is_externally_relevant_label (LabelID label, int ts_index) const {
+    assert(transition_systems[ts_index]);
+    for (size_t index = 0; index < transition_systems.size(); ++index) {
+        if (transition_systems[index] && (index != (size_t)ts_index)) {
+            if(transition_systems[index]->is_relevant_label(label)) {
+                return true;
             }
         }
-        return true;
     }
-    
+
+    return false;
+}
+
+
+
 bool FactoredTransitionSystem::remove_irrelevant_labels () {
     std::vector<LabelID> irrelevant_labels;
-    for (LabelID (label_no); label_no < labels->get_size(); ++label_no) {         
+    for (LabelID (label_no); label_no < labels->get_size(); ++label_no) {
         if (labels->is_current_label(label_no) && is_irrelevant_label(label_no)) {
             irrelevant_labels.push_back(label_no);
         }
@@ -333,24 +348,24 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
            }
        }
    }
-   
+
    return tau_labels;
 }
 
-   
+
     bool FactoredTransitionSystem::is_tau_label (int ts_index, LabelID label) const{
         assert(label >= 0);
         for (size_t index = 0; index < transition_systems.size(); ++index) {
-           
+
             if (transition_systems[index] && (index != (size_t)ts_index)) {
                 if(!(transition_systems[index]->is_selfloop_everywhere(label))) {
                     // cout << label << " is not tau for " << ts_index << " because of " << index <<endl;
                     return false;
                 }
             }
-                    
+
         }
-        
+
         return true;
     }
 
@@ -383,11 +398,11 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         }
         cout << endl;
         }
-        
+
         std::vector<int> transition_system_mapping (num_active_entries, -1);
         std::vector<int> transition_system_all_mapping (transition_systems.size(), -1);
-        
-        // 1) Construct plan reconstruction object       
+
+        // 1) Construct plan reconstruction object
         vector<unique_ptr<TransitionSystem> > new_transition_systems;
         vector<unique_ptr<Distances> > new_distances;
         vector<unique_ptr<MergeAndShrinkRepresentation> > old_mas_representations;
@@ -419,7 +434,7 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         //Renumber labels consecutively
         auto label_mapping = labels->cleanup();
 
-        
+
 
         //assert(new_num_labels == labels->get_size());
 
@@ -458,10 +473,10 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
             }
 
             label_map.reset(new LabelMap (labels->get_size()));
-        
-        
+
+
         if(!transition_systems.empty()) {
-            //Making copy of transition systems and labels 
+            //Making copy of transition systems and labels
             predecessor_fts_task = make_shared<task_representation::FTSTask> (transition_systems,
                                                                               labels);
 
@@ -470,18 +485,18 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         } else {
             predecessor_fts_task = nullptr;
         }
-    }    
-    
-            
+    }
+
+
     std::shared_ptr<PlanReconstruction> FactoredTransitionSystem::get_plan_reconstruction() {
         assert(!plan_reconstruction_steps.empty());
         if (plan_reconstruction_steps.size() == 1) {
             return plan_reconstruction_steps[0];
         }
-        
+
         return make_shared<PlanReconstructionSequence>(plan_reconstruction_steps);
     }
-    
+
     std::shared_ptr<task_representation::FTSTask> FactoredTransitionSystem::get_transformed_fts_task() {
         return make_shared<task_representation::FTSTask> (move(transition_systems), move(labels));
     }

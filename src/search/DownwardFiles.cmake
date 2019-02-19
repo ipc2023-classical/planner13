@@ -137,6 +137,7 @@ fast_downward_plugin(
         task_transformation/merge_tree_factory
         task_transformation/merge_tree_factory_linear
         task_transformation/shrink_bisimulation
+        task_transformation/shrink_weak_bisimulation
         task_transformation/shrink_own_labels
         task_transformation/shrink_composite
         task_transformation/shrink_strategy
