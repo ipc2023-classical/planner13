@@ -2,8 +2,38 @@ from downward.reports import PlanningReport
 
 from collections import defaultdict
 
+def domain_mapping(domain):
+    if domain == 'openstacks':
+        return 'openstacks-06'
+    elif 'openstacks' in domain:
+        return 'openstacks-08-11-14'
+    elif 'logistics' in domain:
+        return 'logistics'
+    else:
+        result = domain.replace('-adl', '')
+        result = domain.replace('-strips', '')
+        result = result.replace('-08', '')
+        result = result.replace('-opt08', '')
+        result = result.replace('-opt11', '')
+        result = result.replace('-opt14', '')
+        result = result.replace('-opt18', '')
+        result = result.replace('-sat08', '')
+        result = result.replace('-sat11', '')
+        result = result.replace('-sat14', '')
+        # The following replacements are valid for the paper-tables.py script
+        # where we removed all opt/sat substrings.
+        result = result.replace('-08', '')
+        result = result.replace('-11', '')
+        result = result.replace('-14', '')
+        result = result.replace('-18', '')
+        result = result.replace('-08', '')
+        result = result.replace('-11', '')
+        result = result.replace('-14', '')
+        return result
+
 # TODO: this currently uses coverage and sum as the hard-coded attribute and
 # aggregation function.
+# NOTE: hacked to consider same domains of different years as one domain.
 class DomainComparisonReport(PlanningReport):
     def __init__(self, algo_to_print = {}, **kwargs):
         PlanningReport.__init__(self, **kwargs)
@@ -14,9 +44,11 @@ class DomainComparisonReport(PlanningReport):
         domain_and_algo_to_coverage = defaultdict(int)
         algo_to_coverage = defaultdict(int)
         for (domain, problem), runs in self.problem_runs.items():
-            domains.add(domain)
+            mapped_domain = domain_mapping(domain)
+            domains.add(mapped_domain)
             for run in runs:
-                domain_and_algo_to_coverage[(run['domain'], run['algorithm'])] += run['coverage']
+                assert domain == run['domain']
+                domain_and_algo_to_coverage[(mapped_domain, run['algorithm'])] += run['coverage']
                 algo_to_coverage[run['algorithm']] += run['coverage']
 
         def turn_list_into_table_row(line):
@@ -63,7 +95,7 @@ class DomainComparisonReport(PlanningReport):
                 else:
                     entry = str(num_algo1_better)
                 line.append(entry)
-            # total column
+            # aggregated value column
             line.append(algo_to_coverage[algo1])
             lines.append(turn_list_into_table_row(line))
         return '\n'.join(lines)
