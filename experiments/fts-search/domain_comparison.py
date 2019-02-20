@@ -2,7 +2,8 @@ from downward.reports import PlanningReport
 
 from collections import defaultdict
 
-# TODO: this currently uses coverage as the hard-coded attribute.
+# TODO: this currently uses coverage and sum as the hard-coded attribute and
+# aggregation function.
 class DomainComparisonReport(PlanningReport):
     def __init__(self, algo_to_print = {}, **kwargs):
         PlanningReport.__init__(self, **kwargs)
@@ -62,7 +63,7 @@ class DomainComparisonReport(PlanningReport):
                 else:
                     entry = str(num_algo1_better)
                 line.append(entry)
-            # total coverage column
+            # total column
             line.append(algo_to_coverage[algo1])
             lines.append(turn_list_into_table_row(line))
         return '\n'.join(lines)
