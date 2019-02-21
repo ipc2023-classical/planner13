@@ -57,7 +57,7 @@ void TSConstIterator::operator++() {
 }
 
 GroupAndTransitions TSConstIterator::operator*() const {
-    return GroupAndTransitions(current_group_id, 
+    return GroupAndTransitions(current_group_id,
         label_equivalence_relation.get_group(current_group_id),
         transitions_by_group_id[current_group_id]);
 }
@@ -111,7 +111,7 @@ TransitionSystem::TransitionSystem(const TransitionSystem &other)
       goal_states(other.goal_states),
       init_state(other.init_state) {
 
-    
+
 }
 
 TransitionSystem::TransitionSystem(const TransitionSystem &other, const Labels &labels)
@@ -418,7 +418,7 @@ void TransitionSystem::apply_label_reduction(
             vector<Transition> &transitions = label_and_transitions.second;
             int new_group_id = label_equivalence_relation->get_group_id(new_label_no);
             if ((size_t)new_group_id >= transitions_by_group_id.size()) {
-                transitions_by_group_id.resize(new_group_id+1);                
+                transitions_by_group_id.resize(new_group_id+1);
             }
             assert((size_t)new_group_id < transitions_by_group_id.size());
             transitions_by_group_id[new_group_id] = move(transitions);
@@ -434,7 +434,7 @@ void TransitionSystem::apply_label_reduction(
 
         compute_locally_equivalent_labels();
     }
-    
+
     selfloop_everywhere_label_groups.clear();
 
     assert(are_transitions_sorted_unique());
@@ -468,7 +468,7 @@ bool TransitionSystem::remove_labels(const vector<LabelID> & labels) {
             }
         }
     }
-    
+
     selfloop_everywhere_label_groups.clear();
     return relevant_label_group_removed;
 }
@@ -588,7 +588,7 @@ const vector<int> & TransitionSystem::get_goal_states() const {
             if (goal_states[i]) {
                 goal_state_list.push_back(i);
             }
-        }        
+        }
     }
     return goal_state_list;
 }
@@ -612,9 +612,13 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
         }
     }
 
-        
+
     return label_group_precondition[label_equivalence_relation->get_group_id(label)];
 }
+
+    int TransitionSystem::num_label_groups () const {
+        return label_equivalence_relation->get_size();
+    }
 
     const std::vector<LabelGroupID> & TransitionSystem::get_relevant_label_groups() const {
 
@@ -623,7 +627,7 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
                 if (is_relevant_label_group(group_id)){
                     relevant_label_groups.push_back(group_id);
                 }
-                
+
             }
         }
 
@@ -644,7 +648,7 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
         return false;
 
     }
-    
+
     bool TransitionSystem::is_selfloop_everywhere(LabelID label) const {
 
         if (selfloop_everywhere_label_groups.empty()) {
@@ -659,7 +663,7 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
                     }
                     if (num_self_loops == get_size()) {
                         selfloop_everywhere_label_groups[group_id] = true;
-                    } 
+                    }
                 }
             }
 
@@ -674,7 +678,7 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
         LabelGroupID label_group = label_equivalence_relation->get_group_id(label);
         assert(label_group >=0);
         assert((size_t)label_group < selfloop_everywhere_label_groups.size());
-        
+
         return selfloop_everywhere_label_groups[label_group];
     }
 

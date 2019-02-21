@@ -18,6 +18,7 @@ namespace task_transformation {
     struct Signature;
     class ShrinkWeakBisimulation : public ShrinkStrategy {
         const bool preserve_optimality;
+        const bool ignore_irrelevant_tau_groups;
 
         int initialize_groups(
             const std::vector<int> & goal_distances,
@@ -27,6 +28,7 @@ namespace task_transformation {
         const task_representation::TransitionSystem &ts,
         const std::vector<int> & mapping_to_scc,
         const std::vector<int> & goal_distances,
+        const std::vector<bool> &ignore_label_group,
         std::vector<Signature> &signatures,
         const std::vector<int> &state_to_group,
         const std::vector<std::vector<int>> &can_reach_via_tau_path) const;
@@ -35,7 +37,6 @@ namespace task_transformation {
         ShrinkWeakBisimulation(const options::Options &opts);
 
         virtual ~ShrinkWeakBisimulation() override = default;
-
 
         virtual StateEquivalenceRelation compute_equivalence_relation(
             const FactoredTransitionSystem &fts,

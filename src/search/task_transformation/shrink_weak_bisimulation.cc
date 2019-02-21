@@ -90,7 +90,8 @@ struct Signature {
 
     ShrinkWeakBisimulation::ShrinkWeakBisimulation(const Options &opts) :
         ShrinkStrategy(),
-        preserve_optimality (opts.get<bool>("preserve_optimality")) {
+        preserve_optimality (opts.get<bool>("preserve_optimality")),
+        ignore_irrelevant_tau_groups (opts.get<bool>("ignore_irrelevant_tau_groups")){
     }
 
     void ShrinkWeakBisimulation::dump_strategy_specific_options() const {
@@ -135,8 +136,11 @@ struct Signature {
         const TransitionSystem &ts = fts.get_ts(index);
         int num_states = ts.get_size();
 
+        vector<bool> ignore_label_group(ts.num_label_groups(), false);
+
         // Step 1: Compute tau graph
         vector<vector<int>> tau_graph(num_states);
+        int label_group_index = 0;
         for (const GroupAndTransitions &gat : ts) {
             const vector<Transition> &transitions = gat.transitions;
 
@@ -148,6 +152,13 @@ struct Signature {
                                       });
 
             if(is_tau) {
+                ignore_label_group [label_group_index] = ignore_irrelevant_tau_groups &&
+                    std::all_of(gat.label_group.begin(), gat.label_group.end(),
+                                [&](int label) {
+                                    return !fts.is_externally_relevant_label(LabelID(label), index);
+                                });
+
+
                 // cout << "Tau label group!" << endl;
                 for (const Transition &transition : transitions) {
                     tau_graph[transition.target].push_back(transition.src);
@@ -155,6 +166,7 @@ struct Signature {
             }
         }
         sort_unique(tau_graph);
+        label_group_index ++;
 
 
         //Step 2: Compute SCCs in tau graph
@@ -252,7 +264,7 @@ struct Signature {
             stable = true;
 
             signatures.clear();
-            compute_signatures(ts, mapping_to_scc, goal_distances, signatures, scc_to_group, can_reach_via_tau_path);
+            compute_signatures(ts, mapping_to_scc, goal_distances, ignore_label_group, signatures, scc_to_group, can_reach_via_tau_path);
 
             // Verify size of signatures and presence of sentinels.
             assert(static_cast<int>(signatures.size()) == num_sccs + 2);
@@ -371,6 +383,7 @@ struct Signature {
         const TransitionSystem &ts,
         const vector<int> & mapping_to_scc,
         const vector<int> &goal_distances,
+        const vector<bool> &ignore_label_group,
         vector<Signature> &signatures,
         const vector<int> &state_to_group,
         const vector<vector<int>> &can_reach_via_tau_path) const {
@@ -390,26 +403,27 @@ struct Signature {
         // Step 2: Add transition information.
         int label_group_counter = 0;
         for (const GroupAndTransitions &gat : ts) {
-            const vector<Transition> &transitions = gat.transitions;
-            for (const Transition &transition : transitions) {
-                int transition_src = mapping_to_scc[transition.src];
-                int transition_target = mapping_to_scc[transition.target];
+            if (!ignore_label_group[label_group_counter]) {
+                const vector<Transition> &transitions = gat.transitions;
+                for (const Transition &transition : transitions) {
+                    int transition_src = mapping_to_scc[transition.src];
+                    int transition_target = mapping_to_scc[transition.target];
 
-                assert(signatures[transition_src + 1].state == transition_src);
+                    assert(signatures[transition_src + 1].state == transition_src);
 
-                int target_group = state_to_group[transition_target];
-                assert(target_group != -1 && target_group != SENTINEL);
+                    int target_group = state_to_group[transition_target];
+                    assert(target_group != -1 && target_group != SENTINEL);
 
-                for (int src_state : can_reach_via_tau_path[transition_src]) {
-                    assert (src_state >= 0);
-                    assert (src_state < (int)(goal_distances.size()));
-                    assert(signatures[src_state + 1].state == src_state);
+                    for (int src_state : can_reach_via_tau_path[transition_src]) {
+                        assert (src_state >= 0);
+                        assert (src_state < (int)(goal_distances.size()));
+                        assert(signatures[src_state + 1].state == src_state);
 
-                    signatures[src_state + 1].succ_signature.push_back(
-                        make_pair(label_group_counter, target_group));
+                        signatures[src_state + 1].succ_signature.push_back(
+                            make_pair(label_group_counter, target_group));
+                    }
                 }
             }
-
             ++label_group_counter;
         }
 
@@ -556,6 +570,10 @@ struct Signature {
                                 "Only consider tau transitions with 0-cost actions so that the reduction is optimallity preserving",
                                 "false");
 
+        parser.add_option<bool>("ignore_irrelevant_tau_groups",
+                                "During weak bisimulation, label groups that are tau and externally irrelevant are ignored",
+                                "false");
+
         Options opts = parser.parse();
 
         if (!parser.dry_run())
@@ -568,8 +586,8 @@ struct Signature {
 
     shared_ptr<ShrinkStrategy> ShrinkWeakBisimulation::create_default() {
         Options opts;
-        opts.set<bool> ("goal_shrinking", true);
         opts.set<bool> ("preserve_optimality", false);
+        opts.set<bool> ("ignore_irrelevant_tau_groups", false);
 
         return make_shared<ShrinkWeakBisimulation>(opts);
     }

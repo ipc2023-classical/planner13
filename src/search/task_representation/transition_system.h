@@ -136,7 +136,7 @@ private:
 
     //List of label groups that have a selfloop transition in every state
     mutable std::vector<bool> selfloop_everywhere_label_groups;
-  
+
     /*
       Check if two or more labels are locally equivalent to each other, and
       if so, update the label equivalence relation.
@@ -232,7 +232,7 @@ public:
     void statistics() const;
 
     bool is_unit_cost() const;
-    
+
     int get_size() const {
         return num_states;
     }
@@ -258,11 +258,13 @@ public:
     bool is_goal_relevant() const {
         return get_goal_states().size() < (size_t)num_states;
     }
-    
+
     const std::vector<int> & get_label_precondition(LabelID label) const;
 
     bool is_relevant_label (LabelID label) const;
 
+
+    int num_label_groups () const;
     bool is_relevant_label_group (LabelGroupID group_id) const;
 
     const std::vector<LabelGroupID> & get_relevant_label_groups() const;
@@ -272,7 +274,7 @@ public:
     }
 
     const LabelGroup &get_label_group(LabelGroupID group_id) const;
-    
+
     bool is_selfloop_everywhere(LabelID label) const;
 
     const std::vector<Transition> &get_transitions_with_label(int label_id) const ;
