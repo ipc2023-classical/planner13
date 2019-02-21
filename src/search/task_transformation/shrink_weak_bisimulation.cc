@@ -164,9 +164,11 @@ struct Signature {
                     tau_graph[transition.target].push_back(transition.src);
                 }
             }
+
+            label_group_index ++;
+
         }
         sort_unique(tau_graph);
-        label_group_index ++;
 
 
         //Step 2: Compute SCCs in tau graph
