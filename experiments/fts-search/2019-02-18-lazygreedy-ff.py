@@ -10,7 +10,7 @@ from lab.reports import Attribute, geometric_mean
 
 from downward.reports.compare import ComparativeReport
 
-from common_setup import IssueConfig, IssueExperiment, DEFAULT_SATISFICING_SUITE, is_test_run, get_experiment_name
+from common_setup import IssueConfig, IssueExperiment, DEFAULT_SATISFICING_SUITE, is_test_run, get_experiment_name, QualityFilters
 
 REVISION = 'fcf42e988494'
 
@@ -111,6 +111,7 @@ def main(revisions=None):
     exp.add_step('start', exp.start_runs)
     exp.add_fetcher(name='fetch')
 
+    quality_filters = QualityFilters()
     exp.add_absolute_report_step(attributes=attributes, filter_algorithm=[
         '{}-lazy-ff-atomic'.format(REVISION),
         '{}-lazy-ff-transform-atomic-labelreduction'.format(REVISION),
@@ -121,7 +122,7 @@ def main(revisions=None):
         '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm100-t900'.format(REVISION),
         '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm1000-t900'.format(REVISION),
         '{}-lazy-ff-transform-full-bisimown-labelreduction-miasm10000-t900'.format(REVISION),
-    ])
+    ],filter=[quality_filters.store_costs, quality_filters.add_quality])
 
     BASELINE_REV = 'fts-search-base-v2'
     exp.add_fetcher('data/2019-02-18-lazygreedy-baseline-eval', filter_algorithm=[
