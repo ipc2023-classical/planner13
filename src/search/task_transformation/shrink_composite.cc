@@ -120,16 +120,16 @@ static shared_ptr<ShrinkStrategy> _parse(OptionParser &parser) {
         return make_shared<ShrinkComposite> (strategies);
     }
 
-    static shared_ptr<ShrinkStrategy> _parse_weak(OptionParser &/*parser*/) {
-        Options opts;
+    // static shared_ptr<ShrinkStrategy> _parse_weak(OptionParser &/*parser*/) {
+    //     Options opts;
 
-        vector<shared_ptr<ShrinkStrategy>> strategies;
-        strategies.push_back(ShrinkOwnLabels::create_default());
-        strategies.push_back(ShrinkWeakBisimulation::create_default());
+    //     vector<shared_ptr<ShrinkStrategy>> strategies;
+    //     strategies.push_back(ShrinkOwnLabels::create_default());
+    //     strategies.push_back(ShrinkWeakBisimulation::create_default());
 
 
-        return make_shared<ShrinkComposite> (strategies);
-    }
+    //     return make_shared<ShrinkComposite> (strategies);
+    // }
 
     void ShrinkComposite::dump_strategy_specific_options() const {
         for(auto st: strategies) {
@@ -143,7 +143,7 @@ static PluginShared<ShrinkStrategy> _plugin("shrink_composite", _parse);
 static PluginShared<ShrinkStrategy> _plugin_perfect("shrink_own_bisimulation", _parse_perfect);
 
 
-//Creates a default composite of shrink own labels and shrink bisimulation
-static PluginShared<ShrinkStrategy> _plugin_weak("shrink_weak_bisimulation", _parse_weak);
+// //Creates a default composite of shrink own labels and shrink bisimulation
+// static PluginShared<ShrinkStrategy> _plugin_weak("shrink_weak_bisimulation", _parse_weak);
 
 }

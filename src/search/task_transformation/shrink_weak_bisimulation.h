@@ -20,12 +20,12 @@ namespace task_transformation {
         const bool preserve_optimality;
 
         int initialize_groups(
-            const task_representation::TransitionSystem &ts,
             const std::vector<int> & goal_distances,
             std::vector<int> &state_to_group) const;
 
     void compute_signatures(
         const task_representation::TransitionSystem &ts,
+        const std::vector<int> & mapping_to_scc,
         const std::vector<int> & goal_distances,
         std::vector<Signature> &signatures,
         const std::vector<int> &state_to_group,

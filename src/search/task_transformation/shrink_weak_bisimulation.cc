@@ -1,4 +1,4 @@
-#include "shrink_weak_bisimulation.h"
+	#include "shrink_weak_bisimulation.h"
 
 #include "distances.h"
 #include "factored_transition_system.h"
@@ -51,26 +51,20 @@ const int IRRELEVANT = SENTINEL - 1;
 */
 
 struct Signature {
-    int h_and_goal; // -1 for goal states; h value for non-goal states
+    int h; // h value (tau transitions cost 0, other transitions cost 1)
     int group;
     SuccessorSignature succ_signature;
     int state;
 
-    Signature(int h, bool is_goal, int group_,
+    Signature(int h_, int group_,
               const SuccessorSignature &succ_signature_,
               int state_)
-        : group(group_), succ_signature(succ_signature_), state(state_) {
-        if (is_goal) {
-            assert(h == 0);
-            h_and_goal = -1;
-        } else {
-            h_and_goal = h;
-        }
+        : h(h_), group(group_), succ_signature(succ_signature_), state(state_) {
     }
 
     bool operator<(const Signature &other) const {
-        if (h_and_goal != other.h_and_goal)
-            return h_and_goal < other.h_and_goal;
+        if (h != other.h)
+            return h < other.h;
         if (group != other.group)
             return group < other.group;
         if (succ_signature != other.succ_signature)
@@ -79,7 +73,7 @@ struct Signature {
     }
 
     void dump() const {
-        cout << "Signature(h_and_goal = " << h_and_goal
+        cout << "Signature(h = " << h
              << ", group = " << group
              << ", state = " << state
              << ", succ_sig = [";
@@ -126,17 +120,25 @@ struct Signature {
         can_reach_via_tau_path[i].erase(it, can_reach_via_tau_path[i].end());
     }
 
+            /* remove duplicates in adjacency matrix */
+
+    static void sort_unique (vector<vector<int>> & vs) {
+        for (auto & v : vs) {
+            ::sort(v.begin(), v.end());
+            v.erase(unique(v.begin(), v.end()), v.end());
+        }
+    }
+
     StateEquivalenceRelation
     ShrinkWeakBisimulation::compute_equivalence_relation(const FactoredTransitionSystem &fts,
                                                          int index, int /*target*/) const {
         const TransitionSystem &ts = fts.get_ts(index);
         int num_states = ts.get_size();
 
-        vector<vector<int>> non_tau_graph(num_states);
+        // Step 1: Compute tau graph
         vector<vector<int>> tau_graph(num_states);
         for (const GroupAndTransitions &gat : ts) {
             const vector<Transition> &transitions = gat.transitions;
-
 
             bool is_tau = std::any_of(gat.label_group.begin(), gat.label_group.end(),
                                       [&](int label) {
@@ -150,35 +152,59 @@ struct Signature {
                 for (const Transition &transition : transitions) {
                     tau_graph[transition.target].push_back(transition.src);
                 }
-            } else {
-                for (const Transition &transition : transitions) {
-                    non_tau_graph[transition.target].push_back(transition.src);
-                }
-            }
-
-
-            /* remove duplicates in adjacency matrix */
-            for (int i = 0; i < num_states; i++) {
-                ::sort(tau_graph[i].begin(), tau_graph[i].end());
-                auto it = unique(tau_graph[i].begin(), tau_graph[i].end());
-                tau_graph[i].erase(it, tau_graph[i].end());
-
-
-                ::sort(non_tau_graph[i].begin(), non_tau_graph[i].end());
-                it = unique(non_tau_graph[i].begin(), non_tau_graph[i].end());
-                non_tau_graph[i].erase(it, non_tau_graph[i].end());
             }
         }
+        sort_unique(tau_graph);
 
+
+        //Step 2: Compute SCCs in tau graph
+        StateEquivalenceRelation final_sccs;
+        sccs::SCC<int>::compute_scc_equivalence (tau_graph, final_sccs);
+        int num_sccs = final_sccs.size();
+        vector<int> mapping_to_scc = compute_abstraction_mapping (num_states, final_sccs);
+
+        //Step 3: Compute goal distances (on the SCC graph)
+        vector<vector<int>> tau_scc_graph(num_sccs);
+        std::vector<bool> is_scc_goal (num_sccs, false);
+        for (int s = 0; s < num_states; ++s) {
+            for (int t : tau_graph[s]) {
+                tau_scc_graph[mapping_to_scc[s]].push_back(mapping_to_scc[t]);
+            }
+            if (ts.is_goal_state(s)) {
+                is_scc_goal[mapping_to_scc[s]] = true;
+            }
+        }
+        sort_unique(tau_scc_graph);
+
+        vector<vector<int>> non_tau_scc_graph(num_sccs);
+        for (const GroupAndTransitions &gat : ts) {
+            const vector<Transition> &transitions = gat.transitions;
+
+            bool is_tau = std::any_of(gat.label_group.begin(), gat.label_group.end(),
+                                      [&](int label) {
+                                          return fts.is_tau_label(index, LabelID(label)) &&
+                                          (!preserve_optimality ||
+                                           fts.get_labels().get_label_cost(label) == 0);
+                                      });
+
+            if(!is_tau) {
+                // cout << "Tau label group!" << endl;
+                for (const Transition &transition : transitions) {
+                    non_tau_scc_graph[mapping_to_scc[transition.target]].push_back(mapping_to_scc[transition.src]);
+                }
+            }
+        }
+        sort_unique(non_tau_scc_graph);
 
         // breadth_first_search to find goal distances
         int current_distance = 0;
-        vector<int> goal_distances(num_states, std::numeric_limits<int>::max());
+        vector<int> goal_distances(num_sccs, std::numeric_limits<int>::max());
         vector<int> current_queue, next_queue;
-        for (int state = 0; state < num_states; ++state) {
-            if (ts.is_goal_state(state)) {
-                goal_distances[state] = 0;
-                next_queue.push_back(state);
+        for (int state = 0; state < num_sccs; ++state) {
+            int scc = mapping_to_scc[state];
+            if (is_scc_goal[scc]) {
+                goal_distances[scc] = 0;
+                next_queue.push_back(scc);
             }
         }
         while (!next_queue.empty()) {
@@ -186,7 +212,7 @@ struct Signature {
             next_queue.clear();
             for(size_t i = 0; i < current_queue.size(); ++i) {
                 int state = current_queue[i];
-                for (int successor : tau_graph[state]) {
+                for (int successor : tau_scc_graph[state]) {
                     if (goal_distances[successor] > current_distance) {
                         goal_distances[successor] = current_distance;
                         current_queue.push_back(successor);
@@ -195,7 +221,7 @@ struct Signature {
             }
 
             for(int state : current_queue) {
-                for (int successor : non_tau_graph[state]) {
+                for (int successor : non_tau_scc_graph[state]) {
                     if (goal_distances[successor] > current_distance + 1) {
                         goal_distances[successor] = current_distance + 1;
                         next_queue.push_back(successor);
@@ -206,35 +232,36 @@ struct Signature {
             current_distance ++;
         }
 
-        vector<vector<int>> can_reach_via_tau_path(num_states);
-        for(int i = 0; i < num_states; ++i) {
-            dfs_reachability(tau_graph, i, can_reach_via_tau_path);
+        //Step 4: Compute can_reach_via_tau_path
+        vector<vector<int>> can_reach_via_tau_path(num_sccs);
+        for(int i = 0; i < num_sccs; ++i) {
+            dfs_reachability(tau_scc_graph, i, can_reach_via_tau_path);
         }
 
-        vector<int> state_to_group(num_states);
+        //Step 5: Initialize Weak Bisimulations with the goal distances
+        vector<int> scc_to_group(num_sccs);
         vector<Signature> signatures;
-        signatures.reserve(num_states + 2);
+        signatures.reserve(num_sccs + 2);
 
-        int num_groups = initialize_groups(ts, goal_distances, state_to_group);
+        int num_groups = initialize_groups(goal_distances, scc_to_group);
 
+        //Step 6: Compute weak bisimulation
         bool stable = false;
         while (!stable) {
             stable = true;
 
             signatures.clear();
-            compute_signatures(ts, goal_distances, signatures,
-                               state_to_group,
-                               can_reach_via_tau_path);
+            compute_signatures(ts, mapping_to_scc, goal_distances, signatures, scc_to_group, can_reach_via_tau_path);
 
             // Verify size of signatures and presence of sentinels.
-            assert(static_cast<int>(signatures.size()) == num_states + 2);
-            assert(signatures[0].h_and_goal == -2);
-            assert(signatures[num_states + 1].h_and_goal == SENTINEL);
+            assert(static_cast<int>(signatures.size()) == num_sccs + 2);
+            assert(signatures[0].h == -2);
+            assert(signatures[num_sccs + 1].h == SENTINEL);
 
             int sig_start = 1; // Skip over initial sentinel.
             while (true) {
-                int h_and_goal = signatures[sig_start].h_and_goal;
-                if (h_and_goal == SENTINEL) {
+                int h = signatures[sig_start].h;
+                if (h == SENTINEL) {
                     // We have hit the end sentinel.
                     assert(sig_start + 1 == static_cast<int>(signatures.size()));
                     break;
@@ -245,7 +272,7 @@ struct Signature {
                 int num_new_groups = 0;
                 int sig_end;
                 for (sig_end = sig_start; true; ++sig_end) {
-                    if (signatures[sig_end].h_and_goal != h_and_goal) {
+                    if (signatures[sig_end].h != h) {
                         break;
                     }
 
@@ -283,23 +310,23 @@ struct Signature {
                         }
 
                         assert(new_group_no != -1);
-                        state_to_group[curr_sig.state] = new_group_no;
+                        scc_to_group[curr_sig.state] = new_group_no;
                     }
                 }
                 sig_start = sig_end;
             }
         }
 
-        /* Reduce memory pressure before generating the equivalence
-           relation since this is one of the code parts relevant to peak
-           memory. */
+        /* Reduce memory pressure before generating the equivalence relation since this is
+           one of the code parts relevant to peak memory. */
         utils::release_vector_memory(signatures);
 
-        // Generate final result.
+
+        // Step 7: Generate final result.
         StateEquivalenceRelation equivalence_relation;
         equivalence_relation.resize(num_groups);
         for (int state = 0; state < num_states; ++state) {
-            int group = state_to_group[state];
+            int group = scc_to_group[mapping_to_scc[state]];
             if (group != -1) {
                 assert(group >= 0 && group < num_groups);
                 equivalence_relation[group].push_front(state);
@@ -314,37 +341,34 @@ struct Signature {
 
 
     int ShrinkWeakBisimulation::initialize_groups(
-        const TransitionSystem &ts,
         const vector<int> &goal_distances,
         vector<int> &state_to_group) const {
 
         typedef unordered_map<int, int> GroupMap;
         GroupMap h_to_group;
-        int num_groups = 1; // Group 0 is for goal states.
-        for (int state = 0; state < ts.get_size(); ++state) {
+        int num_groups = 0;
+        vector<int> irrelevant_states;
+        for (size_t state = 0; state < goal_distances.size(); ++state) {
             int h = goal_distances[state];
             if (h == INF) {
-                h = IRRELEVANT;
-            }
-            if (ts.is_goal_state(state)) {
-                assert(h == 0);
-                state_to_group[state] = 0;
+                irrelevant_states.push_back(state);
             } else {
-                pair<GroupMap::iterator, bool> result = h_to_group.insert(
-                    make_pair(h, num_groups));
-                state_to_group[state] = result.first->second;
-                if (result.second) {
-                    // We inserted a new element => a new group was started.
-                    ++num_groups;
-                }
+                state_to_group[state] = h;
+                num_groups = max(num_groups, h);
             }
         }
-        return num_groups;
+        if (irrelevant_states.size()) {
+            num_groups ++;
+            for (int s : irrelevant_states) {
+                state_to_group[s] = num_groups;
+            }
+        }
+        return num_groups + 1;
     }
-
 
     void ShrinkWeakBisimulation::compute_signatures(
         const TransitionSystem &ts,
+        const vector<int> & mapping_to_scc,
         const vector<int> &goal_distances,
         vector<Signature> &signatures,
         const vector<int> &state_to_group,
@@ -352,30 +376,32 @@ struct Signature {
         assert(signatures.empty());
 
         // Step 1: Compute bare state signatures (without transition information).
-        signatures.push_back(Signature(-2, false, -1, SuccessorSignature(), -1));
-        for (int state = 0; state < ts.get_size(); ++state) {
+        signatures.push_back(Signature(-2, -1, SuccessorSignature(), -1));
+        for (size_t state = 0; state < goal_distances.size(); ++state) {
             int h = goal_distances[state];
             if (h == INF) {
                 h = IRRELEVANT;
             }
-            Signature signature(h, ts.is_goal_state(state),
-                                state_to_group[state], SuccessorSignature(),
-                                state);
-            signatures.push_back(signature);
+            signatures.push_back(Signature (h, state_to_group[state], SuccessorSignature(), state));
         }
-        signatures.push_back(Signature(SENTINEL, false, -1, SuccessorSignature(), -1));
+        signatures.push_back(Signature(SENTINEL, -1, SuccessorSignature(), -1));
 
         // Step 2: Add transition information.
         int label_group_counter = 0;
         for (const GroupAndTransitions &gat : ts) {
             const vector<Transition> &transitions = gat.transitions;
             for (const Transition &transition : transitions) {
-                assert(signatures[transition.src + 1].state == transition.src);
+                int transition_src = mapping_to_scc[transition.src];
+                int transition_target = mapping_to_scc[transition.target];
 
-                int target_group = state_to_group[transition.target];
+                assert(signatures[transition_src + 1].state == transition_src);
+
+                int target_group = state_to_group[transition_target];
                 assert(target_group != -1 && target_group != SENTINEL);
 
-                for (int src_state : can_reach_via_tau_path[transition.src]) {
+                for (int src_state : can_reach_via_tau_path[transition_src]) {
+                    assert (src_state >= 0);
+                    assert (src_state < (int)(goal_distances.size()));
                     assert(signatures[src_state + 1].state == src_state);
 
                     signatures[src_state + 1].succ_signature.push_back(
@@ -409,43 +435,42 @@ struct Signature {
     bool ShrinkWeakBisimulation::apply_shrinking_transformation(FactoredTransitionSystem & fts,
                                                                 Verbosity verbosity,
                                                                 int &  check_only_index) const  {
-        int old_index = 0;
-        int new_index = 0;
-        vector<int> initial_state_values;
+      int old_index = 0;
+      int new_index = 0;
+      vector<int> initial_state_values;
 
-        std::set<int> exclude_transition_systems;
-        // All equivalences must be applied after computing the equivalences for other FTSs
-        vector<StateEquivalenceRelation> equivalences (fts.get_size());
-        vector<int> equivalences_to_apply;
-        vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction;
+      std::set<int> exclude_transition_systems;
+      // All equivalences must be applied after computing the equivalences for other FTSs
+      vector<StateEquivalenceRelation> equivalences (fts.get_size());
+      vector<int> equivalences_to_apply;
+      vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction;
 
-
+      cout << "INPUT: " << fts.get_size() << endl;
       for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
                 initial_state_values.push_back(fts.get_ts(index).get_init_state());
 
                 if (check_only_index == -1 || index == check_only_index) {
-                    equivalences[old_index] = compute_equivalence_relation(fts, index, 0);
+                    equivalences[new_index] = compute_equivalence_relation(fts, index, 0);
 
                     size_t old_size = fts.get_ts(index).get_size();
 
+                    cout << "Shrinking from " << old_size << " to " << equivalences[new_index].size() << endl;
 
-                    // cout << "Shrinking: " << old_size << " to " << equivalences[old_index].size() << endl;
-
-                    if (equivalences[old_index].size() < old_size) {
+                    if (equivalences[new_index].size() < old_size) {
 
                         unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
 
                         int succ_index = -1;
-                        if (equivalences[old_index].size() > 1) {
-                            equivalences_to_apply.push_back(old_index);
+                        if (equivalences[new_index].size() > 1) {
+                            equivalences_to_apply.push_back(new_index);
                             succ_index = new_index++;
                         } else{
-                            assert (equivalences[old_index].size() == 1);
+                            assert (equivalences[new_index].size() == 1);
                             exclude_transition_systems.insert(index);
                         }
 
-                        vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[old_index]);
+                        vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[new_index]);
 
                         unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
 
@@ -462,41 +487,44 @@ struct Signature {
             }
       }
 
-        bool changes = !(exclude_transition_systems.empty());
-        if (!equivalences_to_apply.empty() || !exclude_transition_systems.empty() ){
-            cout << "WeakBisimulation applicable in " <<
-                (equivalences_to_apply.size() + exclude_transition_systems.size())
-                 << " out of " << old_index << " systems" << endl;
+      bool changes = !(exclude_transition_systems.empty());
+      if (!equivalences_to_apply.empty() || !exclude_transition_systems.empty() ){
+          cout << "WeakBisimulation applicable in " <<
+              (equivalences_to_apply.size() + exclude_transition_systems.size())
+               << " out of " << old_index << " systems" << endl;
 
 
-            // 1) Extract the plan reconstruction M&S and insert it in the list of plan
-            // reconstruction steps
-           FTSMapping fts_m = fts.cleanup(exclude_transition_systems);
-           for (auto & sh : tau_shrinking_reconstruction) {
-               sh->apply_label_mapping(fts_m.label_mapping);
-           }
-            assert(fts.get_size() == new_index);
+          // 1) Extract the plan reconstruction M&S and insert it in the list of plan
+          // reconstruction steps
+          FTSMapping fts_m = fts.cleanup(exclude_transition_systems);
+          for (auto & sh : tau_shrinking_reconstruction) {
+              sh->apply_label_mapping(fts_m.label_mapping);
+          }
+          assert(fts.get_size() == new_index);
 
 
-            if (check_only_index >= 0) {
-                check_only_index = fts_m.transition_system_all_mapping[check_only_index];
-            }
+          if (check_only_index >= 0) {
+              check_only_index = fts_m.transition_system_all_mapping[check_only_index];
+          }
 
-            // 2) Add tau plan reconstruction step
-            fts.add_plan_reconstruction(
-                make_shared<PlanReconstructionTauPath>(fts_m, PlanState(move(initial_state_values)),
-                                                       move(tau_shrinking_reconstruction)));
+          // 2) Add tau plan reconstruction step
+          fts.add_plan_reconstruction(
+              make_shared<PlanReconstructionTauPath>(fts_m, PlanState(move(initial_state_values)),
+                                                     move(tau_shrinking_reconstruction)));
 
-            // 3) Apply abstractions:
-            for (int index : equivalences_to_apply) {
-                cout << "Applying changes to " << index << endl;
-                changes |= fts.apply_abstraction(index, equivalences[index], verbosity, true);
-            }
 
-            // 4) Re-initialize fts with new merge_and_shrink and label mappings
-            fts.reinitialize_predecessor_task();
+          // 3) Apply abstractions:
+          for (int index : equivalences_to_apply) {
+              cout << "Applying changes to " << index << " out of " << fts.get_size() << endl;
 
-           cout << "There are " << fts.get_size() << " systems after applying weak bisimulation label shrinking"  <<endl;
+              changes |= fts.apply_abstraction(index, equivalences[index], verbosity, true);
+          }
+
+          // 4) Re-initialize fts with new merge_and_shrink and label mappings
+          fts.reinitialize_predecessor_task();
+
+
+          cout << "There are " << fts.get_size() << " systems after applying weak bisimulation label shrinking"  <<endl;
 
         }
         return changes;
@@ -535,7 +563,7 @@ struct Signature {
             return nullptr;
     }
 
-    static PluginShared<ShrinkStrategy> _plugin("weak_bisimulation", _parse);
+    static PluginShared<ShrinkStrategy> _plugin("shrink_weak_bisimulation", _parse);
 
     shared_ptr<ShrinkStrategy> ShrinkWeakBisimulation::create_default() {
         Options opts;

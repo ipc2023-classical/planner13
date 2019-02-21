@@ -52,8 +52,8 @@ std::vector<std::vector<int>> compute_maximal_sccs(
 class EquivalenceRelation;
 
 
-template<class T> 
-static int get_successor (const T & successor) { 
+template<class T>
+static int get_successor (const T & successor) {
     return successor.get_successor();
 }
 
@@ -62,11 +62,10 @@ static int get_successor (const T & successor) {
 }
 
 
-//TODO: It could be convinient to use template functions here to allow
-//returning the SCC result in different ways (vector<vector<int> >,
-//EquivalenceRelation, or even vector <int> state_to_group. However,
-//it is not so easy to do so since we need to change the whole
-//insertion of sccs into the result
+//TODO: It could be convinient to use template functions here to allow returning the SCC
+//result in different ways (vector<vector<int> >, EquivalenceRelation, or even vector
+//<int> state_to_group. However, it is not so easy to do so since we need to change the
+//whole insertion of sccs into the result
 template<class Q>
 class SCC {
     template <class T> static void insert_in (std::vector<T> & container, T item) {
@@ -79,13 +78,13 @@ class SCC {
 
 
     template <class T>
-	static void dfs_equivalence(const std::vector<std::vector<Q> > &graph, 
+	static void dfs_equivalence(const std::vector<std::vector<Q> > &graph,
 				    int vertex, int & current_dfs_number,
 				    std::vector<int> & stack,
 				    std::vector<int> & stack_indices,
 				    std::vector<int> & dfs_numbers,
 				    std::vector<int> & dfs_minima,
-				    std::vector<T > & final_sccs, 
+				    std::vector<T > & final_sccs,
 				    std::vector<bool> * is_goal){
 	int vertex_dfs_number = current_dfs_number++;
 	dfs_numbers[vertex] = dfs_minima[vertex] = vertex_dfs_number;
@@ -110,7 +109,7 @@ class SCC {
 
 	if (dfs_minima[vertex] == vertex_dfs_number) {
 	    int stack_index = stack_indices[vertex];
-	    
+
 	    final_sccs.push_back(T());
 	    T & scc = final_sccs.back();
 	    for (size_t i = stack_index; i < stack.size(); i++) {
@@ -122,12 +121,12 @@ class SCC {
     }
 
 
-    // Input graph. TODO: Change type? 
+    // Input graph. TODO: Change type?
     // Should we have a LabelledTransitionClass for those cases?
-    // TODO: Using a const reference is not completely safe. 
-    // A shared_ptr could be more appropiate. 
+    // TODO: Using a const reference is not completely safe.
+    // A shared_ptr could be more appropiate.
     const std::vector<std::vector<Q> > &graph;
-    
+
     // Output relative at the SCCs and their connection
     std::vector<std::vector<int> > sccs;
 
@@ -141,14 +140,14 @@ class SCC {
 
     //Auxiliar functions to compute additional output on demand
     void compute_scc_graph();
-    
+
 
 public:
     //Allows to access scc equivalence computation without creating a new class
     //TODO: is_goal is an optional parameter (use std::optional?)
     template <class T>
-        static void compute_scc_equivalence(const std::vector<std::vector<Q> > &graph, 
-					    std::vector<T> & result, 
+        static void compute_scc_equivalence(const std::vector<std::vector<Q> > &graph,
+					    std::vector<T> & result,
 					    std::vector<bool> *is_goal = NULL){
     int node_count = graph.size();
 
@@ -160,10 +159,12 @@ public:
     stack.reserve(node_count);
     int current_dfs_number = 0;
 
-    for (int i = 0; i < node_count; i++)
-	if (dfs_numbers[i] == -1)
-	    dfs_equivalence(graph, i, current_dfs_number, stack, stack_indices, 
+    for (int i = 0; i < node_count; i++) {
+	if (dfs_numbers[i] == -1) {
+	    dfs_equivalence(graph, i, current_dfs_number, stack, stack_indices,
 			    dfs_numbers, dfs_minima, result, is_goal);
+        }
+    }
 
     std::reverse(result.begin(), result.end());
     }
