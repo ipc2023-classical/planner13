@@ -162,6 +162,7 @@ struct Signature {
         sccs::SCC<int>::compute_scc_equivalence (tau_graph, final_sccs);
         int num_sccs = final_sccs.size();
         vector<int> mapping_to_scc = compute_abstraction_mapping (num_states, final_sccs);
+        assert (count(mapping_to_scc.begin(), mapping_to_scc.end(), -1) == 0);
 
         //Step 3: Compute goal distances (on the SCC graph)
         vector<vector<int>> tau_scc_graph(num_sccs);
@@ -456,10 +457,11 @@ struct Signature {
                     size_t old_size = fts.get_ts(index).get_size();
 
                     cout << "Shrinking from " << old_size << " to " << equivalences[new_index].size() << endl;
-
                     if (equivalences[new_index].size() < old_size) {
+                        vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[new_index]);
 
-                        unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
+                        assert (count(abstraction_mapping.begin(), abstraction_mapping.end(), -1) == 0);
+
 
                         int succ_index = -1;
                         if (equivalences[new_index].size() > 1) {
@@ -470,10 +472,10 @@ struct Signature {
                             exclude_transition_systems.insert(index);
                         }
 
-                        vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[new_index]);
 
                         unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
 
+                        unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
                         tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
                                                                                                      move(abstraction_mapping),
                                                                                                      unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
@@ -492,7 +494,6 @@ struct Signature {
           cout << "WeakBisimulation applicable in " <<
               (equivalences_to_apply.size() + exclude_transition_systems.size())
                << " out of " << old_index << " systems" << endl;
-
 
           // 1) Extract the plan reconstruction M&S and insert it in the list of plan
           // reconstruction steps

@@ -26,7 +26,7 @@ namespace task_transformation {
         const TransitionSystem & ts = fts.get_ts(index);
         int num_states = ts.get_size();
        // cout<< "Constructing Tau Graph for: "; ts.dump_labels_and_transitions(); cout <<endl;
- 
+
         std::vector<std::map<int, TauTransition>> adjacency_map(num_states);
 
         const Labels & labels_info = fts.get_labels();
@@ -45,9 +45,9 @@ namespace task_transformation {
                     }
                 }
             }
-                    
+
             if(is_own) {
-                
+
                 for (const auto & trans : gt.transitions) {
 
                     auto pos = adjacency_map[trans.src].find(trans.target);
@@ -83,7 +83,7 @@ namespace task_transformation {
             }
         }
     }
-    StateEquivalenceRelation TauGraph::compute_own_label_shrinking(){        
+    StateEquivalenceRelation TauGraph::compute_own_label_shrinking(){
         /* perform Tarjan's algorithm for finding SCCs */
         StateEquivalenceRelation final_sccs;
         sccs::SCC<TauTransition>::compute_scc_equivalence (adjacency_matrix, final_sccs, &is_goal);
@@ -129,10 +129,6 @@ namespace task_transformation {
         }
         return final_sccs;
     }
-    
-
-
-
 
 
     // Auxiliar method that finds the shortest path from source to a target state. It
@@ -145,7 +141,7 @@ namespace task_transformation {
         std::vector<std::pair<LabelID, int>> result_path;
 
         int num_states = adjacency_matrix.size();
-        
+
         vector<int> distances (num_states, std::numeric_limits<int>::max());
         distances[source] = 0;
         vector<pair<int, LabelID>> best_supporter(num_states, pair<int, LabelID> (-1, LabelID(-1)));
@@ -161,7 +157,7 @@ namespace task_transformation {
                 while(best_supporter[state].first != -1) {
                     result_path.push_back(pair<LabelID, int>
                                           (best_supporter[state].second, state));
-                    state = best_supporter[state].first;                    
+                    state = best_supporter[state].first;
                 }
                 assert(state == source);
                 std::reverse(result_path.begin(),result_path.end());
@@ -184,8 +180,6 @@ namespace task_transformation {
         cerr << "Error: path in tau graph not found" << endl;
         utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
         return result_path;
-        
+
     }
 }
-
-

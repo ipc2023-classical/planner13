@@ -259,12 +259,7 @@ bool MergeAndShrinkAlgorithm::prune_fts(
        }
    }
 
-    fts.remove_irrelevant_transition_systems(verbosity);
-    for (int index = 0; index < fts.get_size(); ++index) {
-          if (fts.is_active(index)) {
-              assert (fts.get_ts(index).get_size() > 1);
-          }
-      }
+   fts.remove_irrelevant_transition_systems(verbosity);
 
    if (verbosity >= Verbosity::NORMAL && pruned) {
        print_time(timer, "after pruning atomic factors");
