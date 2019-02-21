@@ -12,7 +12,7 @@ from downward.reports.compare import ComparativeReport
 
 from common_setup import IssueConfig, IssueExperiment, DEFAULT_OPTIMAL_SUITE, is_test_run, get_experiment_name
 
-REVISION = 'd6c19704bcf0'
+REVISION = 'fd337bdf10e0'
 
 def main(revisions=None):
     benchmarks_dir=os.path.expanduser('~/repos/downward/benchmarks')
@@ -24,6 +24,9 @@ def main(revisions=None):
         environment = LocalEnvironment(processes=4)
 
     configs = {
+        IssueConfig('astar-blind-transform-atomic-weakbisim-labelreduction', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_weak_bisimulation(preserve_optimality=false,ignore_irrelevant_tau_groups=false),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false)", "--search", "astar(blind)"]),
+        IssueConfig('astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_weak_bisimulation(preserve_optimality=false,ignore_irrelevant_tau_groups=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(blind)"]),
+
         IssueConfig('astar-blind-transform-atomic-weakbisim-iggirr-labelreduction', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_weak_bisimulation(preserve_optimality=false,ignore_irrelevant_tau_groups=true),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false)", "--search", "astar(blind)"]),
         IssueConfig('astar-blind-transform-full-weakbisim-iggirr-labelreduction-dfp1000-t900', ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_weak_bisimulation(preserve_optimality=false,ignore_irrelevant_tau_groups=true),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),goal_relevance,dfp,total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)", "--search", "astar(blind)"]),
     }
@@ -82,11 +85,33 @@ def main(revisions=None):
     exp.add_fetcher(name='fetch')
 
     exp.add_absolute_report_step(attributes=attributes, filter_algorithm=[
+        '{}-astar-blind-transform-atomic-weakbisim-labelreduction'.format(REVISION),
         '{}-astar-blind-transform-atomic-weakbisim-iggirr-labelreduction'.format(REVISION),
+        '{}-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION),
         '{}-astar-blind-transform-full-weakbisim-iggirr-labelreduction-dfp1000-t900'.format(REVISION),
     ])
 
-    exp.add_fetcher('data/2019-02-21-astar-blind-weakbisim-eval', filter_algorithm=[
+    OTHER_REV = 'fcf42e988494'
+    exp.add_fetcher('data/2019-02-18-astar-blind-ownbisim-eval', filter_algorithm=[
+        '{}-astar-blind-transform-atomic-ownbisim-labelreduction'.format(OTHER_REV),
+        '{}-astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900'.format(OTHER_REV),
+    ],merge=True)
+
+    outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-ownbisim-vs-weakbisim.html')
+    exp.add_report(
+        ComparativeReport(
+            algorithm_pairs=[
+                ('{}-astar-blind-transform-atomic-ownbisim-labelreduction'.format(OTHER_REV), '{}-astar-blind-transform-atomic-weakbisim-labelreduction'.format(REVISION)),
+                ('{}-astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900'.format(OTHER_REV), '{}-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION)),
+            ],
+            format='html',
+            attributes=attributes,
+        ),
+        outfile=outfile,
+    )
+    exp.add_step('publish-{}'.format(outfile), subprocess.call, ['publish', outfile])
+
+    exp.add_fetcher('data/2019-02-22-astar-blind-weakbisim-eval', filter_algorithm=[
         '{}-astar-blind-transform-atomic-weakbisim-labelreduction'.format(REVISION),
         '{}-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION),
     ],merge=True)
