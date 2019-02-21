@@ -91,7 +91,7 @@ def main(revisions=None):
         '{}-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION),
     ],merge=True)
 
-    outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-ownbisim-vs-weakbisim.html')
+    outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-compare-vs-igirr.html')
     exp.add_report(
         ComparativeReport(
             algorithm_pairs=[
