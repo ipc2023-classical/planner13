@@ -213,8 +213,7 @@ struct Signature {
         int current_distance = 0;
         vector<int> goal_distances(num_sccs, std::numeric_limits<int>::max());
         vector<int> current_queue, next_queue;
-        for (int state = 0; state < num_sccs; ++state) {
-            int scc = mapping_to_scc[state];
+        for (int scc = 0; scc < num_sccs; ++scc) {
             if (is_scc_goal[scc]) {
                 goal_distances[scc] = 0;
                 next_queue.push_back(scc);
@@ -450,6 +449,17 @@ struct Signature {
     bool ShrinkWeakBisimulation::apply_shrinking_transformation(FactoredTransitionSystem & fts,
                                                                 Verbosity verbosity,
                                                                 int &  check_only_index) const  {
+
+        if (verbosity == Verbosity::VERBOSE) {
+            cout << "Apply shrinking transformation over ";
+            if(check_only_index > 0) {
+                cout << check_only_index << "\n";
+            } else {
+                cout << "all\n";
+            }
+        }
+        assert (check_only_index < 0 || fts.is_active(check_only_index));
+
       int old_index = 0;
       int new_index = 0;
       vector<int> initial_state_values;
@@ -460,20 +470,22 @@ struct Signature {
       vector<int> equivalences_to_apply;
       vector<unique_ptr<TauShrinking>> tau_shrinking_reconstruction;
 
-      cout << "INPUT: " << fts.get_size() << endl;
       for (int index = 0; index < fts.get_size(); ++index) {
             if (fts.is_active(index)) {
                 initial_state_values.push_back(fts.get_ts(index).get_init_state());
 
                 if (check_only_index == -1 || index == check_only_index) {
                     equivalences[new_index] = compute_equivalence_relation(fts, index, 0);
+                    assert(equivalences[new_index].size() > 0);
 
                     size_t old_size = fts.get_ts(index).get_size();
 
-                    cout << "Shrinking from " << old_size << " to " << equivalences[new_index].size() << endl;
+                    if (verbosity == Verbosity::VERBOSE) {
+                        cout << "Weak bisimulation shrinking from " << old_size << " to " << equivalences[new_index].size() << endl;
+                    }
+
                     if (equivalences[new_index].size() < old_size) {
                         vector<int> abstraction_mapping = compute_abstraction_mapping(old_size, equivalences[new_index]);
-
                         assert (count(abstraction_mapping.begin(), abstraction_mapping.end(), -1) == 0);
 
 
@@ -483,9 +495,11 @@ struct Signature {
                             succ_index = new_index++;
                         } else{
                             assert (equivalences[new_index].size() == 1);
+                            if (verbosity == Verbosity::VERBOSE) {
+                                cout << "Transition system " << index << " removed by weak bisimulation" << endl;
+                            }
                             exclude_transition_systems.insert(index);
                         }
-
 
                         unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
 
@@ -531,7 +545,8 @@ struct Signature {
           // 3) Apply abstractions:
           for (int index : equivalences_to_apply) {
               cout << "Applying changes to " << index << " out of " << fts.get_size() << endl;
-
+              assert (check_only_index < 0 || check_only_index == index);
+              assert (equivalences[index].size() > 0);
               changes |= fts.apply_abstraction(index, equivalences[index], verbosity, true);
           }
 
