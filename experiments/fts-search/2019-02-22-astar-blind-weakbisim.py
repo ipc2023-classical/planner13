@@ -12,7 +12,7 @@ from downward.reports.compare import ComparativeReport
 
 from common_setup import IssueConfig, IssueExperiment, DEFAULT_OPTIMAL_SUITE, is_test_run, get_experiment_name
 
-REVISION = '2f7d2176ba09'
+REVISION = '2962f2c32cf0'
 
 def main(revisions=None):
     benchmarks_dir=os.path.expanduser('~/repos/downward/benchmarks')
