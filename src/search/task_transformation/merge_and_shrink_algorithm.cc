@@ -205,16 +205,69 @@ bool MergeAndShrinkAlgorithm::exclude_if_too_many_transitions() const {
     return num_transitions_to_exclude != INF;
 }
 
-bool MergeAndShrinkAlgorithm::prune_fts(
-   FactoredTransitionSystem &fts, const utils::Timer &timer) const {
+
+bool MergeAndShrinkAlgorithm::check_dead_labels(FactoredTransitionSystem &fts,
+                                                const vector<int> & ts_to_check_initially) const {
+    set<LabelID> dead_labels;
+
+    for (int index : ts_to_check_initially) {
+        if (fts.is_active(index)) {
+            fts.get_ts(index).check_dead_labels(dead_labels);
+        }
+    }
+
+    return remove_dead_labels(fts, dead_labels);
+}
+
+
+bool MergeAndShrinkAlgorithm::check_dead_labels(FactoredTransitionSystem &fts,
+                                                int index) const {
+    set<LabelID> dead_labels;
+
+    assert (fts.is_active(index));
+    fts.get_ts(index).check_dead_labels(dead_labels);
+
+    return remove_dead_labels(fts, dead_labels);
+}
+
+
+bool MergeAndShrinkAlgorithm::remove_dead_labels(FactoredTransitionSystem &fts,
+                                                set<LabelID> & dead_labels) const {
+
+    while(!dead_labels.empty()) {
+        cout << "Eliminating " << dead_labels.size() << " dead labels.\n";
+        vector<int> ts_to_check = fts.remove_labels(vector<LabelID>(dead_labels.begin(), dead_labels.end()));
+
+        dead_labels.clear();
+        for (int index : ts_to_check) {
+            if (prune_unreachable_states || prune_irrelevant_states) {
+                bool pruned_factor = prune_step(fts, index,
+                                                prune_unreachable_states,
+                                                prune_irrelevant_states,
+                                                verbosity);
+
+                if (pruned_factor) {
+                    fts.get_ts(index).check_dead_labels(dead_labels);
+                }
+            }
+            if (!fts.is_factor_solvable(index)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool MergeAndShrinkAlgorithm::prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const {
    /*
-     Prune all factors according to the chosen options. Stop early if one
-     factor is unsolvable. Return true iff unsolvable.
+     Prune all factors according to the chosen options. Stop early if one factor is unsolvable. Return true iff unsolvable.
    */
    bool pruned = false;
-   bool unsolvable = false;
-   set<LabelID> dead_labels;
+   vector<int> check_dead_labels_in;
    for (int index = 0; index < fts.get_size(); ++index) {
+       if (!fts.is_active(index)) {
+           continue;
+       }
        if (prune_unreachable_states || prune_irrelevant_states) {
            bool pruned_factor = prune_step(
                fts,
@@ -224,47 +277,28 @@ bool MergeAndShrinkAlgorithm::prune_fts(
                verbosity);
 
            if (pruned_factor) {
-               fts.get_ts(index).check_dead_labels(dead_labels);
+               check_dead_labels_in.push_back(index);
+               pruned = true;
            }
-           pruned = pruned || pruned_factor;
        }
+
        if (!fts.is_factor_solvable(index)) {
-           unsolvable = true;
-           break;
+           return true;
        }
    }
 
-   while(!dead_labels.empty()) {
-       vector<int> ts_to_check = fts.remove_labels(vector<LabelID>(dead_labels.begin(), dead_labels.end()));
-
-       dead_labels.clear();
-       for (int index : ts_to_check) {
-           if (prune_unreachable_states || prune_irrelevant_states) {
-               bool pruned_factor = prune_step(
-                   fts,
-                   index,
-                   prune_unreachable_states,
-                   prune_irrelevant_states,
-                   verbosity);
-
-               if (pruned_factor) {
-                   fts.get_ts(index).check_dead_labels(dead_labels);
-               }
-               pruned = pruned || pruned_factor;
-           }
-           if (!fts.is_factor_solvable(index)) {
-               unsolvable = true;
-               break;
-           }
+   if (pruned) {
+       if(check_dead_labels(fts, check_dead_labels_in)) {
+           return true;
        }
-   }
 
-   fts.remove_irrelevant_transition_systems(verbosity);
+       fts.remove_irrelevant_transition_systems(verbosity);
+   }
 
    if (verbosity >= Verbosity::NORMAL && pruned) {
        print_time(timer, "after pruning atomic factors");
    }
-   return unsolvable;
+   return false;
 }
 
 void MergeAndShrinkAlgorithm::main_loop(
@@ -369,6 +403,15 @@ void MergeAndShrinkAlgorithm::main_loop(
                prune_unreachable_states,
                prune_irrelevant_states,
                verbosity);
+
+           if (pruned) {
+               if (check_dead_labels(fts, merged_index)) {
+                   if (verbosity >= Verbosity::NORMAL) {
+                       cout << "Abstract problem is unsolvable, exiting" << endl;
+                       utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
+                   }
+               }
+           }
            if (verbosity >= Verbosity::NORMAL && pruned) {
                if (verbosity >= Verbosity::VERBOSE) {
                    fts.statistics(merged_index);
@@ -376,6 +419,8 @@ void MergeAndShrinkAlgorithm::main_loop(
                print_time(timer, "after pruning");
            }
        }
+
+
 
         /*
           NOTE: both the shrink strategy classes and the construction
@@ -583,6 +628,7 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             return fts;
         }
     } while (/*run_atomic_loop && */has_simplified);
+
 
     cout << "Merge-and-shrink atomic construction runtime: " << timer << endl;
 

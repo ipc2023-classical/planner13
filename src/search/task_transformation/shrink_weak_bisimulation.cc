@@ -452,9 +452,11 @@ struct Signature {
                                                                 Verbosity verbosity,
                                                                 int &  check_only_index) const  {
 
+        assert(!fts.remove_irrelevant_labels());
+
         if (verbosity == Verbosity::VERBOSE) {
             cout << "Apply shrinking transformation over ";
-            if(check_only_index > 0) {
+            if(check_only_index >= 0) {
                 cout << check_only_index << "\n";
             } else {
                 cout << "all\n";

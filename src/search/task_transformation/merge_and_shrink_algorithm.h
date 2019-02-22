@@ -3,6 +3,8 @@
 
 #include "../operator_cost.h"
 #include <memory>
+#include <vector>
+#include <set>
 
 namespace options {
 class OptionParser;
@@ -16,6 +18,7 @@ class Timer;
 namespace task_representation {
 class FTSTask;
 class TransitionSystem;
+class LabelID;
 }
 
 using namespace task_representation;
@@ -52,7 +55,7 @@ class MergeAndShrinkAlgorithm {
     const int num_transitions_to_exclude;
 
     const OperatorCost cost_type;
-    
+
     //std::unique_ptr<task_transformation::LabelMap> label_map;
     long starting_peak_memory;
 
@@ -63,7 +66,15 @@ class MergeAndShrinkAlgorithm {
     bool too_many_transitions(const FactoredTransitionSystem &fts) const;
     bool exclude_if_too_many_transitions() const;
     // Return true iff fts has been detected to be unsolvable.
-   bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
+    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
+    bool check_dead_labels(FactoredTransitionSystem &fts,
+                           const std::vector<int> & ts_to_check_initially) const;
+
+    bool remove_dead_labels(FactoredTransitionSystem &fts,
+                            std::set<LabelID> & dead_labels) const;
+
+    bool check_dead_labels(FactoredTransitionSystem &fts, int index) const;
+
     void statistics(int maximum_intermediate_size) const;
     void main_loop(
         FactoredTransitionSystem &fts,
