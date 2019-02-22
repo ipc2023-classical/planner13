@@ -68,25 +68,25 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
             }
         }
         if (!found_match) {
-            cout << "Error: no match found in plan reconstruction" << endl;
-            cout << "Trying to find a match with abstract label: " << label << endl;
+            cerr << "Error: no match found in plan reconstruction" << endl;
+            cerr<< "Trying to find a match with abstract label: " << label << endl;
             for(int i = 0; i < g_sas_task()->get_num_operators(); ++i) {
                 if (label_map->get_reduced_label(i) == label) {
-                    cout <<  g_sas_task()->get_operator_name(i) << endl;
+                    cerr <<  g_sas_task()->get_operator_name(i) << endl;
                 }
             }
-            cout << "Available original labels:" << endl;
+            cerr << "Available original labels:" << endl;
             for (OperatorID op : applicable_ops)  {
                 LabelID original_label = search_task->get_label (op);
-                cout << "  " << g_sas_task()->get_operator_name(original_label)
+                cerr<< "  " << g_sas_task()->get_operator_name(original_label)
                      << " (" << original_label << ") reduced to "
                      << label_map->get_reduced_label(original_label);
 
                 auto result_state = state_registry.get_successor_state(initial_state, op);
                 if (match_states(result_state, target)) {
-                    cout << "   state matches!" << endl;
+                    cerr<< "   state matches!" << endl;
                 }else{
-                    cout << endl;
+                    cerr << endl;
                 }
 
             }
