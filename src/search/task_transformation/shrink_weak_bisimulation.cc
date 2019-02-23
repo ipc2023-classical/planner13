@@ -155,9 +155,8 @@ struct Signature {
                 ignore_label_group [label_group_index] = ignore_irrelevant_tau_groups &&
                     std::all_of(gat.label_group.begin(), gat.label_group.end(),
                                 [&](int label) {
-                                    return !fts.is_externally_relevant_label(LabelID(label), index);
+                                    return !fts.is_tau_label(index, LabelID(label));
                                 });
-
 
                 // cout << "Tau label group!" << endl;
                 for (const Transition &transition : transitions) {
