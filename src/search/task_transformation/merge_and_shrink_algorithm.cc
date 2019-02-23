@@ -550,6 +550,10 @@ apply_full_label_reduction_and_shrinking(FactoredTransitionSystem &fts,
     cout << "Run label reduction and shrinking loop" << endl;
     bool has_simplified;
     do {
+        if (fts.get_size() == 0) {
+            return;
+        }
+
         has_simplified = false;
         // Label reduction of atomic FTS.
         if (label_reduction && apply_label_reduction) {
@@ -576,11 +580,6 @@ apply_full_label_reduction_and_shrinking(FactoredTransitionSystem &fts,
         has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
 
         has_simplified |= fts.remove_irrelevant_labels();
-
-
-        if (fts.get_size() == 0) {
-            return;
-        }
 
         if (ran_out_of_time(timer)) {
             return;
