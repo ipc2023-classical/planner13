@@ -49,11 +49,17 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
         opts.get<shared_ptr<MergeStrategyFactory>>("merge_strategy", nullptr)),
     shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy", nullptr)),
     shrink_atomic_fts(opts.get<bool>("shrink_atomic_fts")),
+    run_atomic_loop(opts.get<bool>("run_atomic_loop")),
+    run_final_lr_shrink(opts.get<bool>("run_final_lr_shrink")),
+    reduce_labels_final_fts(opts.get<bool>("reduce_labels_final_fts")),
+    shrink_final_fts(opts.get<bool>("shrink_final_fts")),
+    run_final_loop(opts.get<bool>("run_final_loop")),
     num_states_to_trigger_shrinking(opts.get<int>("num_states_to_trigger_shrinking")),
     max_states(opts.get<int>("max_states")),
     label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
     prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
     prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
+    prune_transitions_from_goal(opts.get<bool>("prune_transitions_from_goal")),
     verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
     run_main_loop(opts.get<bool>("run_main_loop")),
     max_time(opts.get<double>("max_time")),
@@ -163,6 +169,10 @@ void MergeAndShrinkAlgorithm::warn_on_unusual_options() const {
            "drastically reduce the performance of merge-and-shrink!"
             << endl << dashes << endl;
    }
+
+   if (prune_transitions_from_goal) {
+       cout << "Prune transitions from goal activated.\n";
+   }
 }
 
 bool MergeAndShrinkAlgorithm::ran_out_of_time(
@@ -263,6 +273,12 @@ bool MergeAndShrinkAlgorithm::prune_fts(FactoredTransitionSystem &fts, const uti
      Prune all factors according to the chosen options. Stop early if one factor is unsolvable. Return true iff unsolvable.
    */
    bool pruned = false;
+
+   // Pruning
+   if (prune_transitions_from_goal) {
+       fts.remove_transitions_from_goal();
+   }
+
    vector<int> check_dead_labels_in;
    for (int index = 0; index < fts.get_size(); ++index) {
        if (!fts.is_active(index)) {
@@ -396,6 +412,10 @@ void MergeAndShrinkAlgorithm::main_loop(
         }
 
         // Pruning
+        if (prune_transitions_from_goal) {
+            fts.remove_transitions_from_goal();
+        }
+
        if (prune_unreachable_states || prune_irrelevant_states) {
            bool pruned = prune_step(
                fts,
@@ -419,8 +439,6 @@ void MergeAndShrinkAlgorithm::main_loop(
                print_time(timer, "after pruning");
            }
        }
-
-
 
         /*
           NOTE: both the shrink strategy classes and the construction
@@ -518,11 +536,56 @@ void MergeAndShrinkAlgorithm::main_loop(
         ++iteration_counter;
     }
 
-    cout << "End of merge-and-shrink algorithm, statistics:" << endl;
+    cout << "End of merge-and-shrink algorithm main loop, statistics:" << endl;
     cout << "Maximum intermediate abstraction size: "
          << maximum_intermediate_size << endl;
-    shrink_strategy = nullptr;
-    label_reduction = nullptr;
+}
+
+
+void MergeAndShrinkAlgorithm::
+apply_full_label_reduction_and_shrinking(FactoredTransitionSystem &fts,
+                                         bool apply_label_reduction, bool apply_shrink,
+                                         bool run_loop, const utils::Timer &timer,
+                                         Verbosity verbosity) {
+    cout << "Run label reduction and shrinking loop" << endl;
+    bool has_simplified;
+    do {
+        has_simplified = false;
+        // Label reduction of atomic FTS.
+        if (label_reduction && apply_label_reduction) {
+            bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
+            if (verbosity >= Verbosity::NORMAL && reduced) {
+                print_time(timer, "after label reduction of atomic FTS");
+            }
+        }
+
+        if (ran_out_of_time(timer)) {
+            return;
+        }
+
+
+        if (shrink_strategy && apply_shrink) {
+            shrink_strategy->apply_shrinking_transformation(fts, verbosity);
+
+            if (verbosity >= Verbosity::NORMAL) {
+                print_time(timer, "after shrinking of atomic FTS");
+            }
+        }
+
+
+        has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
+
+        has_simplified |= fts.remove_irrelevant_labels();
+
+
+        if (fts.get_size() == 0) {
+            return;
+        }
+
+        if (ran_out_of_time(timer)) {
+            return;
+        }
+    } while (run_loop && has_simplified);
 }
 
 FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_system(
@@ -590,54 +653,32 @@ FactoredTransitionSystem MergeAndShrinkAlgorithm::build_factored_transition_syst
             utils::exit_with(ExitCode::UNSOLVED_INCOMPLETE);
     }
 
-    bool has_simplified;
-    do {
-        has_simplified = false;
-        // Label reduction of atomic FTS.
-        if (label_reduction && label_reduction->reduce_atomic_fts()) {
-            bool reduced = label_reduction->reduce(pair<int, int>(-1, -1), fts, verbosity);
-            if (verbosity >= Verbosity::NORMAL && reduced) {
-                print_time(timer, "after label reduction of atomic FTS");
-            }
-        }
 
-        if (ran_out_of_time(timer)) {
-            return fts;
-        }
-
-
-        if (shrink_strategy && shrink_atomic_fts) {
-            shrink_strategy->apply_shrinking_transformation(fts, verbosity);
-
-            if (verbosity >= Verbosity::NORMAL) {
-                print_time(timer, "after shrinking of atomic FTS");
-            }
-        }
-
-
-        has_simplified |= fts.remove_irrelevant_transition_systems(verbosity);
-
-        has_simplified |= fts.remove_irrelevant_labels();
-
-
-        if (fts.get_size() == 0) {
-            return fts;
-        }
-
-        if (ran_out_of_time(timer)) {
-            return fts;
-        }
-    } while (/*run_atomic_loop && */has_simplified);
-
+    apply_full_label_reduction_and_shrinking(fts,
+                                             label_reduction->reduce_atomic_fts(),
+                                             shrink_atomic_fts, run_atomic_loop, timer,
+                                             verbosity) ;
 
     cout << "Merge-and-shrink atomic construction runtime: " << timer << endl;
 
     if (run_main_loop) {
         assert(shrink_strategy && merge_strategy_factory);
         main_loop(fts, *fts_task, timer);
+
+        if (run_final_lr_shrink) {
+            apply_full_label_reduction_and_shrinking(fts,
+                                                     reduce_labels_final_fts,
+                                                     shrink_final_fts, run_final_loop, timer,
+                                                     verbosity) ;
+        }
     }
+
+
     const bool final = true;
     report_peak_memory_delta(final);
+    shrink_strategy = nullptr;
+    label_reduction = nullptr;
+
     cout << "Merge-and-shrink algorithm runtime: " << timer << endl;
     cout << endl;
     return fts;
@@ -697,6 +738,11 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
        "reached.",
        "true");
 
+   parser.add_option<bool>(
+       "prune_transitions_from_goal",
+       "If true, prune transitions that can only be applied in goal states",
+       "true");
+
     vector<string> verbosity_levels;
     vector<string> verbosity_level_docs;
     verbosity_levels.push_back("silent");
@@ -722,6 +768,37 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
         "run_main_loop",
         "Run the main loop of the algorithm.",
         "true");
+
+    parser.add_option<bool>(
+        "run_atomic_loop",
+        "The atomic label reduction + shrinking loop on the atomic FTS runs up to a fixpoint.",
+        "true");
+
+    parser.add_option<bool>(
+        "shrink_atomic_fts",
+        "Use shrinking on the atomic FTS.",
+        "true");
+
+    parser.add_option<bool>(
+        "reduce_labels_final_fts",
+        "Use label reduction after the main loop (only if main loop is used).",
+        "true");
+
+    parser.add_option<bool>(
+        "run_final_loop",
+        "The final label reduction + shrinking loop is computed up to a fixpoint.",
+        "true");
+
+    parser.add_option<bool>(
+        "run_final_lr_shrink",
+        "Runs a label reduction + shrinking loop after the main loop (only if main loop is used).",
+        "false");
+
+    parser.add_option<bool>(
+        "shrink_final_fts",
+        "Use shrinking on the final FTS after the main loop (only if main loop is used).",
+        "true");
+
     parser.add_option<double>(
         "max_time",
         "A limit in seconds on the computation time of the algorithm.",

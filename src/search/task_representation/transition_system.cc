@@ -734,4 +734,12 @@ const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int 
         }
 
     }
+
+    void TransitionSystem::remove_transitions_from_goal()  {
+        for (auto  & trs : transitions_by_group_id) {
+            trs.erase(remove_if(trs.begin(), trs.end(), [&](const Transition & tr) {
+                        return goal_states[tr.src];
+                    }), trs.end());
+        }
+    }
 }

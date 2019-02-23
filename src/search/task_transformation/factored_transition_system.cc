@@ -369,8 +369,22 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
         return true;
     }
 
-    bool FactoredTransitionSystem::is_only_goal_relevant (int ts_index) const {
+    void FactoredTransitionSystem::remove_transitions_from_goal () {
+        int ts_goal = -1;
+        for (size_t i = 0; i < transition_systems.size() ; ++i) {
+            if (transition_systems[i] && transition_systems[i]->is_goal_relevant()) {
+                if (ts_goal == -1) {
+                    ts_goal = i;
+                }else {
+                    return;
+                }
+            }
+        }
+        transition_systems[ts_goal]->remove_transitions_from_goal();
+    }
 
+
+    bool FactoredTransitionSystem::is_only_goal_relevant (int ts_index) const {
         for (size_t i = 0; i < transition_systems.size() ; ++i) {
             if (transition_systems[i]) {
                 if ((int)i == ts_index){

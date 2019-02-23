@@ -37,7 +37,14 @@ class MergeAndShrinkAlgorithm {
     // pointers.
     std::shared_ptr<MergeStrategyFactory> merge_strategy_factory;
     std::shared_ptr<ShrinkStrategy> shrink_strategy;
-    bool shrink_atomic_fts;
+    const bool shrink_atomic_fts;
+    const bool run_atomic_loop;
+
+    const bool run_final_lr_shrink;
+    const bool reduce_labels_final_fts;
+    const bool shrink_final_fts;
+    const bool run_final_loop;
+
     int num_states_to_trigger_shrinking;
     int max_states;
     std::shared_ptr<LabelReduction> label_reduction;
@@ -45,6 +52,7 @@ class MergeAndShrinkAlgorithm {
     // Options for pruning
     const bool prune_unreachable_states;
     const bool prune_irrelevant_states;
+    const bool prune_transitions_from_goal;
 
     const Verbosity verbosity;
 
@@ -58,8 +66,6 @@ class MergeAndShrinkAlgorithm {
 
     //std::unique_ptr<task_transformation::LabelMap> label_map;
     long starting_peak_memory;
-
-
 
     bool ran_out_of_time(const utils::Timer &timer) const;
     bool too_many_transitions(const FactoredTransitionSystem &fts, int index) const;
@@ -82,6 +88,12 @@ class MergeAndShrinkAlgorithm {
         const utils::Timer &timer);
 
     void report_peak_memory_delta(bool final = false) const;
+
+    void apply_full_label_reduction_and_shrinking(FactoredTransitionSystem &fts,
+                                                  bool apply_label_reduction, bool apply_shrink,
+                                                  bool run_loop, const utils::Timer &timer,
+                                                  Verbosity verbosity);
+
 public:
     explicit MergeAndShrinkAlgorithm(const options::Options &opts);
     void dump_options() const;

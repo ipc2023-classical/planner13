@@ -208,6 +208,9 @@ public:
     bool remove_irrelevant_labels();
     std::vector<int> remove_labels(const std::vector<task_representation::LabelID> & labels);
     bool remove_irrelevant_transition_systems(Verbosity verbosity);
+    void remove_transitions_from_goal();
+
+
 
     bool is_tau_label(int index, task_representation::LabelID label) const;
     std::vector<task_representation::LabelID> get_tau_labels(int index) const;

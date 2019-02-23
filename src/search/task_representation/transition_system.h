@@ -282,6 +282,8 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const TransitionSystem &tr);
 
     void check_dead_labels(std::set<LabelID> & dead_labels) const;
+
+    void remove_transitions_from_goal();
 };
 }
 
