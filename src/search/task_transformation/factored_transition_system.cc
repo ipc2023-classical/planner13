@@ -380,7 +380,9 @@ vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
                 }
             }
         }
-        transition_systems[ts_goal]->remove_transitions_from_goal();
+        if(ts_goal >= 0) {
+            transition_systems[ts_goal]->remove_transitions_from_goal();
+        }
     }
 
 
