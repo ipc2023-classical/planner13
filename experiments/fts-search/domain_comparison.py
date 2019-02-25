@@ -20,15 +20,6 @@ def domain_mapping(domain):
         result = result.replace('-sat08', '')
         result = result.replace('-sat11', '')
         result = result.replace('-sat14', '')
-        # The following replacements are valid for the paper-tables.py script
-        # where we removed all opt/sat substrings.
-        result = result.replace('-08', '')
-        result = result.replace('-11', '')
-        result = result.replace('-14', '')
-        result = result.replace('-18', '')
-        result = result.replace('-08', '')
-        result = result.replace('-11', '')
-        result = result.replace('-14', '')
         return result
 
 # TODO: this currently uses coverage and sum as the hard-coded attribute and
