@@ -110,21 +110,21 @@ exp.add_report(AbsoluteReport(attributes=['coverage'],filter_algorithm=all_confi
 ## Latex reports
 
 algo_to_print = {
-    'astar-hmax': 'FD',
-    'astar-hmax-atomic': 'a',
-    'astar-hmax-transform-atomic-bisim-labelreduction': 'a-l-b',
-    'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900': 'f-d',
-    'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900': 'f-m',
-    'astar-masdfpbisim50k': 'FD',
-    'astar-masdfpbisim50k-atomic': 'a',
-    'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction': 'a-l-b',
-    'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': 'f-d',
-    'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': 'f-m',
-    'astar-masmiasmbisim50k': 'FD',
-    'astar-masmiasmbisim50k-atomic': 'a',
-    'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction': 'a-l-b',
-    'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': 'f-d',
-    'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': 'f-m',
+    'astar-hmax': '\\SAS',
+    'astar-hmax-atomic': '\\atomic',
+    'astar-hmax-transform-atomic-bisim-labelreduction': '\\atomicshrink',
+    'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900': '\\fulldfp',
+    'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900': '\\fullmiasm',
+    'astar-masdfpbisim50k': '\\SAS',
+    'astar-masdfpbisim50k-atomic': '\\atomic',
+    'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction': '\\atomicshrink',
+    'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': '\\fulldfp',
+    'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': '\\fullmiasm',
+    'astar-masmiasmbisim50k': '\\SAS',
+    'astar-masmiasmbisim50k-atomic': '\\atomic',
+    'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction': '\\atomicshrink',
+    'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': '\\fulldfp',
+    'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': '\\fullmiasm',
 }
 
 exp.add_report(
@@ -166,7 +166,7 @@ exp.add_report(
         # attributes=attributes,
         attributes=['coverage'],
     ),
-    outfile=os.path.join(exp.eval_dir, 'oracel-coverage-astar-hmax.tex'),
+    outfile=os.path.join(exp.eval_dir, 'oracle-coverage-astar-hmax.tex'),
 )
 
 exp.add_report(
