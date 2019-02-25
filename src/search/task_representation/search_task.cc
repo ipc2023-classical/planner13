@@ -279,6 +279,14 @@ void SearchTask::create_fts_operators() {
 bool SearchTask::has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const {
     // Ideally, we would assert that the operator is applicable.
     const FTSOperator &fts_op = operators[op_id.get_index()];
+    LabelID label = fts_op.get_label();
+
+    // Static Effects
+    for (const auto  & eff : label_to_info[label].static_effects) {
+        if (eff == fact) {
+            return true;
+        }
+    }
 
     // Effects on non-deterministic TS
     for (const FactPair &effect : fts_op.get_effects()) {
@@ -288,7 +296,6 @@ bool SearchTask::has_effect(const GlobalState &predecessor, OperatorID op_id, co
     }
 
     // Effects on deterministic TS
-    LabelID label = fts_op.get_label();
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
     const vector<unordered_map<int, int>> &src_to_target_by_ts_index = label_to_info[label].src_to_target_by_ts_index;
     for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
