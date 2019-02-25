@@ -24,7 +24,8 @@ exp = FastDownwardExperiment()
 
 REVISIONS = [
     'fts-search-base-v2',
-    'fcf42e988494',
+    'fcf42e988494', # ownbisim
+    'dadea9de3e7a', # weakbisim
 ]
 
 def remove_revision(run):
@@ -38,7 +39,9 @@ exp.add_fetcher('data/2019-02-18-astar-baseline-eval',filter=[remove_revision],f
     'astar-blind',
 ])
 exp.add_fetcher('data/2019-02-18-astar-blind-bisim-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-18-astar-blind-ownbisim-eval',filter=[remove_revision],merge=True)
+# exp.add_fetcher('data/2019-02-18-astar-blind-ownbisim-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-24-astarunit-baseline-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-24-astar-blind-weakbisim-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
@@ -62,7 +65,8 @@ attributes.extend(extra_attributes)
 
 ## Configs
 
-'astar-blind'
+all_configs=[
+'astar-blind',
 
 'astar-blind-atomic',
 'astar-blind-transform-atomic-labelreduction',
@@ -82,9 +86,21 @@ attributes.extend(extra_attributes)
 'astar-blind-transform-full-ownbisim-labelreduction-miasm1000-t900',
 'astar-blind-transform-full-ownbisim-labelreduction-miasm10000-t900',
 
+'astarunit-blind',
+
+'astar-blindunit-atomic',
+'astar-blindunit-transform-atomic-labelreduction',
+'astar-blind-transform-full-weakbisim-labelreduction-dfp100-t900',
+'astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900',
+'astar-blind-transform-full-weakbisim-labelreduction-dfp10000-t900',
+'astar-blind-transform-full-weakbisim-labelreduction-miasm100-t900',
+'astar-blind-transform-full-weakbisim-labelreduction-miasm1000-t900',
+'astar-blind-transform-full-weakbisim-labelreduction-miasm10000-t900',
+]
+
 ## HTML reports
 
-# exp.add_report(AbsoluteReport(attributes=['coverage']))
+exp.add_report(AbsoluteReport(attributes=['coverage'],filter_algorithm=all_configs))
 
 class OracleScatterPlotReport(ScatterPlotReport):
     """
@@ -195,97 +211,86 @@ exp.add_report(
     outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
 )
 
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind-transform-atomic-bisim-labelreduction',
-            'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-atomic-bisim-labelreduction-vs-astar-blind-transform-full-bisim-labelreduction-dfp1000-t900'),
-)
-
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind-transform-atomic-bisim-labelreduction',
-            'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-atomic-bisim-labelreduction-vs-astar-blind-transform-full-bisim-labelreduction-miasm1000-t900'),
-)
-
 
 ## expansion plots for ownbisim
+# exp.add_report(
+    # ScatterPlotReport(
+        # filter_algorithm=[
+            # 'astar-blind',
+            # 'astar-blind-transform-atomic-ownbisim-labelreduction',
+        # ],
+        # # get_category=lambda run1, run2: run1['domain'],
+        # attributes=['expansions_until_last_jump'],
+        # format='tex',
+    # ),
+    # outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-atomic-ownbisim-labelreduction'),
+# )
+
+# exp.add_report(
+    # ScatterPlotReport(
+        # filter_algorithm=[
+            # 'astar-blind',
+            # 'astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900',
+        # ],
+        # # get_category=lambda run1, run2: run1['domain'],
+        # attributes=['expansions_until_last_jump'],
+        # format='tex',
+    # ),
+    # outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900'),
+# )
+
+# exp.add_report(
+    # ScatterPlotReport(
+        # filter_algorithm=[
+            # 'astar-blind',
+            # 'astar-blind-transform-full-ownbisim-labelreduction-miasm1000-t900',
+        # ],
+        # # get_category=lambda run1, run2: run1['domain'],
+        # attributes=['expansions_until_last_jump'],
+        # format='tex',
+    # ),
+    # outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-ownbisim-labelreduction-miasm1000-t900'),
+# )
+
+
+## expansion plots for weakbisim
 exp.add_report(
     ScatterPlotReport(
         filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-atomic-ownbisim-labelreduction',
+            'astarunit-blind',
+            'astar-blind-transform-atomic-weakbisim-labelreduction',
         ],
         # get_category=lambda run1, run2: run1['domain'],
         attributes=['expansions_until_last_jump'],
         format='tex',
     ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-atomic-ownbisim-labelreduction'),
+    outfile=os.path.join(exp.eval_dir, 'astarunit-blind-vs-astar-blind-transform-atomic-weakbisim-labelreduction'),
 )
 
 exp.add_report(
     ScatterPlotReport(
         filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900',
+            'astarunit-blind',
+            'astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900',
         ],
         # get_category=lambda run1, run2: run1['domain'],
         attributes=['expansions_until_last_jump'],
         format='tex',
     ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900'),
+    outfile=os.path.join(exp.eval_dir, 'astarunit-blind-vs-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'),
 )
 
 exp.add_report(
     ScatterPlotReport(
         filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-full-ownbisim-labelreduction-miasm1000-t900',
+            'astarunit-blind',
+            'astar-blind-transform-full-weakbisim-labelreduction-miasm1000-t900',
         ],
         # get_category=lambda run1, run2: run1['domain'],
         attributes=['expansions_until_last_jump'],
         format='tex',
     ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900'),
-)
-
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind-transform-atomic-ownbisim-labelreduction',
-            'astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-atomic-ownbisim-labelreduction-vs-astar-blind-transform-full-ownbisim-labelreduction-dfp1000-t900'),
-)
-
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind-transform-atomic-ownbisim-labelreduction',
-            'astar-blind-transform-full-ownbisim-labelreduction-miasm1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-transform-atomic-ownbisim-labelreduction-vs-astar-blind-transform-full-ownbisim-labelreduction-miasm1000-t900'),
+    outfile=os.path.join(exp.eval_dir, 'astarunit-blind-vs-astar-blind-transform-full-weakbisim-labelreduction-miasm1000-t900'),
 )
 
 exp.run_steps()
