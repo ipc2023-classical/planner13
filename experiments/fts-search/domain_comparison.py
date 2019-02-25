@@ -20,6 +20,7 @@ def domain_mapping(domain):
         result = result.replace('-sat08', '')
         result = result.replace('-sat11', '')
         result = result.replace('-sat14', '')
+        result = result.replace('-sat18', '')
         return result
 
 # TODO: this currently uses coverage and sum as the hard-coded attribute and
