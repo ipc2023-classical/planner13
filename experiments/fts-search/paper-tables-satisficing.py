@@ -28,6 +28,7 @@ exp = FastDownwardExperiment()
 REVISIONS = [
     'fts-search-base-v2',
     'dadea9de3e7a',
+    'ab305ba7fa1f',
 ]
 
 def remove_revision(run):
@@ -39,7 +40,7 @@ def remove_revision(run):
 
 exp.add_fetcher('data/2019-02-18-lazygreedy-baseline-eval',filter=[remove_revision])
 exp.add_fetcher('data/2019-02-24-lazygreedy-ff-weakbisim-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-24-lazygreedy-ffpref-weakbisim-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-25-lazygreedy-ffpref-weakbisim-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
