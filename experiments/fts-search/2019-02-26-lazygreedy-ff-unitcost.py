@@ -150,6 +150,28 @@ def main(revisions=None):
     )
     exp.add_step('publish-{}'.format(outfile), subprocess.call, ['publish', outfile])
 
+    exp.add_fetcher('data/2019-02-26-lazygreedy-ff-eval',merge=True)
+    outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-non-unitcost-vs-unitcost.html')
+    exp.add_report(
+        ComparativeReport(
+            algorithm_pairs=[
+                ('{}-lazy-ff-transform-atomic'.format(REVISION), '{}-lazy-ff-transformunit-atomic'.format(REVISION)),
+                # ('{}-lazy-ff-transform-atomic-labelreduction'.format(REVISION), '{}-lazy-ff-transformunit-atomic-labelreduction'.format(REVISION)),
+                ('{}-lazy-ff-transform-atomic-weakbisim-labelreduction'.format(REVISION), '{}-lazy-ff-transformunit-atomic-weakbisim-labelreduction'.format(REVISION)),
+                # ('{}-lazy-ff-transform-full-weakbisim-labelreduction-dfp100-t900'.format(REVISION), '{}-lazy-ff-transformunit-full-weakbisim-labelreduction-dfp100-t900'.format(REVISION)),
+                ('{}-lazy-ff-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION), '{}-lazy-ff-transformunit-full-weakbisim-labelreduction-dfp100-t900'.format(REVISION)),
+                # ('{}-lazy-ff-transform-full-weakbisim-labelreduction-dfp10000-t900'.format(REVISION), '{}-lazy-ff-transformunit-full-weakbisim-labelreduction-dfp100-t900'.format(REVISION)),
+                # ('{}-lazy-ff-transform-full-weakbisim-labelreduction-miasm100-t900'.format(REVISION), '{}-lazy-ff-transformunit-full-weakbisim-labelreduction-miasm100-t900'.format(REVISION)),
+                ('{}-lazy-ff-transform-full-weakbisim-labelreduction-miasm1000-t900'.format(REVISION), '{}-lazy-ff-transformunit-full-weakbisim-labelreduction-miasm100-t900'.format(REVISION)),
+                # ('{}-lazy-ff-transform-full-weakbisim-labelreduction-miasm10000-t900'.format(REVISION), '{}-lazy-ff-transformunit-full-weakbisim-labelreduction-miasm100-t900'.format(REVISION)),
+            ],
+            format='html',
+            attributes=attributes,
+        ),
+        outfile=outfile,
+    )
+    exp.add_step('publish-{}'.format(outfile), subprocess.call, ['publish', outfile])
+
     exp.run_steps()
 
 main(revisions=[REVISION])

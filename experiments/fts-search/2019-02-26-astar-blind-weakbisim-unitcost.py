@@ -124,6 +124,28 @@ def main(revisions=None):
     )
     exp.add_step('publish-{}'.format(outfile), subprocess.call, ['publish', outfile])
 
+    exp.add_fetcher('data/2019-02-26-astar-blind-weakbisim-eval',merge=True)
+    outfile = os.path.join(exp.eval_dir, get_experiment_name() + '-non-unitcost-vs-unitcost.html')
+    exp.add_report(
+        ComparativeReport(
+            algorithm_pairs=[
+                ('{}-astar-blind-transform-atomic'.format(REVISION), '{}-astar-blind-transformunitcost-atomic'.format(REVISION)),
+                # ('{}-astar-blind-transform-atomic-labelreduction'.format(REVISION), '{}-astar-blind-transformunitcost-atomic-labelreduction'.format(REVISION)),
+                ('{}-astar-blind-transform-atomic-weakbisim-labelreduction'.format(REVISION), '{}-astar-blind-transformunitcost-atomic-weakbisim-labelreduction'.format(REVISION)),
+                # ('{}-astar-blind-transform-full-weakbisim-labelreduction-dfp100-t900'.format(REVISION), '{}-astar-blind-transformunitcost-full-weakbisim-labelreduction-dfp100-t900'.format(REVISION)),
+                ('{}-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION), '{}-astar-blind-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION)),
+                # ('{}-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'.format(REVISION), '{}-astar-blind-transformunitcost-full-weakbisim-labelreduction-dfp10000-t900'.format(REVISION)),
+                # ('{}-astar-blind-transform-full-weakbisim-labelreduction-miasm100-t900'.format(REVISION), '{}-astar-blind-transformunitcost-full-weakbisim-labelreduction-miasm100-t900'.format(REVISION)),
+                ('{}-astar-blind-transform-full-weakbisim-labelreduction-miasm1000-t900'.format(REVISION), '{}-astar-blind-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900'.format(REVISION)),
+                # ('{}-astar-blind-transform-full-weakbisim-labelreduction-miasm10000-t900'.format(REVISION), '{}-astar-blind-transformunitcost-full-weakbisim-labelreduction-miasm10000-t900'.format(REVISION)),
+            ],
+            format='html',
+            attributes=attributes,
+        ),
+        outfile=outfile,
+    )
+    exp.add_step('publish-{}'.format(outfile), subprocess.call, ['publish', outfile])
+
     exp.run_steps()
 
 main(revisions=[REVISION])
