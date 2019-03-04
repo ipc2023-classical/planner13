@@ -27,7 +27,7 @@ exp = FastDownwardExperiment()
 
 REVISIONS = [
     'fts-search-base-v2',
-    'fcf42e988494',
+    'ab305ba7fa1f',
 ]
 
 def remove_revision(run):
@@ -42,9 +42,9 @@ exp.add_fetcher('data/2019-02-18-astar-baseline-eval',filter=[remove_revision],f
     'astar-masdfpbisim50k',
     'astar-masmiasmbisim50k',
 ])
-exp.add_fetcher('data/2019-02-18-astar-hmax-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-18-astar-masdfp-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-18-astar-masmiasm-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-astar-hmax-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-astar-masdfp-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-astar-masmiasm-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
@@ -70,7 +70,7 @@ attributes.extend(extra_attributes)
 
 all_configs = [
 'astar-hmax',
-'astar-hmax-atomic',
+'astar-hmax-transform-atomic',
 'astar-hmax-transform-atomic-labelreduction',
 'astar-hmax-transform-atomic-bisim-labelreduction',
 'astar-hmax-transform-full-bisim-labelreduction-dfp100-t900',
@@ -81,7 +81,7 @@ all_configs = [
 'astar-hmax-transform-full-bisim-labelreduction-miasm10000-t900',
 
 'astar-masdfpbisim50k',
-'astar-masdfpbisim50k-atomic',
+'astar-masdfpbisim50k-transform-atomic',
 'astar-masdfpbisim50k-transform-atomic-labelreduction',
 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction',
 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
@@ -92,7 +92,7 @@ all_configs = [
 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
 
 'astar-masmiasmbisim50k',
-'astar-masmiasmbisim50k-atomic',
+'astar-masmiasmbisim50k-transform-atomic',
 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
 'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
@@ -111,17 +111,17 @@ exp.add_report(AbsoluteReport(attributes=['coverage'],filter_algorithm=all_confi
 
 algo_to_print = {
     'astar-hmax': '\\SAS',
-    'astar-hmax-atomic': '\\atomic',
+    'astar-hmax-transform-atomic': '\\atomic',
     'astar-hmax-transform-atomic-bisim-labelreduction': '\\atomicshrink',
     'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900': '\\fulldfp',
     'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900': '\\fullmiasm',
     'astar-masdfpbisim50k': '\\SAS',
-    'astar-masdfpbisim50k-atomic': '\\atomic',
+    'astar-masdfpbisim50k-transform-atomic': '\\atomic',
     'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction': '\\atomicshrink',
     'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': '\\fulldfp',
     'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': '\\fullmiasm',
     'astar-masmiasmbisim50k': '\\SAS',
-    'astar-masmiasmbisim50k-atomic': '\\atomic',
+    'astar-masmiasmbisim50k-transform-atomic': '\\atomic',
     'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction': '\\atomicshrink',
     'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900': '\\fulldfp',
     'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900': '\\fullmiasm',
@@ -131,7 +131,7 @@ exp.add_report(
     DomainComparisonReport(
         filter_algorithm=[
             'astar-hmax',
-            'astar-hmax-atomic',
+            'astar-hmax-transform-atomic',
             # 'astar-hmax-transform-atomic-labelreduction',
             'astar-hmax-transform-atomic-bisim-labelreduction',
             # 'astar-hmax-transform-full-bisim-labelreduction-dfp100-t900',
@@ -152,7 +152,7 @@ exp.add_report(
 exp.add_report(
     OracleReport(
         filter_algorithm=[
-            'astar-hmax-atomic',
+            'astar-hmax-transform-atomic',
             # 'astar-hmax-transform-atomic-labelreduction',
             'astar-hmax-transform-atomic-bisim-labelreduction',
             # 'astar-hmax-transform-full-bisim-labelreduction-dfp100-t900',
@@ -173,7 +173,7 @@ exp.add_report(
     DomainComparisonReport(
         filter_algorithm=[
             'astar-masdfpbisim50k',
-            'astar-masdfpbisim50k-atomic',
+            'astar-masdfpbisim50k-transform-atomic',
             # 'astar-masdfpbisim50k-transform-atomic-labelreduction',
             'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction',
             # 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
@@ -215,7 +215,7 @@ exp.add_report(
     DomainComparisonReport(
         filter_algorithm=[
             'astar-masmiasmbisim50k',
-            'astar-masmiasmbisim50k-atomic',
+            'astar-masmiasmbisim50k-transform-atomic',
             # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
             'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
             # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
@@ -236,7 +236,7 @@ exp.add_report(
 exp.add_report(
     OracleReport(
         filter_algorithm=[
-            'astar-masmiasmbisim50k-atomic',
+            'astar-masmiasmbisim50k-transform-atomic',
             # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
             'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
             # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',

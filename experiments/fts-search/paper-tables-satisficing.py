@@ -27,7 +27,6 @@ exp = FastDownwardExperiment()
 
 REVISIONS = [
     'fts-search-base-v2',
-    'dadea9de3e7a',
     'ab305ba7fa1f',
 ]
 
@@ -39,8 +38,10 @@ def remove_revision(run):
     return run
 
 exp.add_fetcher('data/2019-02-18-lazygreedy-baseline-eval',filter=[remove_revision])
-exp.add_fetcher('data/2019-02-24-lazygreedy-ff-weakbisim-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-25-lazygreedy-ffpref-weakbisim-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-lazygreedy-ff-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-lazygreedy-ffpref-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-lazygreedy-ff-unitcost-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-lazygreedy-ffpref-unitcost-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
@@ -66,7 +67,7 @@ attributes.extend(extra_attributes)
 
 all_configs = [
 'lazy-ff',
-'lazy-ff-atomic',
+'lazy-ff-transform-atomic',
 'lazy-ff-transform-atomic-labelreduction',
 'lazy-ff-transform-atomic-bisimown-labelreduction',
 'lazy-ff-transform-full-weakbisim-labelreduction-dfp100-t900',
@@ -77,7 +78,7 @@ all_configs = [
 'lazy-ff-transform-full-weakbisim-labelreduction-miasm10000-t900',
 
 'lazy-ffpref',
-'lazy-ffpref-atomic',
+'lazy-ffpref-transform-atomic',
 'lazy-ffpref-transform-atomic-labelreduction',
 'lazy-ffpref-transform-atomic-weakbisim-labelreduction',
 'lazy-ffpref-transform-full-weakbisim-labelreduction-dfp100-t900',
@@ -86,6 +87,26 @@ all_configs = [
 'lazy-ffpref-transform-full-weakbisim-labelreduction-miasm100-t900',
 'lazy-ffpref-transform-full-weakbisim-labelreduction-miasm1000-t900',
 'lazy-ffpref-transform-full-weakbisim-labelreduction-miasm10000-t900',
+
+'lazy-ff-transformunit-atomic',
+'lazy-ff-transformunit-atomic-labelreduction',
+'lazy-ff-transformunit-atomic-bisimown-labelreduction',
+'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp100-t900',
+'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp1000-t900',
+'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp10000-t900',
+'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm100-t900',
+'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm1000-t900',
+'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm10000-t900',
+
+'lazy-ffpref-transformunit-atomic',
+'lazy-ffpref-transformunit-atomic-labelreduction',
+'lazy-ffpref-transformunit-atomic-weakbisim-labelreduction',
+'lazy-ffpref-transformunit-full-weakbisim-labelreduction-dfp100-t900',
+'lazy-ffpref-transformunit-full-weakbisim-labelreduction-dfp1000-t900',
+'lazy-ffpref-transformunit-full-weakbisim-labelreduction-dfp10000-t900',
+'lazy-ffpref-transformunit-full-weakbisim-labelreduction-miasm100-t900',
+'lazy-ffpref-transformunit-full-weakbisim-labelreduction-miasm1000-t900',
+'lazy-ffpref-transformunit-full-weakbisim-labelreduction-miasm10000-t900',
 ]
 
 ## HTML reports
@@ -96,22 +117,31 @@ exp.add_report(AbsoluteReport(attributes=['coverage'],filter_algorithm=all_confi
 
 algo_to_print = {
     'lazy-ff': '\\SAS',
-    'lazy-ff-atomic': '\\atomic',
+    'lazy-ff-transform-atomic': '\\atomic',
     'lazy-ff-transform-atomic-weakbisim-labelreduction': '\\atomicshrink',
     'lazy-ff-transform-full-weakbisim-labelreduction-dfp1000-t900': '\\fulldfp',
     'lazy-ff-transform-full-weakbisim-labelreduction-miasm1000-t900': '\\fullmiasm',
     'lazy-ffpref': '\\SAS',
-    'lazy-ffpref-atomic': '\\atomic',
+    'lazy-ffpref-transform-atomic': '\\atomic',
     'lazy-ffpref-transform-atomic-weakbisim-labelreduction': '\\atomicshrink',
     'lazy-ffpref-transform-full-weakbisim-labelreduction-dfp1000-t900': '\\fulldfp',
     'lazy-ffpref-transform-full-weakbisim-labelreduction-miasm1000-t900': '\\fullmiasm',
+    'lazy-ff-transformunit-atomic': '\\atomic',
+    'lazy-ff-transformunit-atomic-weakbisim-labelreduction': '\\atomicshrink',
+    'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp1000-t900': '\\fulldfp',
+    'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm1000-t900': '\\fullmiasm',
+    'lazy-ffpref-transformunitcost-atomic': '\\atomic',
+    'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction': '\\atomicshrink',
+    'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900': '\\fulldfp',
+    'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900': '\\fullmiasm',
 }
 
+## regular transformation
 exp.add_report(
     DomainComparisonReport(
         filter_algorithm=[
             'lazy-ff',
-            'lazy-ff-atomic',
+            'lazy-ff-transform-atomic',
             # 'lazy-ff-transform-atomic-labelreduction',
             'lazy-ff-transform-atomic-weakbisim-labelreduction',
             # 'lazy-ff-transform-full-weakbisim-labelreduction-dfp100-t900',
@@ -132,7 +162,7 @@ exp.add_report(
 exp.add_report(
     OracleReport(
         filter_algorithm=[
-            'lazy-ff-atomic',
+            'lazy-ff-transform-atomic',
             # 'lazy-ff-transform-atomic-labelreduction',
             'lazy-ff-transform-atomic-weakbisim-labelreduction',
             # 'lazy-ff-transform-full-weakbisim-labelreduction-dfp100-t900',
@@ -153,7 +183,7 @@ exp.add_report(
     DomainComparisonReport(
         filter_algorithm=[
             'lazy-ffpref',
-            'lazy-ffpref-atomic',
+            'lazy-ffpref-transform-atomic',
             # 'lazy-ffpref-transform-atomic-labelreduction',
             'lazy-ffpref-transform-atomic-weakbisim-labelreduction',
             # 'lazy-ffpref-transform-full-weakbisim-labelreduction-dfp100-t900',
@@ -175,7 +205,7 @@ exp.add_report(
     OracleReport(
         filter_algorithm=[
             'lazy-ffpref',
-            'lazy-ffpref-atomic',
+            'lazy-ffpref-transform-atomic',
             # 'lazy-ffpref-transform-atomic-labelreduction',
             'lazy-ffpref-transform-atomic-weakbisim-labelreduction',
             # 'lazy-ffpref-transform-full-weakbisim-labelreduction-dfp100-t900',
@@ -190,6 +220,93 @@ exp.add_report(
         attributes=['coverage'],
     ),
     outfile=os.path.join(exp.eval_dir, 'oracle-coverage-lazy-ffpref.tex'),
+)
+
+
+## unitcost transformation
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'lazy-ff',
+            'lazy-ff-transformunit-atomic',
+            # 'lazy-ff-transformunit-atomic-labelreduction',
+            'lazy-ff-transformunit-atomic-weakbisim-labelreduction',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp100-t900',
+            'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp1000-t900',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp10000-t900',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm100-t900',
+            'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm1000-t900',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-lazy-ff-transformunit.tex'),
+)
+
+exp.add_report(
+    OracleReport(
+        filter_algorithm=[
+            'lazy-ff-transformunit-atomic',
+            # 'lazy-ff-transformunit-atomic-labelreduction',
+            'lazy-ff-transformunit-atomic-weakbisim-labelreduction',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp100-t900',
+            'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp1000-t900',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-dfp10000-t900',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm100-t900',
+            'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm1000-t900',
+            # 'lazy-ff-transformunit-full-weakbisim-labelreduction-miasm10000-t900',
+        ],
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'oracle-coverage-lazy-ff-transformunit.tex'),
+)
+
+exp.add_report(
+    DomainComparisonReport(
+        filter_algorithm=[
+            'lazy-ffpref',
+            'lazy-ffpref-transformunitcost-atomic',
+            # 'lazy-ffpref-transformunitcost-atomic-labelreduction',
+            'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp100-t900',
+            'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp10000-t900',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm100-t900',
+            'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm10000-t900',
+        ],
+        algo_to_print=algo_to_print,
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-lazy-ffpref-transformunitcost.tex'),
+)
+
+exp.add_report(
+    OracleReport(
+        filter_algorithm=[
+            'lazy-ffpref',
+            'lazy-ffpref-transformunitcost-atomic',
+            # 'lazy-ffpref-transformunitcost-atomic-labelreduction',
+            'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp100-t900',
+            'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp10000-t900',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm100-t900',
+            'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900',
+            # 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm10000-t900',
+        ],
+        format='tex',
+        # attributes=attributes,
+        attributes=['coverage'],
+    ),
+    outfile=os.path.join(exp.eval_dir, 'oracle-coverage-lazy-ffpref-transformunitcost.tex'),
 )
 
 exp.run_steps()
