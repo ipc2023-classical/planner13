@@ -269,6 +269,13 @@ comparison_algo_pairs = [
     ('astar-masdfpbisim50k-transform-atomic', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
 ]
 
+tex_comparison_algo_pairs = [
+    ('astar-hmax-transform-atomic', 'astar-hmax-transform-atomic-bisim-labelreduction'),
+    ('astar-hmax-transform-atomic-bisim-labelreduction', 'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900'),
+    ('astar-masdfpbisim50k-transform-atomic', 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction'),
+    ('astar-masdfpbisim50k-transform-atomic-bisim-labelreduction', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
+]
+
 comparison_attributes = [
     'expansions_until_last_jump',
     'search_time',
@@ -284,14 +291,14 @@ def make_scatter_plot(algo1, algo2, attribute):
     report = ScatterPlotReport(
         filter_algorithm=[algo1, algo2],
         attributes=[attribute],
-        format='png',
+        format='tex',
     )
     report(
         exp.eval_dir,
         os.path.join(scatter_dir, name))
 
 def make_scatter_plots():
-    for algo_pair in comparison_algo_pairs:
+    for algo_pair in tex_comparison_algo_pairs:
         for attribute in comparison_attributes:
             make_scatter_plot(algo_pair[0], algo_pair[1], attribute)
 

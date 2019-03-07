@@ -328,11 +328,17 @@ comparison_algo_pairs = [
     ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
 ]
 
+tex_comparison_algo_pairs = [
+    ('lazy-ffpref', 'lazy-ffpref-transformunitcost-atomic'),
+    ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction'),
+    ('lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
+]
+
 comparison_attributes = [
     'expansions',
     'search_time',
     'total_time',
-    'quality',
+    # 'quality',
 ]
 
 step_name = "make-absolute-scatter-plots"
@@ -345,14 +351,14 @@ def make_scatter_plot(algo1, algo2, attribute):
         filter_algorithm=[algo1, algo2],
         filter=[quality_filters.store_costs, quality_filters.add_quality],
         attributes=[attribute],
-        format='png',
+        format='tex',
     )
     report(
         exp.eval_dir,
         os.path.join(scatter_dir, name))
 
 def make_scatter_plots():
-    for algo_pair in comparison_algo_pairs:
+    for algo_pair in tex_comparison_algo_pairs:
         for attribute in comparison_attributes:
             make_scatter_plot(algo_pair[0], algo_pair[1], attribute)
 
