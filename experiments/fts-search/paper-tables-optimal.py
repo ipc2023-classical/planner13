@@ -37,14 +37,19 @@ def remove_revision(run):
     run['algorithm'] = algo
     return run
 
+def fix_search_time(props):
+    if 'search_time' in props and props['search_time'] == 0:
+        props['search_time'] = 0.01
+    return props
+
 exp.add_fetcher('data/2019-02-18-astar-baseline-eval',filter=[remove_revision],filter_algorithm=[
     'astar-hmax',
     'astar-masdfpbisim50k',
     'astar-masmiasmbisim50k',
 ])
-exp.add_fetcher('data/2019-02-26-astar-hmax-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-26-astar-masdfp-eval',filter=[remove_revision],merge=True)
-exp.add_fetcher('data/2019-02-26-astar-masmiasm-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-02-26-astar-hmax-eval',filter=[remove_revision,fix_search_time],merge=True)
+exp.add_fetcher('data/2019-02-26-astar-masdfp-eval',filter=[remove_revision,fix_search_time],merge=True)
+exp.add_fetcher('data/2019-02-26-astar-masmiasm-eval',filter=[remove_revision,fix_search_time],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
