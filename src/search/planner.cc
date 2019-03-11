@@ -103,7 +103,6 @@ int main(int argc, const char **argv) {
 
     engine->search();
     search_timer.stop();
-    utils::g_timer.stop();
 
     engine->print_statistics();
     cout << "Search time: " << search_timer << endl;
