@@ -43,7 +43,6 @@ exp.add_fetcher('data/2019-02-18-astar-baseline-eval',filter=[remove_revision],f
     'astar-blind',
 ])
 exp.add_fetcher('data/2019-02-26-astar-blind-bisim-eval',filter=[remove_revision,fix_search_time],merge=True)
-exp.add_fetcher('data/2019-02-26-astar-blind-weakbisim-eval',filter=[remove_revision,fix_search_time],merge=True)
 exp.add_fetcher('data/2019-02-24-astarunit-baseline-eval',filter=[remove_revision,fix_search_time],merge=True)
 exp.add_fetcher('data/2019-02-26-astar-blind-weakbisim-unitcost-eval',filter=[remove_revision,fix_search_time],merge=True)
 
@@ -54,6 +53,7 @@ fts_transformation_time = Attribute('fts_transformation_time', absolute=False, m
 fts_search_task_construction_time = Attribute('fts_search_task_construction_time', absolute=False, min_wins=True, functions=[geometric_mean])
 fts_plan_reconstruction_time = Attribute('fts_plan_reconstruction_time', absolute=False, min_wins=True, functions=[geometric_mean])
 atomic_task_constructed = Attribute('atomic_task_constructed', absolute=True, min_wins=False)
+solved_without_search = Attribute('solved_without_search', absolute=True, min_wins=True)
 extra_attributes = [
     ms_algorithm_time,
     ms_atomic_algorithm_time,
@@ -62,6 +62,7 @@ extra_attributes = [
     fts_search_task_construction_time,
     fts_plan_reconstruction_time,
     atomic_task_constructed,
+    solved_without_search,
 ]
 
 attributes = list(IssueExperiment.DEFAULT_TABLE_ATTRIBUTES)
@@ -82,14 +83,6 @@ all_configs=[
 'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
 'astar-blind-transform-full-bisim-labelreduction-miasm10000-t900',
 
-'astar-blind-transform-atomic-weakbisim-labelreduction',
-'astar-blind-transform-full-weakbisim-labelreduction-dfp100-t900',
-'astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900',
-'astar-blind-transform-full-weakbisim-labelreduction-dfp10000-t900',
-'astar-blind-transform-full-weakbisim-labelreduction-miasm100-t900',
-'astar-blind-transform-full-weakbisim-labelreduction-miasm1000-t900',
-'astar-blind-transform-full-weakbisim-labelreduction-miasm10000-t900',
-
 'astarunit-blind',
 
 'astar-blind-transformunitcost-atomic',
@@ -104,7 +97,7 @@ all_configs=[
 
 ## HTML reports
 
-exp.add_report(AbsoluteReport(attributes=['coverage'],filter_algorithm=all_configs))
+exp.add_report(AbsoluteReport(attributes=attributes,filter_algorithm=all_configs))
 
 class OracleScatterPlotReport(ScatterPlotReport):
     """
@@ -200,34 +193,6 @@ exp.add_report(
         format='tex',
     ),
     outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-bisim-labelreduction-dfp1000-t900'),
-)
-
-
-## expansion plots for weakbisim
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-atomic-weakbisim-labelreduction',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-atomic-weakbisim-labelreduction'),
-)
-
-exp.add_report(
-    ScatterPlotReport(
-        filter_algorithm=[
-            'astar-blind',
-            'astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900',
-        ],
-        # get_category=lambda run1, run2: run1['domain'],
-        attributes=['expansions_until_last_jump'],
-        format='tex',
-    ),
-    outfile=os.path.join(exp.eval_dir, 'astar-blind-vs-astar-blind-transform-full-weakbisim-labelreduction-dfp1000-t900'),
 )
 
 ## expansion plots for unitcost weakbisim

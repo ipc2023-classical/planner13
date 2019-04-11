@@ -20,6 +20,7 @@ parser.add_pattern('fts_plan_reconstruction_time', 'Plan reconstruction time: (.
 
 def check_flags(content, props):
     atomic_task_constructed = False
+    solved_without_search = False
     for line in content.split('\n'):
         if line == 'Main task constructed':
             atomic_task_constructed = True
@@ -28,7 +29,9 @@ def check_flags(content, props):
             props['search_time'] = 0.01
             props['expansions'] = 0
             props['expansions_until_last_jump'] = 0
+            solved_without_search = True
     props['atomic_task_constructed'] = atomic_task_constructed
+    props['solved_without_search'] = solved_without_search
 
 parser.add_function(check_flags)
 
