@@ -14,7 +14,7 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
 from downward.reports.scatter import ScatterPlotReport
 
-from lab.reports import Attribute, geometric_mean
+from lab.reports import Attribute, geometric_mean, arithmetic_mean
 
 from lab import tools
 
@@ -98,6 +98,24 @@ all_configs=[
 ## HTML reports
 
 exp.add_report(AbsoluteReport(attributes=attributes,filter_algorithm=all_configs))
+
+exp.add_report(AbsoluteReport(attributes=[fts_transformation_time,fts_search_task_construction_time,fts_plan_reconstruction_time],filter_algorithm=[
+    'astar-blind-transform-atomic-labelreduction',
+    'astar-blind-transform-atomic-bisim-labelreduction',
+    'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
+    'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
+]),name='paper-configs-construction-time-gm')
+
+fts_transformation_time = Attribute('fts_transformation_time', absolute=False, min_wins=True, functions=[arithmetic_mean])
+fts_search_task_construction_time = Attribute('fts_search_task_construction_time', absolute=False, min_wins=True, functions=[arithmetic_mean])
+fts_plan_reconstruction_time = Attribute('fts_plan_reconstruction_time', absolute=False, min_wins=True, functions=[arithmetic_mean])
+
+exp.add_report(AbsoluteReport(attributes=[fts_transformation_time,fts_search_task_construction_time,fts_plan_reconstruction_time],filter_algorithm=[
+    'astar-blind-transform-atomic-labelreduction',
+    'astar-blind-transform-atomic-bisim-labelreduction',
+    'astar-blind-transform-full-bisim-labelreduction-dfp1000-t900',
+    'astar-blind-transform-full-bisim-labelreduction-miasm1000-t900',
+]),name='paper-configs-construction-time-am')
 
 class OracleScatterPlotReport(ScatterPlotReport):
     """
