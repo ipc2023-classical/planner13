@@ -29,6 +29,7 @@ namespace task_transformation {
         const std::vector<int> & mapping_to_scc,
         const std::vector<int> & goal_distances,
         const std::vector<bool> &ignore_label_group,
+        const std::vector<bool> &ignore_label_group_if_tau,
         std::vector<Signature> &signatures,
         const std::vector<int> &state_to_group,
         const std::vector<std::vector<int>> &can_reach_via_tau_path) const;

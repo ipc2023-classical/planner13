@@ -137,6 +137,7 @@ struct Signature {
         int num_states = ts.get_size();
 
         vector<bool> ignore_label_group(ts.num_label_groups(), false);
+        vector<bool> ignore_label_group_if_tau(ts.num_label_groups(), false);
 
         // Step 1: Compute tau graph
         vector<vector<int>> tau_graph(num_states);
@@ -151,13 +152,20 @@ struct Signature {
                                            fts.get_labels().get_label_cost(label) == 0);
                                       });
 
+            ignore_label_group_if_tau [label_group_index] = ignore_irrelevant_tau_groups &&
+                std::all_of(gat.label_group.begin(), gat.label_group.end(),
+                            [&](int label) {
+                                return !fts.is_externally_relevant_label(LabelID(label), index);
+                            });
+
+
             if(is_tau) {
-                ignore_label_group [label_group_index] = ignore_irrelevant_tau_groups &&
-                    std::all_of(gat.label_group.begin(), gat.label_group.end(),
-                                [&](int label) {
-                                    return fts.is_tau_label(index, LabelID(label)) &&
-                                    !fts.is_externally_relevant_label(LabelID(label), index);
-                                });
+               ignore_label_group [label_group_index] = ignore_irrelevant_tau_groups &&
+                   ignore_label_group_if_tau [label_group_index] &&
+                   std::any_of(gat.label_group.begin(), gat.label_group.end(),
+                               [&](int label) {
+                                   return fts.is_tau_label(index, LabelID(label));
+                               });
 
                 // cout << "Tau label group!" << endl;
                 for (const Transition &transition : transitions) {
@@ -265,7 +273,7 @@ struct Signature {
             stable = true;
 
             signatures.clear();
-            compute_signatures(ts, mapping_to_scc, goal_distances, ignore_label_group, signatures, scc_to_group, can_reach_via_tau_path);
+            compute_signatures(ts, mapping_to_scc, goal_distances, ignore_label_group, ignore_label_group_if_tau, signatures, scc_to_group, can_reach_via_tau_path);
 
             // Verify size of signatures and presence of sentinels.
             assert(static_cast<int>(signatures.size()) == num_sccs + 2);
@@ -385,6 +393,7 @@ struct Signature {
         const vector<int> & mapping_to_scc,
         const vector<int> &goal_distances,
         const vector<bool> &ignore_label_group,
+        const vector<bool> &ignore_label_group_if_tau,
         vector<Signature> &signatures,
         const vector<int> &state_to_group,
         const vector<vector<int>> &can_reach_via_tau_path) const {
@@ -410,6 +419,13 @@ struct Signature {
                     int transition_src = mapping_to_scc[transition.src];
                     int transition_target = mapping_to_scc[transition.target];
 
+                    if (ignore_label_group_if_tau[label_group_counter] &&
+                        std::find(can_reach_via_tau_path[transition_target].begin(),
+                                  can_reach_via_tau_path[transition_target].end(),
+                                  transition_src)
+                        != can_reach_via_tau_path[transition_target].end()){
+                        continue;
+                    }
                     assert(signatures[transition_src + 1].state == transition_src);
 
                     int target_group = state_to_group[transition_target];
