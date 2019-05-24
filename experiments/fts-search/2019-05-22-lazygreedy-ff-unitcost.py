@@ -47,7 +47,6 @@ def main(revisions=None):
         environment = LocalEnvironment(processes=4)
 
     configs = {
-        ### TODO: fix names in future (-> transformunitcost)
         IssueConfig('lazy-ff-transformunitcost-atomic', ["--transform", "cost(cost_type=one)", "--search", 'lazy_greedy([ff(cost_type=one)], cost_type=one)']),
         IssueConfig('lazy-ff-transformunitcost-atomic-labelreduction', ['--transform', 'transform_merge_and_shrink(label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=false,run_main_loop=false,max_time=900,cost_type=one,prune_transitions_from_goal=true,prune_transitions_from_goal=true)', '--search',  'lazy_greedy([ff(cost_type=one)], cost_type=one)']),
         IssueConfig('lazy-ff-transformunitcost-atomic-weakbisim-labelreduction', ['--transform', 'transform_merge_and_shrink(shrink_strategy=shrink_weak_bisimulation(ignore_irrelevant_tau_groups=false),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=false,max_time=900,cost_type=one,prune_transitions_from_goal=true,prune_transitions_from_goal=true)', '--search',  'lazy_greedy([ff(cost_type=one)], cost_type=one)']),
