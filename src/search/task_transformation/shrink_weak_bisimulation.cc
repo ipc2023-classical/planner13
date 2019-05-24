@@ -91,7 +91,8 @@ struct Signature {
     ShrinkWeakBisimulation::ShrinkWeakBisimulation(const Options &opts) :
         ShrinkStrategy(),
         preserve_optimality (opts.get<bool>("preserve_optimality")),
-        ignore_irrelevant_tau_groups (opts.get<bool>("ignore_irrelevant_tau_groups")){
+        ignore_irrelevant_tau_groups (opts.get<bool>("ignore_irrelevant_tau_groups")),
+        apply_haslum_rule (opts.get<bool>("apply_haslum_rule")) {
     }
 
     void ShrinkWeakBisimulation::dump_strategy_specific_options() const {
@@ -136,9 +137,9 @@ struct Signature {
         const TransitionSystem &ts = fts.get_ts(index);
         int num_states = ts.get_size();
 
-        vector<bool> ignore_label_group(ts.num_label_groups(), false);
-        vector<bool> ignore_label_group_if_tau(ts.num_label_groups(), false);
-
+        vector<bool> tau_label_group(ts.num_label_groups(), false);
+        vector<bool> outside_relevant_group (ts.num_label_groups(), false);
+        
         // Step 1: Compute tau graph
         vector<vector<int>> tau_graph(num_states);
         int label_group_index = 0;
@@ -152,21 +153,16 @@ struct Signature {
                                            fts.get_labels().get_label_cost(label) == 0);
                                       });
 
-            ignore_label_group_if_tau [label_group_index] = ignore_irrelevant_tau_groups &&
-                std::all_of(gat.label_group.begin(), gat.label_group.end(),
-                            [&](int label) {
-                                return !fts.is_externally_relevant_label(LabelID(label), index);
-                            });
-
+            tau_label_group [label_group_index] = is_tau;
+            if (ignore_irrelevant_tau_groups || apply_haslum_rule) { 
+                outside_relevant_group [label_group_index] =
+                    std::any_of(gat.label_group.begin(), gat.label_group.end(),
+                                [&](int label) {
+                                    return fts.is_externally_relevant_label(LabelID(label), index);
+                                });
+            }
 
             if(is_tau) {
-               ignore_label_group [label_group_index] = ignore_irrelevant_tau_groups &&
-                   ignore_label_group_if_tau [label_group_index] &&
-                   std::any_of(gat.label_group.begin(), gat.label_group.end(),
-                               [&](int label) {
-                                   return fts.is_tau_label(index, LabelID(label));
-                               });
-
                 // cout << "Tau label group!" << endl;
                 for (const Transition &transition : transitions) {
                     tau_graph[transition.target].push_back(transition.src);
@@ -273,7 +269,7 @@ struct Signature {
             stable = true;
 
             signatures.clear();
-            compute_signatures(ts, mapping_to_scc, goal_distances, ignore_label_group, ignore_label_group_if_tau, signatures, scc_to_group, can_reach_via_tau_path);
+            compute_signatures(ts, mapping_to_scc, goal_distances, tau_label_group, outside_relevant_group, signatures, scc_to_group, can_reach_via_tau_path);
 
             // Verify size of signatures and presence of sentinels.
             assert(static_cast<int>(signatures.size()) == num_sccs + 2);
@@ -339,21 +335,65 @@ struct Signature {
             }
         }
 
+
         /* Reduce memory pressure before generating the equivalence relation since this is
            one of the code parts relevant to peak memory. */
         utils::release_vector_memory(signatures);
 
 
         // Step 7: Generate final result.
-        StateEquivalenceRelation equivalence_relation;
-        equivalence_relation.resize(num_groups);
-        for (int state = 0; state < num_states; ++state) {
-            int group = scc_to_group[mapping_to_scc[state]];
-            if (group != -1) {
-                assert(group >= 0 && group < num_groups);
-                equivalence_relation[group].push_front(state);
+
+        // Check if it fullfills the condition by Haslum's et al. If it does, remove the
+        // variable by mapping all states to a single group.
+        int initial_state = ts.get_init_state();
+        bool abstract_away_variable = false;
+        if (apply_haslum_rule &&
+            goal_distances[mapping_to_scc[initial_state]] == 0) {
+            int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];
+            abstract_away_variable = true;
+            int label_group_counter = 0;
+            for (const GroupAndTransitions &gat : ts) {
+                if (outside_relevant_group [label_group_counter]) {
+                    const vector<Transition> &transitions = gat.transitions;
+                    bool found = false;
+                    for (const Transition &transition : transitions) {
+                        if (scc_to_group[mapping_to_scc[transition.src]] == initial_state_group &&
+                            scc_to_group[mapping_to_scc[transition.target]] == initial_state_group) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        abstract_away_variable = false;
+                        break;
+                    }
+                }
+        
+                ++label_group_counter;
             }
         }
+
+        StateEquivalenceRelation equivalence_relation;
+        if (abstract_away_variable) {
+            equivalence_relation.resize(1);
+            for (int state = 0; state < num_states; ++state) {
+                equivalence_relation[0].push_front(state);
+            }
+        } else {
+            equivalence_relation.resize(num_groups);
+            for (int state = 0; state < num_states; ++state) {
+                int group = scc_to_group[mapping_to_scc[state]];
+                if (group != -1) {
+                    assert(group >= 0 && group < num_groups);
+                    equivalence_relation[group].push_front(state);
+                }
+            }
+        }
+        
+
+        
+
+        
 
         return equivalence_relation;
     }
@@ -392,8 +432,8 @@ struct Signature {
         const TransitionSystem &ts,
         const vector<int> & mapping_to_scc,
         const vector<int> &goal_distances,
-        const vector<bool> &ignore_label_group,
-        const vector<bool> &ignore_label_group_if_tau,
+        const vector<bool> &tau_label_group,
+        const vector<bool> &outside_relevant_group,
         vector<Signature> &signatures,
         const vector<int> &state_to_group,
         const vector<vector<int>> &can_reach_via_tau_path) const {
@@ -413,13 +453,16 @@ struct Signature {
         // Step 2: Add transition information.
         int label_group_counter = 0;
         for (const GroupAndTransitions &gat : ts) {
-            if (!ignore_label_group[label_group_counter]) {
+            if (!ignore_irrelevant_tau_groups ||
+                !tau_label_group[label_group_counter]
+                || outside_relevant_group [label_group_counter]) {
                 const vector<Transition> &transitions = gat.transitions;
                 for (const Transition &transition : transitions) {
                     int transition_src = mapping_to_scc[transition.src];
                     int transition_target = mapping_to_scc[transition.target];
 
-                    if (ignore_label_group_if_tau[label_group_counter] &&
+                    if (ignore_irrelevant_tau_groups &&
+                        !outside_relevant_group[label_group_counter] &&
                         std::find(can_reach_via_tau_path[transition_target].begin(),
                                   can_reach_via_tau_path[transition_target].end(),
                                   transition_src)
@@ -467,7 +510,6 @@ struct Signature {
     bool ShrinkWeakBisimulation::apply_shrinking_transformation(FactoredTransitionSystem & fts,
                                                                 Verbosity verbosity,
                                                                 int &  check_only_index) const  {
-
         assert(!fts.remove_irrelevant_labels());
 
         if (verbosity == Verbosity::VERBOSE) {
@@ -609,6 +651,11 @@ struct Signature {
                                 "During weak bisimulation, label groups that are tau and externally irrelevant are ignored",
                                 "false");
 
+        parser.add_option<bool>("apply_haslum_rule",
+                                "After weak bisimulation, eliminate variable if the initial state has self-loops with all outside relevant variables",
+                                "false");
+
+
         Options opts = parser.parse();
 
         if (!parser.dry_run())
@@ -622,6 +669,7 @@ struct Signature {
     shared_ptr<ShrinkStrategy> ShrinkWeakBisimulation::create_default() {
         Options opts;
         opts.set<bool> ("preserve_optimality", false);
+        opts.set<bool> ("apply_haslum_rule", false);
         opts.set<bool> ("ignore_irrelevant_tau_groups", false);
 
         return make_shared<ShrinkWeakBisimulation>(opts);
