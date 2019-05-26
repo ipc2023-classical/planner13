@@ -323,6 +323,22 @@ bool  FactoredTransitionSystem::is_externally_relevant_label (LabelID label, int
 }
 
 
+int FactoredTransitionSystem::single_ts_effect (LabelID label) const {
+    int ts = -2;
+    for (size_t index = 0; index < transition_systems.size(); ++index) {
+            if(transition_systems[index]->is_relevant_label(label)) {
+                if(ts == -2){
+                    ts = index;
+                } else {
+                    return -1;
+                }
+            }
+    }
+
+    return ts;
+}
+
+
 
 bool FactoredTransitionSystem::remove_irrelevant_labels () {
     std::vector<LabelID> irrelevant_labels;

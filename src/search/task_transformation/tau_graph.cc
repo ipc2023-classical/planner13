@@ -182,4 +182,40 @@ namespace task_transformation {
         return result_path;
 
     }
+
+
+
+    bool
+    TauGraph::path_exists (int source, const std::vector<bool> & target) const {
+        assert (source >= 0);
+        assert((size_t)source < target.size());
+        if (target[source]) {
+            return true;
+        }
+        int num_states = adjacency_matrix.size();
+
+        vector<bool> seen (num_states, false);
+        seen[source] = true;
+        
+        vector<int> queue;
+        queue.push_back (source);
+        
+        for (size_t i = 0; i < queue.size(); ++i) {
+            int state = queue[i];
+
+            for (const TauTransition &transition : adjacency_matrix[state]) {
+                if (!seen [transition.target]) {
+                    if (target[transition.target]) {
+                        return true;
+                    }                    
+                    seen [transition.target] = true;
+                    queue.push_back(transition.target);
+                }
+            }
+        }
+
+        return false;
+
+    }
+
 }

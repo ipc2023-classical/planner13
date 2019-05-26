@@ -114,11 +114,14 @@ namespace task_transformation {
             if (check_only_index >= 0) {
                 check_only_index = fts_m.transition_system_all_mapping[check_only_index];
             }
+
+            vector<TauShrinking *> label_only_relevant_for;
             
             // 2) Add tau plan reconstruction step 
             fts.add_plan_reconstruction(
                 make_shared<PlanReconstructionTauPath>(fts_m, PlanState(move(initial_state_values)),
-                                                       move(tau_shrinking_reconstruction)));
+                                                       move(tau_shrinking_reconstruction),
+                                                       move(label_only_relevant_for)));
 
             // 3) Apply abstractions: 
             for (int index : equivalences_to_apply) {

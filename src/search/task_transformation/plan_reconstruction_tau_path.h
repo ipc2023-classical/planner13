@@ -37,8 +37,7 @@ class TauShrinking {
     // Tau label graph of the predecessor task
     std::unique_ptr<TauGraph> tau_graph;
     
-    // transition system of the predecessor class: needed to know from which states a
-    // label is applicable.
+    // Transition system of the predecessor class: needed to know from which states a label is applicable.
     std::unique_ptr<task_representation::TransitionSystem> transition_system; 
 
     // Mapping from states to abstract states
@@ -53,6 +52,7 @@ class TauShrinking {
                           std::vector<int> & new_label_path,
                           std::vector<PlanState> & new_traversed_states) const ;
 
+
 public:
     TauShrinking (int ts_index_predecessor_, int ts_index_successor_,
                   std::unique_ptr<TauGraph> tau_graph_,
@@ -66,12 +66,19 @@ public:
         }
 
 
+    int get_ts_index_predecessor() const {
+        return ts_index_predecessor;
+    }
     void apply_label_mapping(const LabelMapping & label_mapping);
 
         
-    void reconstruct_step(int label, const PlanState & abstract_target, PlanState & concrete_target,
+    void reconstruct_step(int label,
+                          const PlanState & abstract_target, PlanState & concrete_target,
                           std::vector<int> & new_label_path,
                           std::vector<PlanState> & new_traversed_states) const ;
+
+    bool has_tau_path(const PlanState & concrete_source, 
+                      const PlanState & abstract_target) const;
 
     void reconstruct_goal_step(std::vector<int> & new_label_path,
                                std::vector<PlanState> & new_traversed_states) const ;
@@ -81,13 +88,17 @@ public:
 class PlanReconstructionTauPath : public PlanReconstruction {
     PlanState initial_state;
     std::vector<std::unique_ptr<TauShrinking> > tau_transformations;
-
     std::vector<int> transition_system_mapping;
+    
+    std::vector<TauShrinking *> label_only_relevant_for;
+
 public:
 PlanReconstructionTauPath(const FTSMapping & fts_mapping, PlanState initial_state_,
-                              std::vector<std::unique_ptr<TauShrinking> > && transformations) :
+                          std::vector<std::unique_ptr<TauShrinking> > && transformations,
+                          std::vector<TauShrinking *> && label_only_relevant_for) :
     initial_state(initial_state_), tau_transformations(move(transformations)),
-        transition_system_mapping(fts_mapping.transition_system_mapping) {
+        transition_system_mapping(fts_mapping.transition_system_mapping),
+        label_only_relevant_for(move(label_only_relevant_for)) {
     }
     
     virtual ~PlanReconstructionTauPath() = default;

@@ -579,6 +579,7 @@ struct Signature {
             }
       }
 
+
       bool changes = !(exclude_transition_systems.empty());
       if (!equivalences_to_apply.empty() || !exclude_transition_systems.empty() ){
           cout << "WeakBisimulation applicable in " <<
@@ -598,10 +599,27 @@ struct Signature {
               check_only_index = fts_m.transition_system_all_mapping[check_only_index];
           }
 
+          vector<TauShrinking *> label_only_relevant_for;
+          if (ignore_irrelevant_tau_groups || apply_haslum_rule) {
+              const auto & labels = fts.get_labels();
+              label_only_relevant_for.resize(labels.get_size(), nullptr);
+              for (LabelID l (0); l < labels.get_size(); ++l){
+                  int ts = fts.single_ts_effect(l);
+                  if (ts >= 0) {
+                      for (auto & tsr : tau_shrinking_reconstruction) {
+                          if (ts == tsr->get_ts_index_predecessor()) {
+                              label_only_relevant_for[l] = tsr.get();
+                          }
+                      }
+                  }
+              }
+          }
+          
           // 2) Add tau plan reconstruction step
           fts.add_plan_reconstruction(
               make_shared<PlanReconstructionTauPath>(fts_m, PlanState(move(initial_state_values)),
-                                                     move(tau_shrinking_reconstruction)));
+                                                     move(tau_shrinking_reconstruction),
+                                                     move(label_only_relevant_for)));
 
 
           // 3) Apply abstractions:

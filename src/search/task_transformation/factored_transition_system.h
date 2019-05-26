@@ -203,13 +203,13 @@ public:
 
     bool is_irrelevant_label(task_representation::LabelID label) const;
     bool is_externally_relevant_label(task_representation::LabelID label, int index) const;
+    int single_ts_effect(task_representation::LabelID label) const;
 
 
     bool remove_irrelevant_labels();
     std::vector<int> remove_labels(const std::vector<task_representation::LabelID> & labels);
     bool remove_irrelevant_transition_systems(Verbosity verbosity);
     void remove_transitions_from_goal();
-
 
 
     bool is_tau_label(int index, task_representation::LabelID label) const;

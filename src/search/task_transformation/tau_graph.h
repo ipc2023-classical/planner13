@@ -43,6 +43,9 @@ namespace task_transformation {
         // returns the path as a pair of label, target transitions.
         std::vector<std::pair<task_representation::LabelID, int>>
             find_shortest_path (int source, const std::vector<bool> & target) const;
+
+        bool path_exists (int source, const std::vector<bool> & target) const;
+        
         void apply_label_mapping(const LabelMapping & label_mapping); 
     };
 
