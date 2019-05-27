@@ -376,11 +376,13 @@ struct Signature {
         StateEquivalenceRelation equivalence_relation;
         if (abstract_away_variable) {
             cout << "Variable abstracted by Haslum's rule." << endl;
-            equivalence_relation.resize(1);
-            for (int state = 0; state < num_states; ++state) {
-                equivalence_relation[0].push_front(state);
-            }
-        } else {
+            cout << "Haslum's rule disabled because plan reconstruction is not implemented." << endl;
+        }    
+            //     equivalence_relation.resize(1);
+            //     for (int state = 0; state < num_states; ++state) {
+            //         equivalence_relation[0].push_front(state);
+            //     }
+            // } else {
             equivalence_relation.resize(num_groups);
             for (int state = 0; state < num_states; ++state) {
                 int group = scc_to_group[mapping_to_scc[state]];
@@ -389,9 +391,9 @@ struct Signature {
                     equivalence_relation[group].push_front(state);
                 }
             }
-        }
+            // }
         
-
+        
         
 
         
