@@ -69,6 +69,10 @@ public:
     int get_ts_index_predecessor() const {
         return ts_index_predecessor;
     }
+
+    int get_ts_index_successor() const {
+        return ts_index_successor;
+    }
     void apply_label_mapping(const LabelMapping & label_mapping);
 
         

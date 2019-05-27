@@ -66,6 +66,7 @@ void TauShrinking::
 reconstruct_step(int label, const PlanState & abstract_target, PlanState & concrete_target,
                  std::vector<int> & new_label_path,
                  std::vector<PlanState> & new_traversed_states) const {
+    //cout << "Reconstruct step " << ts_index_predecessor << endl;
     //cout << new_traversed_states.back() << endl;
     int source = new_traversed_states.back()[ts_index_predecessor];
     //cout << "Projected: " << source << " -> " << abstraction[source] <<endl;
@@ -98,7 +99,7 @@ reconstruct_step(int label, const PlanState & abstract_target, PlanState & concr
     int concrete_source = new_traversed_states.back()[ts_index_predecessor];
     int projected_concrete_target = get_concrete_target(concrete_source, label, projected_abstract_target );
 
-    //cout << "Concrete target: " << projected_concrete_target << " -> " << abstraction[projected_concrete_target] << endl;
+   // cout << "Concrete target: " << projected_concrete_target << " -> " << abstraction[projected_concrete_target] << endl;
     concrete_target.set(ts_index_predecessor, projected_concrete_target);
 }
 
@@ -139,6 +140,13 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
     const std::vector<int> & label_path = plan.get_labels ();
     const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
     cout << "TauPath reconstruction of plan with " << label_path.size() << " steps" << endl;
+
+
+    //cout << " Transition system mapping" << endl;
+    //for (size_t i = 0; i < transition_system_mapping.size(); ++i) {
+    //    cout << "    " << i << " -> " << transition_system_mapping[i] << endl;
+    //}
+    
     assert(label_path.size() + 1 == traversed_states.size());
 
     std::vector<int> new_label_path;
@@ -155,19 +163,23 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         //cout << "Step: " << step << endl;
         int label = label_path[step];
 
+        
         assert(step + 1 < traversed_states.size());
         PlanState abstract_target = PlanState(traversed_states[step+1], transition_system_mapping);
         PlanState concrete_target = PlanState(traversed_states[step+1], transition_system_mapping);
 
-        
-        // Skip labels with an effect on a single transition system if there is a tau path to the target
+        // Skip labels with an effect on a single transition system if there is a tau path
+        // to the target
         assert ((size_t)label < label_only_relevant_for.size());
         if (!label_only_relevant_for.empty() && label_only_relevant_for[label] &&
             label_only_relevant_for[label]->has_tau_path(new_traversed_states.back(),
                                                          concrete_target) ){
-                continue;
+    //        cout << "Ignoring transition " << label
+    //             << " because it is only relevant for "
+    //             << label_only_relevant_for[label]->get_ts_index_predecessor()  << " " << label_only_relevant_for[label]->get_ts_index_successor() << endl;
+            continue;
         }
-        //cout << concrete_target << " -> " << abstract_target << endl;
+        //cout << "Not ignoring transition" << label << endl;
         for (const auto & tau_shrinking : tau_transformations) {
             tau_shrinking->reconstruct_step(label, abstract_target, concrete_target, new_label_path, new_traversed_states);
         }
@@ -182,10 +194,10 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         tau_shrinking->reconstruct_goal_step(new_label_path, new_traversed_states);
     }
 
-    //cout << "Tau path " << new_traversed_states[0];
-    //for(size_t step = 0; step < new_label_path.size(); ++step) {
-    //    cout << " --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
-    //}
+   // cout << "Tau path " << new_traversed_states[0];
+   // for(size_t step = 0; step < new_label_path.size(); ++step) {
+    //   cout << "\n    --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
+   // }
     //cout << endl;
 
     plan.set_plan(move(new_traversed_states), move(new_label_path));

@@ -607,7 +607,7 @@ struct Signature {
                   int ts = fts.single_ts_effect(l);
                   if (ts >= 0) {
                       for (auto & tsr : tau_shrinking_reconstruction) {
-                          if (ts == tsr->get_ts_index_predecessor()) {
+                          if (ts == tsr->get_ts_index_successor()) {
                               label_only_relevant_for[l] = tsr.get();
                           }
                       }

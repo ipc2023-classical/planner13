@@ -80,15 +80,19 @@ PlanReconstructionMergeAndShrink::PlanReconstructionMergeAndShrink(
                 LabelID original_label = search_task->get_label (op);
                 cerr<< "  " << g_sas_task()->get_operator_name(original_label)
                      << " (" << original_label << ") reduced to "
-                     << label_map->get_reduced_label(original_label);
+                    << label_map->get_reduced_label(original_label) << endl;
 
-                auto result_state = state_registry.get_successor_state(initial_state, op);
-                if (match_states(result_state, target)) {
-                    cerr<< "   state matches!" << endl;
-                }else{
-                    cerr << endl;
+                
+                if (label == label_map->get_reduced_label(original_label)) {
+                    auto result_state = state_registry.get_successor_state(initial_state, op);
+                
+                    for(size_t i = 0; i < merge_and_shrink_representations.size(); ++i) {
+                        int value = merge_and_shrink_representations[i]->get_value(result_state);
+                        if (value != target[i])  {
+                            cerr << "      state does not match for TS " << i << ": " << value << " " << target[i] << endl;
+                        }
+                    }
                 }
-
             }
             utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
         }
