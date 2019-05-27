@@ -1,4 +1,3 @@
-
 #include "plan_reconstruction_tau_path.h"
 
 #include <algorithm>    // std::count
@@ -106,6 +105,27 @@ reconstruct_step(int label, const PlanState & abstract_target, PlanState & concr
 
 
 
+    bool TauShrinking::has_tau_path(int label, const PlanState & concrete_source,
+                                    const PlanState & abstract_target) const {
+        int source = concrete_source[ts_index_predecessor];
+
+        assert(source >= 0);
+        int projected_abstract_target = (ts_index_successor >= 0 ?  abstract_target[ts_index_predecessor] : -1);
+
+
+        int num_states = transition_system->get_size();
+    
+        // Find the right target
+
+        assert(abstraction.size() == (size_t)num_states);
+        std::vector<bool> targets(num_states, false);
+        for (int s = 0; s < num_states; ++s) {
+            targets[s] = is_target(s, label, projected_abstract_target);
+        }
+
+        return tau_graph->path_exists(source, targets);
+    }
+
 
     
 bool TauShrinking::has_tau_path(const PlanState & concrete_source,
@@ -114,9 +134,13 @@ bool TauShrinking::has_tau_path(const PlanState & concrete_source,
 
     assert(source >= 0);
     int projected_abstract_target = (ts_index_successor >= 0 ?  abstract_target[ts_index_predecessor] : -1);
+
+
     int num_states = transition_system->get_size();
+    
     // Find the right target
 
+    assert(abstraction.size() == (size_t)num_states);
     std::vector<bool> targets(num_states, false);
     for (int s = 0; s < num_states; ++s) {
         targets[s] = (abstraction[s] == projected_abstract_target);
@@ -141,6 +165,12 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
     const std::vector<PlanState> & traversed_states = plan.get_traversed_states ();
     cout << "TauPath reconstruction of plan with " << label_path.size() << " steps" << endl;
 
+    //cout << "Input path " << traversed_states[0];
+    //for(size_t step = 0; step < label_path.size(); ++step) {
+    //    cout << "\n    --" << label_path[step] << "--> " << traversed_states[step+1];
+   // }
+    //cout << endl;
+
 
     //cout << " Transition system mapping" << endl;
     //for (size_t i = 0; i < transition_system_mapping.size(); ++i) {
@@ -160,7 +190,8 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
     assert(initial_state.is_complete());
 
     for(size_t step = 0; step < label_path.size(); ++step) {
-        //cout << "Step: " << step << endl;
+      //  cout << "Step: " << step << endl;
+       
         int label = label_path[step];
 
         
@@ -171,15 +202,17 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         // Skip labels with an effect on a single transition system if there is a tau path
         // to the target
         assert ((size_t)label < label_only_relevant_for.size());
+
+
         if (!label_only_relevant_for.empty() && label_only_relevant_for[label] &&
-            label_only_relevant_for[label]->has_tau_path(new_traversed_states.back(),
-                                                         concrete_target) ){
-    //        cout << "Ignoring transition " << label
-    //             << " because it is only relevant for "
-    //             << label_only_relevant_for[label]->get_ts_index_predecessor()  << " " << label_only_relevant_for[label]->get_ts_index_successor() << endl;
+            !label_only_relevant_for[label]->has_tau_path(label, new_traversed_states.back(),
+                                                          concrete_target) ){
+          /*  cout << "Ignoring transition " << label
+                 << " because it is only relevant for "
+                 << label_only_relevant_for[label]->get_ts_index_predecessor()  << " " << label_only_relevant_for[label]->get_ts_index_successor() << endl;*/
             continue;
         }
-        //cout << "Not ignoring transition" << label << endl;
+ 	//       cout << "Not ignoring transition " << label << "(" << (bool)(label_only_relevant_for[label]) << ")"  << endl;
         for (const auto & tau_shrinking : tau_transformations) {
             tau_shrinking->reconstruct_step(label, abstract_target, concrete_target, new_label_path, new_traversed_states);
         }
@@ -194,11 +227,11 @@ void PlanReconstructionTauPath::reconstruct_plan(Plan &plan) const {
         tau_shrinking->reconstruct_goal_step(new_label_path, new_traversed_states);
     }
 
-   // cout << "Tau path " << new_traversed_states[0];
-   // for(size_t step = 0; step < new_label_path.size(); ++step) {
-    //   cout << "\n    --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
-   // }
-    //cout << endl;
+    //cout << "Tau path " << new_traversed_states[0];
+    //for(size_t step = 0; step < new_label_path.size(); ++step) {
+    //    cout << "\n    --" << new_label_path[step] << "--> " << new_traversed_states[step+1];
+    //}
+    cout << endl;
 
     plan.set_plan(move(new_traversed_states), move(new_label_path));
 }

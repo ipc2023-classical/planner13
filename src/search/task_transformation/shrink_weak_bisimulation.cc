@@ -375,6 +375,7 @@ struct Signature {
 
         StateEquivalenceRelation equivalence_relation;
         if (abstract_away_variable) {
+            cout << "Variable abstracted by Haslum's rule." << endl;
             equivalence_relation.resize(1);
             for (int state = 0; state < num_states; ++state) {
                 equivalence_relation[0].push_front(state);

@@ -81,7 +81,12 @@ public:
                           std::vector<int> & new_label_path,
                           std::vector<PlanState> & new_traversed_states) const ;
 
-    bool has_tau_path(const PlanState & concrete_source, 
+    bool has_tau_path(const PlanState & concrete_source,
+                      const PlanState & abstract_target) const;
+
+    
+    bool has_tau_path(int label,
+                      const PlanState & concrete_source,
                       const PlanState & abstract_target) const;
 
     void reconstruct_goal_step(std::vector<int> & new_label_path,

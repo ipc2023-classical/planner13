@@ -47,9 +47,7 @@ namespace task_transformation {
             }
 
             if(is_own) {
-
                 for (const auto & trans : gt.transitions) {
-
                     auto pos = adjacency_map[trans.src].find(trans.target);
                     if (pos == adjacency_map[trans.src].end()) {
                         adjacency_map[trans.src].insert(
@@ -189,10 +187,12 @@ namespace task_transformation {
     TauGraph::path_exists (int source, const std::vector<bool> & target) const {
         assert (source >= 0);
         assert((size_t)source < target.size());
+        
         if (target[source]) {
             return true;
         }
         int num_states = adjacency_matrix.size();
+        assert ((size_t)num_states == target.size());
 
         vector<bool> seen (num_states, false);
         seen[source] = true;
@@ -202,7 +202,6 @@ namespace task_transformation {
         
         for (size_t i = 0; i < queue.size(); ++i) {
             int state = queue[i];
-
             for (const TauTransition &transition : adjacency_matrix[state]) {
                 if (!seen [transition.target]) {
                     if (target[transition.target]) {
