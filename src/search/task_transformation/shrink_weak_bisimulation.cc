@@ -377,6 +377,7 @@ struct Signature {
         if (abstract_away_variable) {
             cout << "Variable abstracted by Haslum's rule." << endl;
             cout << "Haslum's rule disabled because plan reconstruction is not implemented." << endl;
+            apply_haslum_rule = false; // TODO: remove once we apply the rule
         }    
             //     equivalence_relation.resize(1);
             //     for (int state = 0; state < num_states; ++state) {
