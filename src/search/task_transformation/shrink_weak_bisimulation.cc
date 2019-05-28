@@ -345,40 +345,43 @@ struct Signature {
 
         // Check if it fullfills the condition by Haslum's et al. If it does, remove the
         // variable by mapping all states to a single group.
-        int initial_state = ts.get_init_state();
-        bool abstract_away_variable = false;
-        if (apply_haslum_rule &&
-            goal_distances[mapping_to_scc[initial_state]] == 0) {
-            int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];
-            abstract_away_variable = true;
-            int label_group_counter = 0;
-            for (const GroupAndTransitions &gat : ts) {
-                if (outside_relevant_group [label_group_counter]) {
-                    const vector<Transition> &transitions = gat.transitions;
-                    bool found = false;
-                    for (const Transition &transition : transitions) {
-                        if (scc_to_group[mapping_to_scc[transition.src]] == initial_state_group &&
-                            scc_to_group[mapping_to_scc[transition.target]] == initial_state_group) {
-                            found = true;
+        StateEquivalenceRelation equivalence_relation;
+
+        if (num_groups > 1) {
+            bool abstract_away_variable = false;
+            int initial_state = ts.get_init_state();
+            if (apply_haslum_rule &&
+                goal_distances[mapping_to_scc[initial_state]] == 0) {
+                int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];
+                abstract_away_variable = true;
+                int label_group_counter = 0;
+                for (const GroupAndTransitions &gat : ts) {
+                    if (outside_relevant_group [label_group_counter]) {
+                        const vector<Transition> &transitions = gat.transitions;
+                        bool found = false;
+                        for (const Transition &transition : transitions) {
+                            if (scc_to_group[mapping_to_scc[transition.src]] == initial_state_group &&
+                                scc_to_group[mapping_to_scc[transition.target]] == initial_state_group) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            abstract_away_variable = false;
                             break;
                         }
                     }
-                    if (!found) {
-                        abstract_away_variable = false;
-                        break;
-                    }
-                }
         
-                ++label_group_counter;
+                    ++label_group_counter;
+                }
+            }
+
+            if (abstract_away_variable) {
+                cout << "Variable abstracted by Haslum's rule." << endl;
+                cout << "Haslum's rule disabled because plan reconstruction is not implemented." << endl;
+                apply_haslum_rule = false; // TODO: remove once we apply the rule
             }
         }
-
-        StateEquivalenceRelation equivalence_relation;
-        if (abstract_away_variable) {
-            cout << "Variable abstracted by Haslum's rule." << endl;
-            cout << "Haslum's rule disabled because plan reconstruction is not implemented." << endl;
-            apply_haslum_rule = false; // TODO: remove once we apply the rule
-        }    
             //     equivalence_relation.resize(1);
             //     for (int state = 0; state < num_states; ++state) {
             //         equivalence_relation[0].push_front(state);
