@@ -17,8 +17,10 @@ namespace task_transformation {
 bool TauShrinking::is_target(int s, int label, int abstract_target) const {
     for (const Transition & tr : transition_system->get_transitions_with_label(label) ) {
         if (tr.src == s &&  (abstract_target == -1 || abstraction[tr.target] == abstract_target)) {
+            if (std::find (states_forbidden_by_haslum_rule.begin(), states_forbidden_by_haslum_rule.end(), tr.target) ==  states_forbidden_by_haslum_rule.end()) {
             return true;
         }
+    }
     }
     return false;
 }
@@ -28,7 +30,9 @@ int TauShrinking::get_concrete_target(int s, int label, int abstract_target) con
     assert(is_target(s, label, abstract_target));
     for (const Transition & tr : transition_system->get_transitions_with_label(label) ) {
         if (tr.src == s &&  (abstract_target == -1 || abstraction[tr.target] == abstract_target)) {
+                        if (std::find (states_forbidden_by_haslum_rule.begin(), states_forbidden_by_haslum_rule.end(), tr.target) ==  states_forbidden_by_haslum_rule.end()) {
             return tr.target;
+                        }
         }
     }
     return -1;

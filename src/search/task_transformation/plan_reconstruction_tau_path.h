@@ -43,6 +43,7 @@ class TauShrinking {
     // Mapping from states to abstract states
     std::vector<int> abstraction;
     
+    std::vector<int> states_forbidden_by_haslum_rule;
     bool is_target(int s, int label, int abstract_target) const;
 
 
@@ -57,12 +58,13 @@ public:
     TauShrinking (int ts_index_predecessor_, int ts_index_successor_,
                   std::unique_ptr<TauGraph> tau_graph_,
                   std::vector<int> && abstraction_mapping_,
-                  std::unique_ptr<task_representation::TransitionSystem> && transition_system_) :
+                  std::unique_ptr<task_representation::TransitionSystem> && transition_system_,
+                  const std::vector<int> & states_forbidden_by_haslum_rule_) :
     ts_index_predecessor (ts_index_predecessor_),
         ts_index_successor (ts_index_successor_),
         tau_graph(move(tau_graph_)),
         transition_system(move(transition_system_)),
-        abstraction(move(abstraction_mapping_)) {
+        abstraction(move(abstraction_mapping_)), states_forbidden_by_haslum_rule(states_forbidden_by_haslum_rule_) {
         }
 
 

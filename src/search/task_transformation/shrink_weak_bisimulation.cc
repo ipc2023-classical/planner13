@@ -347,11 +347,12 @@ struct Signature {
         // variable by mapping all states to a single group.
         StateEquivalenceRelation equivalence_relation;
 
+        if (apply_haslum_rule) {
+            states_forbidden_by_haslum_rule.clear();
         if (num_groups > 1) {
             bool abstract_away_variable = false;
             int initial_state = ts.get_init_state();
-            if (apply_haslum_rule &&
-                goal_distances[mapping_to_scc[initial_state]] == 0) {
+                if (goal_distances[mapping_to_scc[initial_state]] == 0) {
                 int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];
                 abstract_away_variable = true;
                 int label_group_counter = 0;
@@ -378,15 +379,23 @@ struct Signature {
 
             if (abstract_away_variable) {
                 cout << "Variable abstracted by Haslum's rule." << endl;
-                cout << "Haslum's rule disabled because plan reconstruction is not implemented." << endl;
-                apply_haslum_rule = false; // TODO: remove once we apply the rule
+                    int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];                                                               
+                    equivalence_relation.resize(1);
+                    for (int state = 0; state < num_states; ++state) {
+                        if (scc_to_group[mapping_to_scc[state]] != initial_state_group) {
+                            states_forbidden_by_haslum_rule.push_back(state);
             }
+                        equivalence_relation[0].push_front(state);
         }
-            //     equivalence_relation.resize(1);
-            //     for (int state = 0; state < num_states; ++state) {
+                    return equivalence_relation;
+        }
+    //     equivalence_relation.resize(1);
+    //     for (int state = 0; state < num_states; ++state) {
             //         equivalence_relation[0].push_front(state);
             //     }
             // } else {
+            }
+        }
             equivalence_relation.resize(num_groups);
             for (int state = 0; state < num_states; ++state) {
                 int group = scc_to_group[mapping_to_scc[state]];
@@ -575,7 +584,7 @@ struct Signature {
                         unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
                         tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
                                                                                                      move(abstraction_mapping),
-                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
+                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index))), states_forbidden_by_haslum_rule));
                     } else {
                         new_index ++;
                     }

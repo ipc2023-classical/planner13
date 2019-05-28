@@ -19,7 +19,10 @@ namespace task_transformation {
     class ShrinkWeakBisimulation : public ShrinkStrategy {
         const bool preserve_optimality;
         const bool ignore_irrelevant_tau_groups;
-        mutable bool apply_haslum_rule; // TODO: make const immutable once supported
+        const bool apply_haslum_rule;
+
+
+        mutable std::vector<int> states_forbidden_by_haslum_rule;
 
         int initialize_groups(
             const std::vector<int> & goal_distances,

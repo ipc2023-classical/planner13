@@ -83,9 +83,10 @@ namespace task_transformation {
 
                         unique_ptr<TransitionSystem> copy_tr(new TransitionSystem(fts.get_ts(index)));
                                                          
+                        vector<int> states_forbidden_by_haslum_rule;
                         tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
                                                                                                      move(abstraction_mapping),
-                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index)))));
+                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index))), states_forbidden_by_haslum_rule));
                     } else {
                         new_index ++;
                     }
