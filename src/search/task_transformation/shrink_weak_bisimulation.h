@@ -22,7 +22,7 @@ namespace task_transformation {
         const bool apply_haslum_rule;
 
 
-        mutable std::vector<int> states_forbidden_by_haslum_rule;
+        mutable std::vector<int> haslum_rule_center_state;
 
         int initialize_groups(
             const std::vector<int> & goal_distances,

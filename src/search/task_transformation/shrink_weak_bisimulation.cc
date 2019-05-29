@@ -1,4 +1,4 @@
-	#include "shrink_weak_bisimulation.h"
+#include "shrink_weak_bisimulation.h"
 
 #include "distances.h"
 #include "factored_transition_system.h"
@@ -342,74 +342,112 @@ struct Signature {
 
 
         // Step 7: Generate final result.
-
         // Check if it fullfills the condition by Haslum's et al. If it does, remove the
         // variable by mapping all states to a single group.
         StateEquivalenceRelation equivalence_relation;
 
         if (apply_haslum_rule) {
-            states_forbidden_by_haslum_rule.clear();
-        if (num_groups > 1) {
-            bool abstract_away_variable = false;
+            haslum_rule_center_state.clear();
             int initial_state = ts.get_init_state();
-                if (goal_distances[mapping_to_scc[initial_state]] == 0) {
+            if (num_groups > 1 && goal_distances[mapping_to_scc[initial_state]] == 0) {
+                int center_state_group = -1;
                 int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];
-                abstract_away_variable = true;
-                int label_group_counter = 0;
-                for (const GroupAndTransitions &gat : ts) {
-                    if (outside_relevant_group [label_group_counter]) {
-                        const vector<Transition> &transitions = gat.transitions;
-                        bool found = false;
-                        for (const Transition &transition : transitions) {
-                            if (scc_to_group[mapping_to_scc[transition.src]] == initial_state_group &&
-                                scc_to_group[mapping_to_scc[transition.target]] == initial_state_group) {
-                                found = true;
+
+                vector<int> goal_distances_groups (num_groups);
+                vector<vector<bool>> can_reach_via_tau_path_groups (num_groups);
+                for (int g = 0; g < num_groups; ++g) {
+                    can_reach_via_tau_path_groups[g].resize(num_groups, false);
+                }
+                for(int i = 0; i < num_sccs; ++i) {
+                    goal_distances_groups[scc_to_group[i]] = goal_distances[i];
+                    for(int j  : can_reach_via_tau_path[i]) {
+                        can_reach_via_tau_path_groups[scc_to_group[i]] [scc_to_group[j]] = true;
+                    }
+
+                    assert (can_reach_via_tau_path_groups[scc_to_group[i]] [scc_to_group[i]]);
+                }
+
+                for (int candidate_group = 0; candidate_group < num_groups; ++candidate_group) {
+                    if (!can_reach_via_tau_path_groups[initial_state_group][candidate_group] ||
+                        goal_distances_groups[candidate_group] > 0) {
+                        continue;
+                    }
+                            
+                    bool is_center_state = true;
+                    int label_group_counter = 0;
+                    for (const GroupAndTransitions &gat : ts) {
+                        if (outside_relevant_group [label_group_counter]) {
+                            const vector<Transition> &transitions = gat.transitions;
+                            bool found = false;
+                            for (const Transition &transition : transitions) {
+                                if (scc_to_group[mapping_to_scc[transition.src]] == candidate_group &&
+                                    can_reach_via_tau_path_groups[scc_to_group[mapping_to_scc[transition.target]]] [candidate_group]) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                is_center_state = false;
                                 break;
                             }
                         }
-                        if (!found) {
-                            abstract_away_variable = false;
-                            break;
-                        }
+                        ++label_group_counter;
                     }
-        
-                    ++label_group_counter;
-                }
-            }
 
-            if (abstract_away_variable) {
-                cout << "Variable abstracted by Haslum's rule." << endl;
-                    int initial_state_group = scc_to_group[mapping_to_scc[initial_state]];                                                               
+                    if (is_center_state) {
+                        center_state_group = candidate_group;
+                        break;
+                    }
+                }
+
+
+
+                // bool abstract_away_variable = true;
+                // int label_group_counter = 0;
+                // for (const GroupAndTransitions &gat : ts) {
+                //     if (outside_relevant_group [label_group_counter]) {
+                //         const vector<Transition> &transitions = gat.transitions;
+                //         bool found = false;
+                //         for (const Transition &transition : transitions) {
+                //             if (scc_to_group[mapping_to_scc[transition.src]] == initial_state_group &&
+                //                 scc_to_group[mapping_to_scc[transition.target]] == initial_state_group) {
+                //                 found = true;
+                //                 break;
+                //             }
+                //         }
+                //         if (!found) {
+                //             abstract_away_variable = false;
+                //             break;
+                //         }
+                //     }
+        
+                //     ++label_group_counter;
+                // }
+
+                // assert(!abstract_away_variable || center_state_group > 0);
+
+                if (center_state_group >= 0) {
+                    cout << "Variable abstracted by Haslum's rule." << endl;
                     equivalence_relation.resize(1);
                     for (int state = 0; state < num_states; ++state) {
-                        if (scc_to_group[mapping_to_scc[state]] != initial_state_group) {
-                            states_forbidden_by_haslum_rule.push_back(state);
-            }
+                        if (can_reach_via_tau_path_groups[scc_to_group[mapping_to_scc[state]]][center_state_group]) {
+                            haslum_rule_center_state.push_back(state);
+                        }
                         equivalence_relation[0].push_front(state);
-        }
+                    }
                     return equivalence_relation;
-        }
-    //     equivalence_relation.resize(1);
-    //     for (int state = 0; state < num_states; ++state) {
-            //         equivalence_relation[0].push_front(state);
-            //     }
-            // } else {
-            }
-        }
-            equivalence_relation.resize(num_groups);
-            for (int state = 0; state < num_states; ++state) {
-                int group = scc_to_group[mapping_to_scc[state]];
-                if (group != -1) {
-                    assert(group >= 0 && group < num_groups);
-                    equivalence_relation[group].push_front(state);
                 }
             }
-            // }
-        
-        
-        
+        }
 
-        
+        equivalence_relation.resize(num_groups);
+        for (int state = 0; state < num_states; ++state) {
+            int group = scc_to_group[mapping_to_scc[state]];
+            if (group != -1) {
+                assert(group >= 0 && group < num_groups);
+                equivalence_relation[group].push_front(state);
+            }
+        }
 
         return equivalence_relation;
     }
@@ -584,7 +622,7 @@ struct Signature {
                         unique_ptr<TauGraph> tau_graph (new TauGraph(fts, index, preserve_optimality));
                         tau_shrinking_reconstruction.push_back(utils::make_unique_ptr<TauShrinking> (old_index, succ_index, move(tau_graph),
                                                                                                      move(abstraction_mapping),
-                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index))), states_forbidden_by_haslum_rule));
+                                                                                                     unique_ptr<TransitionSystem>(new TransitionSystem(fts.get_ts(index))), haslum_rule_center_state));
                     } else {
                         new_index ++;
                     }
