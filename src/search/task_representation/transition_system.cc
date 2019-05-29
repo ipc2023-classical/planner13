@@ -737,9 +737,17 @@ const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int 
 
     void TransitionSystem::remove_transitions_from_goal()  {
         for (auto  & trs : transitions_by_group_id) {
+            //Only remove self loops if the labels will be dead (only applicable on goal states)
+            bool should_remove_self_loops = std::all_of(trs.begin(), trs.end(),
+                                                     [&](const Transition & tr) {
+                                                         return goal_states[tr.src];
+                                                     });
+
             trs.erase(remove_if(trs.begin(), trs.end(), [&](const Transition & tr) {
-                        return goal_states[tr.src];
+                        return goal_states[tr.src] &&
+                            (should_remove_self_loops || tr.src != tr.target);
                     }), trs.end());
+            
         }
     }
 }
