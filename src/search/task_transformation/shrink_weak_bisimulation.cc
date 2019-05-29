@@ -134,7 +134,9 @@ struct Signature {
     StateEquivalenceRelation
     ShrinkWeakBisimulation::compute_equivalence_relation(const FactoredTransitionSystem &fts,
                                                          int index, int /*target*/) const {
+        //cout << "Equivalence relation for " << index << endl;
         const TransitionSystem &ts = fts.get_ts(index);
+        //ts.dump_labels_and_transitions();
         int num_states = ts.get_size();
 
         vector<bool> tau_label_group(ts.num_label_groups(), false);
@@ -163,7 +165,7 @@ struct Signature {
             }
 
             if(is_tau) {
-                // cout << "Tau label group!" << endl;
+               // cout << "Tau label group!" << label_group_index << endl;
                 for (const Transition &transition : transitions) {
                     tau_graph[transition.target].push_back(transition.src);
                 }
@@ -271,6 +273,7 @@ struct Signature {
             signatures.clear();
             compute_signatures(ts, mapping_to_scc, goal_distances, tau_label_group, outside_relevant_group, signatures, scc_to_group, can_reach_via_tau_path);
 
+
             // Verify size of signatures and presence of sentinels.
             assert(static_cast<int>(signatures.size()) == num_sccs + 2);
             assert(signatures[0].h == -2);
@@ -361,7 +364,7 @@ struct Signature {
                 for(int i = 0; i < num_sccs; ++i) {
                     goal_distances_groups[scc_to_group[i]] = goal_distances[i];
                     for(int j  : can_reach_via_tau_path[i]) {
-                        can_reach_via_tau_path_groups[scc_to_group[i]] [scc_to_group[j]] = true;
+                        can_reach_via_tau_path_groups[scc_to_group[j]] [scc_to_group[i]] = true;
                     }
 
                     assert (can_reach_via_tau_path_groups[scc_to_group[i]] [scc_to_group[i]]);
