@@ -85,6 +85,7 @@ def main(revisions=None):
     fts_plan_reconstruction_time = Attribute('fts_plan_reconstruction_time', absolute=False, min_wins=True, functions=[geometric_mean])
     atomic_task_constructed = Attribute('atomic_task_constructed', absolute=True, min_wins=False)
     haslum_rule_applicable = Attribute('haslum_rule_applicable', absolute=True, min_wins=False)
+    solved_without_search = Attribute('solved_without_search', absolute=True, min_wins=False)
     extra_attributes = [
         ms_algorithm_time,
         ms_atomic_algorithm_time,
@@ -102,6 +103,7 @@ def main(revisions=None):
         fts_plan_reconstruction_time,
         atomic_task_constructed,
         haslum_rule_applicable,
+        solved_without_search,
     ]
 
     attributes = list(exp.DEFAULT_TABLE_ATTRIBUTES)
