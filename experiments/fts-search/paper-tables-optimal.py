@@ -27,7 +27,7 @@ exp = FastDownwardExperiment()
 
 REVISIONS = [
     'fts-search-base-v2',
-    'ab305ba7fa1f',
+    'd70c6c01de9c',
 ]
 
 def remove_revision(run):
@@ -37,35 +37,48 @@ def remove_revision(run):
     run['algorithm'] = algo
     return run
 
-def fix_search_time(props):
-    if 'search_time' in props and props['search_time'] == 0:
-        props['search_time'] = 0.01
-    return props
-
-exp.add_fetcher('data/2019-02-18-astar-baseline-eval',filter=[remove_revision],filter_algorithm=[
+exp.add_fetcher('data/2019-05-22-astar-baseline-eval',filter=[remove_revision],filter_algorithm=[
     'astar-hmax',
     'astar-masdfpbisim50k',
     'astar-masmiasmbisim50k',
 ])
-exp.add_fetcher('data/2019-02-26-astar-hmax-eval',filter=[remove_revision,fix_search_time],merge=True)
-exp.add_fetcher('data/2019-02-26-astar-masdfp-eval',filter=[remove_revision,fix_search_time],merge=True)
-exp.add_fetcher('data/2019-02-26-astar-masmiasm-eval',filter=[remove_revision,fix_search_time],merge=True)
+exp.add_fetcher('data/2019-05-22-astar-hmax-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-05-22-astar-masdfp-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-05-22-astar-masmiasm-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_memory_delta = Attribute('ms_memory_delta', absolute=False, min_wins=True)
 fts_transformation_time = Attribute('fts_transformation_time', absolute=False, min_wins=True, functions=[geometric_mean])
+transformed_task_variables = Attribute('transformed_task_variables', absolute=False, min_wins=True, functions=[sum])
+transformed_task_labels = Attribute('transformed_task_labels', absolute=False, min_wins=True, functions=[sum])
+transformed_task_facts = Attribute('transformed_task_facts', absolute=False, min_wins=True, functions=[sum])
+transformed_task_transitions = Attribute('transformed_task_transitions', absolute=False, min_wins=True, functions=[sum])
 fts_search_task_construction_time = Attribute('fts_search_task_construction_time', absolute=False, min_wins=True, functions=[geometric_mean])
+search_task_variables = Attribute('search_task_variables', absolute=False, min_wins=True, functions=[sum])
+search_task_labels = Attribute('search_task_labels', absolute=False, min_wins=True, functions=[sum])
+search_task_facts = Attribute('search_task_facts', absolute=False, min_wins=True, functions=[sum])
+search_task_transitions = Attribute('search_task_transitions', absolute=False, min_wins=True, functions=[sum])
 fts_plan_reconstruction_time = Attribute('fts_plan_reconstruction_time', absolute=False, min_wins=True, functions=[geometric_mean])
 atomic_task_constructed = Attribute('atomic_task_constructed', absolute=True, min_wins=False)
+solved_without_search = Attribute('solved_without_search', absolute=True, min_wins=True)
 extra_attributes = [
-    ms_algorithm_time,
+ms_algorithm_time,
     ms_atomic_algorithm_time,
     ms_memory_delta,
     fts_transformation_time,
+    transformed_task_variables,
+    transformed_task_labels,
+    transformed_task_facts,
+    transformed_task_transitions,
     fts_search_task_construction_time,
+    search_task_variables,
+    search_task_labels,
+    search_task_facts,
+    search_task_transitions,
     fts_plan_reconstruction_time,
     atomic_task_constructed,
+    solved_without_search,
 ]
 
 attributes = list(IssueExperiment.DEFAULT_TABLE_ATTRIBUTES)
