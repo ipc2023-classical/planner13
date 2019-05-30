@@ -27,7 +27,7 @@ exp = FastDownwardExperiment()
 
 REVISIONS = [
     'fts-search-base-v2',
-    'ab305ba7fa1f',
+    'b55624a83c62',
 ]
 
 def remove_revision(run):
@@ -37,30 +37,44 @@ def remove_revision(run):
     run['algorithm'] = algo
     return run
 
-def fix_search_time(props):
-    if 'search_time' in props and props['search_time'] == 0:
-        props['search_time'] = 0.01
-    return props
-
-exp.add_fetcher('data/2019-02-18-lazygreedy-baseline-eval',filter=[remove_revision])
-exp.add_fetcher('data/2019-02-26-lazygreedy-ff-unitcost-eval',filter=[remove_revision,fix_search_time],merge=True)
-exp.add_fetcher('data/2019-02-26-lazygreedy-ffpref-unitcost-eval',filter=[remove_revision,fix_search_time],merge=True)
+exp.add_fetcher('data/2019-05-22-lazygreedy-baseline-eval',filter=[remove_revision])
+exp.add_fetcher('data/2019-05-29-lazygreedy-ff-unitcost-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-05-29-lazygreedy-ffpref-unitcost-eval',filter=[remove_revision],merge=True)
+exp.add_fetcher('data/2019-05-29-lazygreedy-missing-eval',filter=[remove_revision],merge=True)
 
 ms_algorithm_time = Attribute('ms_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_atomic_algorithm_time = Attribute('ms_atomic_algorithm_time', absolute=False, min_wins=True, functions=[geometric_mean])
 ms_memory_delta = Attribute('ms_memory_delta', absolute=False, min_wins=True)
 fts_transformation_time = Attribute('fts_transformation_time', absolute=False, min_wins=True, functions=[geometric_mean])
+transformed_task_variables = Attribute('transformed_task_variables', absolute=False, min_wins=True, functions=[sum])
+transformed_task_labels = Attribute('transformed_task_labels', absolute=False, min_wins=True, functions=[sum])
+transformed_task_facts = Attribute('transformed_task_facts', absolute=False, min_wins=True, functions=[sum])
+transformed_task_transitions = Attribute('transformed_task_transitions', absolute=False, min_wins=True, functions=[sum])
 fts_search_task_construction_time = Attribute('fts_search_task_construction_time', absolute=False, min_wins=True, functions=[geometric_mean])
+search_task_variables = Attribute('search_task_variables', absolute=False, min_wins=True, functions=[sum])
+search_task_labels = Attribute('search_task_labels', absolute=False, min_wins=True, functions=[sum])
+search_task_facts = Attribute('search_task_facts', absolute=False, min_wins=True, functions=[sum])
+search_task_transitions = Attribute('search_task_transitions', absolute=False, min_wins=True, functions=[sum])
 fts_plan_reconstruction_time = Attribute('fts_plan_reconstruction_time', absolute=False, min_wins=True, functions=[geometric_mean])
 atomic_task_constructed = Attribute('atomic_task_constructed', absolute=True, min_wins=False)
+solved_without_search = Attribute('solved_without_search', absolute=True, min_wins=True)
 extra_attributes = [
-    ms_algorithm_time,
+ms_algorithm_time,
     ms_atomic_algorithm_time,
     ms_memory_delta,
     fts_transformation_time,
+    transformed_task_variables,
+    transformed_task_labels,
+    transformed_task_facts,
+    transformed_task_transitions,
     fts_search_task_construction_time,
+    search_task_variables,
+    search_task_labels,
+    search_task_facts,
+    search_task_transitions,
     fts_plan_reconstruction_time,
     atomic_task_constructed,
+    solved_without_search,
 ]
 
 attributes = list(IssueExperiment.DEFAULT_TABLE_ATTRIBUTES)
@@ -73,8 +87,7 @@ all_configs = [
 'lazy-ffpref',
 
 'lazy-ff-transformunitcost-atomic',
-'lazy-ff-transformunitcost-atomic-labelreduction',
-'lazy-ff-transformunitcost-atomic-bisimown-labelreduction',
+'lazy-ff-transformunitcost-atomic-weakbisim-labelreduction',
 'lazy-ff-transformunitcost-full-weakbisim-labelreduction-dfp100-t900',
 'lazy-ff-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900',
 'lazy-ff-transformunitcost-full-weakbisim-labelreduction-dfp10000-t900',
@@ -83,7 +96,6 @@ all_configs = [
 'lazy-ff-transformunitcost-full-weakbisim-labelreduction-miasm10000-t900',
 
 'lazy-ffpref-transformunitcost-atomic',
-'lazy-ffpref-transformunitcost-atomic-labelreduction',
 'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction',
 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp100-t900',
 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900',
@@ -105,6 +117,7 @@ algo_to_print = {
     'lazy-ff-transformunitcost-atomic-weakbisim-labelreduction': '\\atomicshrink',
     'lazy-ff-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900': '\\fulldfp',
     'lazy-ff-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900': '\\fullmiasm',
+    'lazy-ffpref': '\\SAS',
     'lazy-ffpref-transformunitcost-atomic': '\\atomic',
     'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction': '\\atomicshrink',
     'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900': '\\fulldfp',
@@ -215,7 +228,6 @@ comparison_algo_pairs = [
 ]
 
 tex_comparison_algo_pairs = [
-    ('lazy-ffpref', 'lazy-ffpref-transformunitcost-atomic'),
     ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction'),
     ('lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
 ]
