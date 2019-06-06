@@ -229,47 +229,47 @@ exp.add_report(
     outfile=os.path.join(exp.eval_dir, 'oracle-coverage-astar-masdfpbisim50k.tex'),
 )
 
-exp.add_report(
-    DomainComparisonReport(
-        filter_algorithm=[
-            'astar-masmiasmbisim50k',
-            'astar-masmiasmbisim50k-transform-atomic',
-            # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
-            'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
-            'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp10000-t900',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm100-t900',
-            'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
-        ],
-        algo_to_print=algo_to_print,
-        format='tex',
-        # attributes=attributes,
-        attributes=['coverage'],
-    ),
-    outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-astar-masmiasmbisim50k.tex'),
-)
+# exp.add_report(
+    # DomainComparisonReport(
+        # filter_algorithm=[
+            # 'astar-masmiasmbisim50k',
+            # 'astar-masmiasmbisim50k-transform-atomic',
+            # # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
+            # 'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp10000-t900',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm100-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
+        # ],
+        # algo_to_print=algo_to_print,
+        # format='tex',
+        # # attributes=attributes,
+        # attributes=['coverage'],
+    # ),
+    # outfile=os.path.join(exp.eval_dir, 'domain-comparison-coverage-astar-masmiasmbisim50k.tex'),
+# )
 
-exp.add_report(
-    OracleReport(
-        filter_algorithm=[
-            'astar-masmiasmbisim50k-transform-atomic',
-            # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
-            'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
-            'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp10000-t900',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm100-t900',
-            'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
-            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
-        ],
-        format='tex',
-        # attributes=attributes,
-        attributes=['coverage'],
-    ),
-    outfile=os.path.join(exp.eval_dir, 'oracle-coverage-astar-masmiasmbisim50k.tex'),
-)
+# exp.add_report(
+    # OracleReport(
+        # filter_algorithm=[
+            # 'astar-masmiasmbisim50k-transform-atomic',
+            # # 'astar-masmiasmbisim50k-transform-atomic-labelreduction',
+            # 'astar-masmiasmbisim50k-transform-atomic-bisim-labelreduction',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp100-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp1000-t900',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-dfp10000-t900',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm100-t900',
+            # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm1000-t900',
+            # # 'astar-masmiasmbisim50k-transform-full-bisim-labelreduction-miasm10000-t900',
+        # ],
+        # format='tex',
+        # # attributes=attributes,
+        # attributes=['coverage'],
+    # ),
+    # outfile=os.path.join(exp.eval_dir, 'oracle-coverage-astar-masmiasmbisim50k.tex'),
+# )
 
 # plots
 
@@ -284,14 +284,18 @@ comparison_algo_pairs = [
     ('astar-masdfpbisim50k', 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction'),
     ('astar-masdfpbisim50k', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
     ('astar-masdfpbisim50k-transform-atomic', 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction'),
-    ('astar-masdfpbisim50k-transform-atomic', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
+    ('astar-masdfpbisim50k-transform-atomic-bisim-labelreduction', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
+    ('astar-masdfpbisim50k-transform-atomic-bisim-labelreduction', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900'),
 ]
 
 tex_comparison_algo_pairs = [
+    ('astar-hmax', 'astar-hmax-transform-atomic'),
     ('astar-hmax-transform-atomic', 'astar-hmax-transform-atomic-bisim-labelreduction'),
     ('astar-hmax-transform-atomic-bisim-labelreduction', 'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900'),
+    ('astar-masdfpbisim50k', 'astar-masdfpbisim50k-transform-atomic'),
     ('astar-masdfpbisim50k-transform-atomic', 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction'),
     ('astar-masdfpbisim50k-transform-atomic-bisim-labelreduction', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
+    ('astar-masdfpbisim50k-transform-atomic-bisim-labelreduction', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-miasm1000-t900'),
 ]
 
 comparison_attributes = [
