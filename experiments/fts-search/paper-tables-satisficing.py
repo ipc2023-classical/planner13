@@ -225,11 +225,18 @@ comparison_algo_pairs = [
     ('lazy-ffpref', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
     ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction'),
     ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
+    ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900'),
 ]
 
 tex_comparison_algo_pairs = [
+    ('lazy-ff', 'lazy-ff-transformunitcost-atomic'),
+    ('lazy-ff-transformunitcost-atomic', 'lazy-ff-transformunitcost-atomic-weakbisim-labelreduction'),
+    ('lazy-ff-transformunitcost-atomic-weakbisim-labelreduction', 'lazy-ff-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
+    ('lazy-ff-transformunitcost-atomic-weakbisim-labelreduction', 'lazy-ff-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900'),
+    ('lazy-ffpref', 'lazy-ffpref-transformunitcost-atomic'),
     ('lazy-ffpref-transformunitcost-atomic', 'lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction'),
     ('lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-dfp1000-t900'),
+    ('lazy-ffpref-transformunitcost-atomic-weakbisim-labelreduction', 'lazy-ffpref-transformunitcost-full-weakbisim-labelreduction-miasm1000-t900'),
 ]
 
 comparison_attributes = [
