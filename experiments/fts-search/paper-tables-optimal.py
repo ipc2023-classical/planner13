@@ -292,6 +292,7 @@ tex_comparison_algo_pairs = [
     ('astar-hmax', 'astar-hmax-transform-atomic'),
     ('astar-hmax-transform-atomic', 'astar-hmax-transform-atomic-bisim-labelreduction'),
     ('astar-hmax-transform-atomic-bisim-labelreduction', 'astar-hmax-transform-full-bisim-labelreduction-dfp1000-t900'),
+    ('astar-hmax-transform-atomic-bisim-labelreduction', 'astar-hmax-transform-full-bisim-labelreduction-miasm1000-t900'),
     ('astar-masdfpbisim50k', 'astar-masdfpbisim50k-transform-atomic'),
     ('astar-masdfpbisim50k-transform-atomic', 'astar-masdfpbisim50k-transform-atomic-bisim-labelreduction'),
     ('astar-masdfpbisim50k-transform-atomic-bisim-labelreduction', 'astar-masdfpbisim50k-transform-full-bisim-labelreduction-dfp1000-t900'),
