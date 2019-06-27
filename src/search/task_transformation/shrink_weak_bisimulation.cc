@@ -92,7 +92,8 @@ struct Signature {
         ShrinkStrategy(),
         preserve_optimality (opts.get<bool>("preserve_optimality")),
         ignore_irrelevant_tau_groups (opts.get<bool>("ignore_irrelevant_tau_groups")),
-        apply_haslum_rule (opts.get<bool>("apply_haslum_rule")) {
+        apply_haslum_rule (opts.get<bool>("apply_haslum_rule")),
+        coarsest (opts.get<bool>("coarsest")) {
     }
 
     void ShrinkWeakBisimulation::dump_strategy_specific_options() const {
@@ -258,6 +259,17 @@ struct Signature {
             dfs_reachability(tau_scc_graph, i, can_reach_via_tau_path);
         }
 
+
+        vector<vector<int>> can_be_reached_via_tau_path;
+        if (coarsest) {
+            can_be_reached_via_tau_path.resize(num_sccs);
+            for(int i = 0; i < num_sccs; ++i) {
+                for (int j : can_reach_via_tau_path[i]){
+                    can_be_reached_via_tau_path[j].push_back(i);
+                }
+            }
+        }
+
         //Step 5: Initialize Weak Bisimulations with the goal distances
         vector<int> scc_to_group(num_sccs);
         vector<Signature> signatures;
@@ -271,7 +283,7 @@ struct Signature {
             stable = true;
 
             signatures.clear();
-            compute_signatures(ts, mapping_to_scc, goal_distances, tau_label_group, outside_relevant_group, signatures, scc_to_group, can_reach_via_tau_path);
+            compute_signatures(ts, mapping_to_scc, goal_distances, tau_label_group, outside_relevant_group, signatures, scc_to_group, can_reach_via_tau_path, can_be_reached_via_tau_path);
 
 
             // Verify size of signatures and presence of sentinels.
@@ -493,7 +505,8 @@ struct Signature {
         const vector<bool> &outside_relevant_group,
         vector<Signature> &signatures,
         const vector<int> &state_to_group,
-        const vector<vector<int>> &can_reach_via_tau_path) const {
+        const vector<vector<int>> &can_reach_via_tau_path,
+        const vector<vector<int>> & can_be_reached_via_tau_path) const {
         assert(signatures.empty());
 
         // Step 1: Compute bare state signatures (without transition information).
@@ -536,8 +549,16 @@ struct Signature {
                         assert (src_state < (int)(goal_distances.size()));
                         assert(signatures[src_state + 1].state == src_state);
 
-                        signatures[src_state + 1].succ_signature.push_back(
-                            make_pair(label_group_counter, target_group));
+                        if(can_be_reached_via_tau_path.empty()) {
+                            signatures[src_state + 1].succ_signature.push_back(
+                                make_pair(label_group_counter, target_group));
+                        } else {
+                            for (int target : can_be_reached_via_tau_path[transition_target]) {
+                                signatures[src_state + 1].succ_signature.push_back(
+                                    make_pair(label_group_counter, state_to_group[target]));
+
+                            }
+                        }
                     }
                 }
             }
@@ -730,6 +751,10 @@ struct Signature {
                                 "After weak bisimulation, eliminate variable if the initial state has self-loops with all outside relevant variables",
                                 "false");
 
+        parser.add_option<bool>("coarsest",
+                                "Do full coarsest weak bisimulation",
+                                "false");
+
 
         Options opts = parser.parse();
 
@@ -746,6 +771,7 @@ struct Signature {
         opts.set<bool> ("preserve_optimality", false);
         opts.set<bool> ("apply_haslum_rule", false);
         opts.set<bool> ("ignore_irrelevant_tau_groups", false);
+        opts.set<bool> ("coarsest", false);
 
         return make_shared<ShrinkWeakBisimulation>(opts);
     }

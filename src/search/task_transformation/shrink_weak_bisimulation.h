@@ -20,6 +20,7 @@ namespace task_transformation {
         const bool preserve_optimality;
         const bool ignore_irrelevant_tau_groups;
         const bool apply_haslum_rule;
+        const bool coarsest;
 
 
         mutable std::vector<int> haslum_rule_center_state;
@@ -36,7 +37,8 @@ namespace task_transformation {
         const std::vector<bool> & outside_relevant_group,
         std::vector<Signature> &signatures,
         const std::vector<int> &state_to_group,
-        const std::vector<std::vector<int>> &can_reach_via_tau_path) const;
+        const std::vector<std::vector<int>> &can_reach_via_tau_path, 
+        const std::vector<std::vector<int>> &can_be_reached_via_tau_path) const;
 
     public:
         ShrinkWeakBisimulation(const options::Options &opts);
