@@ -69,7 +69,7 @@ State(const FTSTask &task, std::vector<int> &&values)
     }
 
     int operator[](int var) const {
-        assert(!is_dead_end());        
+        assert(!is_dead_end());
         return values[var];
     }
 

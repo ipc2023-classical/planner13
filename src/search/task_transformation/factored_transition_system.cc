@@ -342,7 +342,7 @@ int FactoredTransitionSystem::single_ts_effect (LabelID label) const {
 
 bool FactoredTransitionSystem::remove_irrelevant_labels () {
     std::vector<LabelID> irrelevant_labels;
-    for (LabelID (label_no); label_no < labels->get_size(); ++label_no) {
+    for (LabelID label_no; label_no < labels->get_size(); ++label_no) {
         if (labels->is_current_label(label_no) && is_irrelevant_label(label_no)) {
             irrelevant_labels.push_back(label_no);
         }
