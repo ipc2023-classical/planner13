@@ -3,7 +3,6 @@
 #include "../merge_and_shrink/abstraction.h"
 #include "../merge_and_shrink/labels.h"
 #include "../merge_and_shrink/labelled_transition_system.h"
-#include "../merge_and_shrink/abstraction_builder.h"
 
 #include "numeric_simulation_relation.h"
 #include "numeric_dominance_relation.h"
@@ -37,7 +36,6 @@ NumericDominancePruning<T>::NumericDominancePruning(const Options &opts)
   max_lts_size_to_compute_simulation(opts.get<int>("max_lts_size_to_compute_simulation")),
   num_labels_to_use_dominates_in (opts.get<int>("num_labels_to_use_dominates_in")),
   dump(opts.get<bool>("dump")), exit_after_preprocessing(opts.get<bool>("exit_after_preprocessing")),
-  abstractionBuilder(opts.get<AbstractionBuilder *>("abs")),
   all_desactivated(false), activation_checked(false),
   states_inserted(0), states_checked(0), states_pruned(0), deadends_pruned(0) {
 }
@@ -77,10 +75,7 @@ void NumericDominancePruning<T>::initialize(bool force_initialization) {
     if(!initialized){
 	dump_options();
         initialized = true;
-	abstractionBuilder->build_abstraction(is_unit_cost_problem() ||
-					      cost_type == OperatorCost::ZERO,
-					      cost_type, ldSimulation, abstractions);
-	cout << "LDSimulation finished" << endl;
+        cout << "LDSimulation finished" << endl;
 
 	if(force_initialization || apply_pruning()) {
 	    ldSimulation->
@@ -197,12 +192,6 @@ static PruneHeuristic *_parse(OptionParser &parser) {
             "false");
 
     Heuristic::add_options_to_parser(parser);
-
-    parser.add_option<AbstractionBuilder *>(
-        "abs",
-        "abstraction builder",
-        "");
-    //LDSimulation::add_options_to_parser(parser);
 
     parser.add_option<bool>("prune_dominated_by_parent",
                             "Prunes a state if it is dominated by its parent",

@@ -8,7 +8,6 @@
 #include "numeric_dominance_relation.h"
 
 class LDSimulation;
-class AbstractionBuilder;
 class Abstraction;
 
 template <typename T>
@@ -33,7 +32,6 @@ class NumericDominancePruning : public PruneHeuristic {
   const bool dump;
   const bool exit_after_preprocessing;
 
-  std::unique_ptr<AbstractionBuilder> abstractionBuilder;
   std::unique_ptr<LDSimulation> ldSimulation;
   std::unique_ptr<NumericDominanceRelation<T>> numeric_dominance_relation;
   std::vector<std::unique_ptr<Abstraction> > abstractions;
