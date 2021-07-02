@@ -27,9 +27,6 @@ NumericDominancePruning<T>::NumericDominancePruning(const Options &opts)
 : PruneHeuristic(opts),
   mgrParams(opts), initialized(false),
   tau_labels(make_shared<TauLabelManager<T>>(opts, false)),
-  use_quantified_dominance(opts.get<bool>("use_quantified_dominance")),
-  trade_off_dominance(opts.get<bool>("trade_off_dominance")),
-  only_positive_dominance(opts.get<bool>("only_positive_dominance")),
   prune_dominated_by_parent(opts.get<bool>("prune_dominated_by_parent")),
   prune_dominated_by_initial_state(opts.get<bool>("prune_dominated_by_initial_state")),
   prune_successors(opts.get<bool>("prune_successors")),
@@ -238,18 +235,6 @@ static PruneHeuristic *_parse(OptionParser &parser) {
 
     parser.add_option<bool>("prune_successors",
             "Prunes all siblings if any successor dominates the parent by enough margin",
-                            "false");
-
-    parser.add_option<bool>("use_quantified_dominance",
-                            "Prune with respect to the quantified or the qualitative dominance",
-                            "false");
-
-    parser.add_option<bool>("trade_off_dominance",
-			    "Compute dominatedBDD trading off positive and negative values",
-			    "false");
-
-    parser.add_option<bool>("only_positive_dominance",
-                            "Compute dominatedBDDMaps only for positive values",
                             "false");
 
     TauLabelManager<int>::add_options_to_parser(parser);

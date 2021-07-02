@@ -17,17 +17,10 @@ class NumericDominancePruning : public PruneHeuristic {
 
   bool initialized;
   std::shared_ptr<TauLabelManager<T>> tau_labels;
-  const bool remove_spurious_dominated_states;
-  const bool insert_dominated;
-  const bool use_quantified_dominance;
-  const bool trade_off_dominance;
-  const bool only_positive_dominance;
 
   const bool prune_dominated_by_parent;
   const bool prune_dominated_by_initial_state;
   const bool prune_successors;
-  const bool prune_dominated_by_closed;
-  const bool prune_dominated_by_open;
 
   const int truncate_value;
   const int max_simulation_time;
@@ -36,16 +29,6 @@ class NumericDominancePruning : public PruneHeuristic {
 
   const int max_lts_size_to_compute_simulation;
   const int num_labels_to_use_dominates_in;
-    /*
-   * Three parameters help to decide whether to apply dominance
-   * pruning or not. Dominance pruning is used until
-   * min_insertions_desactivation are performed. At that moment, if
-   * the ratio pruned/checked is lower than min_desactivation_ratio
-   * the pruning is desactivated. If not, the pruning remains
-   * activated until the planner finishes.
-   */
-  const int min_insertions_desactivation;
-  const double min_desactivation_ratio;
 
   const bool dump;
   const bool exit_after_preprocessing;

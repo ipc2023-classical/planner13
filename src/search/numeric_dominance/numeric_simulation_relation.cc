@@ -1,7 +1,7 @@
 #include "numeric_simulation_relation.h"
-#include "numeric_label_relation.h" 
-#include "../merge_and_shrink/abstraction.h" 
-#include "../merge_and_shrink/labelled_transition_system.h" 
+#include "numeric_label_relation.h"
+#include "../merge_and_shrink/abstraction.h"
+#include "../merge_and_shrink/labelled_transition_system.h"
 #include "../priority_queue.h"
 #include "../debug.h"
 #include "dijkstra_search_epsilon.h"
@@ -10,19 +10,19 @@
 using namespace std;
 
 template <typename T>
-NumericSimulationRelation<T>::NumericSimulationRelation(Abstraction * _abs, 
+NumericSimulationRelation<T>::NumericSimulationRelation(Abstraction * _abs,
 							int truncate_value_,
-							std::shared_ptr<TauLabelManager<T>> tau_labels_mgr) : abs(_abs), 
+							std::shared_ptr<TauLabelManager<T>> tau_labels_mgr) : abs(_abs),
 													   truncate_value(truncate_value_), tau_labels(tau_labels_mgr),
-													   max_relation_value(0), cancelled(false) { 
+													   max_relation_value(0), cancelled(false) {
     assert(abs);
 }
 
 template <typename T>
 void NumericSimulationRelation<T>::init_goal_respecting() {
-   
+
     assert(abs->are_distances_computed());
-    //assert(abs->no_dead_labels()); 
+    //assert(abs->no_dead_labels());
     int num_states = abs->size();
     //const std::vector <bool> & goal_states = abs->get_goal_states();
     const std::vector <int> & goal_distances = abs->get_goal_distances();
@@ -52,7 +52,7 @@ void NumericSimulationRelation<T>::init_goal_respecting() {
 template <>
 void NumericSimulationRelation<IntEpsilon>::init_goal_respecting() {
     assert(abs->are_distances_computed());
-    //assert(abs->no_dead_labels()); 
+    //assert(abs->no_dead_labels());
     int num_states = abs->size();
     cout << "Recompute distances with epsilon" << endl;
     std::vector <IntEpsilonSum> goal_distances = abs->recompute_goal_distances_with_epsilon();
@@ -79,7 +79,7 @@ void NumericSimulationRelation<IntEpsilon>::init_goal_respecting() {
 template <typename T>
 T NumericSimulationRelation<T>::compare_transitions(int lts_id, int tr_s_target, int tr_s_label,
 						    int tr_t_target, int tr_t_label,
-						    T tau_distance, 
+						    T tau_distance,
 						    const NumericLabelRelation<T> & label_dominance) const {
     if(label_dominance.may_dominate (tr_t_label, tr_s_label, lts_id) &&
        may_simulate(tr_t_target, tr_s_target)) {
@@ -91,25 +91,25 @@ T NumericSimulationRelation<T>::compare_transitions(int lts_id, int tr_s_target,
 	    + q_simulates(tr_t_target, tr_s_target);
     } else {
 	return std::numeric_limits<int>::lowest();
-    }         
+    }
 }
 
 template <typename T>
 T NumericSimulationRelation<T>::compare_noop(int lts_id, int tr_s_target, int tr_s_label,
-					    int t,  T tau_distance, 
+					    int t,  T tau_distance,
 					    const NumericLabelRelation<T> & label_dominance) const {
 
-    // Checking noop 
+    // Checking noop
     if(may_simulate(t, tr_s_target) &&
        label_dominance.may_dominated_by_noop(tr_s_label, lts_id)) {
-	return tau_distance + 
+	return tau_distance +
 	    q_simulates(t, tr_s_target) +
 	    label_dominance.get_label_cost(tr_s_label) +
 	    label_dominance.q_dominated_by_noop(tr_s_label, lts_id);
     } else {
 	return std::numeric_limits<int>::lowest();
-    }    
-}				
+    }
+}
 
 
 
@@ -119,7 +119,7 @@ cancel_simulation_computation(int lts_id, const LabelledTransitionSystem * lts) 
 
     const auto & tau_distances = tau_labels->get_tau_distances(lts_id);
     int new_tau_distances_id = tau_distances.get_id();
-    if(new_tau_distances_id != tau_distances_id || !cancelled) { 
+    if(new_tau_distances_id != tau_distances_id || !cancelled) {
     	const auto & tau_distances = tau_labels->get_tau_distances(lts_id);
 	cancelled = true;
 	for (int s = 0; s < lts->size(); s++) {
@@ -134,7 +134,7 @@ cancel_simulation_computation(int lts_id, const LabelledTransitionSystem * lts) 
 template <typename T>
 vector<int> NumericSimulationRelation<T>::get_dangerous_labels(const LabelledTransitionSystem * lts) const {
     vector<int> dangerous_labels;
-    
+
     int num_states = lts->size();
     vector<bool> is_state_to_check(num_states);
     vector<bool> is_ok(num_states);
@@ -167,7 +167,7 @@ vector<int> NumericSimulationRelation<T>::get_dangerous_labels(const LabelledTra
 	}
     }
     //for (int i  : dangerous_labels) cout << g_operators[i].get_name() << endl;
-    return dangerous_labels;   
+    return dangerous_labels;
 }
 
 
@@ -179,15 +179,15 @@ int NumericSimulationRelation<T>::update_pair_stable (int lts_id, const Labelled
 					       int s, int t) {
     assert (s != t // && !is_relation_stable[s][t]
             && may_simulate(t, s)) ;
-    
+
     T lower_bound = tau_distances.minus_shortest_path(t,s);
     T previous_value = q_simulates(t, s);
     // cout << "prev: " << previous_value << endl;
-		    
+
     assert(lower_bound <= previous_value);
     if(lower_bound == previous_value) {
 	return false;
-    } 
+    }
 
     T min_value = previous_value;
     // if (lts->is_goal(t) || !lts->is_goal(s)) {
@@ -200,9 +200,9 @@ int NumericSimulationRelation<T>::update_pair_stable (int lts_id, const Labelled
 	    for(int tr_s_label : lts->get_labels(trs.label_group)) {
 		T max_value = std::numeric_limits<int>::lowest();
 		for (int t2 : tau_distances.states_reachable_from(t)) {
-		    T tau_distance = tau_distances.minus_shortest_path(t, t2);			    
+		    T tau_distance = tau_distances.minus_shortest_path(t, t2);
 
-		    max_value = max(max_value, 
+		    max_value = max(max_value,
 				    compare_noop(lts_id, trs.target, tr_s_label, t2, tau_distance, label_dominance));
 
 		    if (max_value >= min_value) {
@@ -277,8 +277,8 @@ int NumericSimulationRelation<T>::update_pair_stable (int lts_id, const Labelled
     // }
 
     assert(min_value <= previous_value);
-    
-    
+
+
     if(min_value < previous_value) {
 	//cout << "Updating " << lts->get_names()[s] << " <= " << lts->get_names()[t]
 	// << " with " << min_value << " before " << previous_value << endl;
@@ -296,17 +296,17 @@ int NumericSimulationRelation<T>::update_pair (int lts_id, const LabelledTransit
 					       const TauDistances<T> & tau_distances,
 					       int s, int t) {
     assert (s != t && may_simulate(t, s)) ;
-    
+
     T lower_bound = tau_distances.minus_shortest_path(t,s);
 
     T previous_value = q_simulates(t, s);
-    
+
     // cout << "prev: " << previous_value << endl;
-		    
+
     assert(lower_bound <= previous_value);
     if(lower_bound == previous_value) {
 	return false;
-    } 
+    }
 
     T min_value = previous_value;
     // if (lts->is_goal(t) || !lts->is_goal(s)) {
@@ -320,14 +320,14 @@ int NumericSimulationRelation<T>::update_pair (int lts_id, const LabelledTransit
 		T max_value = std::numeric_limits<int>::lowest();
 		for (int t2 : tau_distances.states_reachable_from(t)) {
 		    T tau_distance = tau_distances.minus_shortest_path(t, t2);
-                    
-		    max_value = max(max_value, 
+
+		    max_value = max(max_value,
 				    compare_noop(lts_id, trs.target, tr_s_label, t2, tau_distance, label_dominance));
 
 		    if (max_value >= min_value) {
 			continue; // Go to next transition
 		    }
-			       
+
 		    lts->applyPostSrc(t2,[&](const LTSTransition & trt) {
 			    for(int tr_t_label : lts->get_labels(trt.label_group)) {
 				max_value = max(max_value, compare_transitions(lts_id, trs.target, tr_s_label, trt.target, tr_t_label, tau_distance, label_dominance));
@@ -387,8 +387,8 @@ int NumericSimulationRelation<T>::update_pair (int lts_id, const LabelledTransit
     // }
 
     assert(min_value <= previous_value);
-    
-    
+
+
     if(min_value < previous_value) {
 	//cout << "Updating " << lts->get_names()[s] << " <= " << lts->get_names()[t]
 	// << " with " << min_value << " before " << previous_value << endl;
@@ -408,12 +408,12 @@ int NumericSimulationRelation<T>::update (int lts_id, const LabelledTransitionSy
 	cancel_simulation_computation(lts_id, lts); //check that tau-labels have not changed
 	return 0;
     }
-    
+
     assert(tau_labels);
 
 
     const auto & tau_distances = tau_labels->get_tau_distances(lts_id);
-   
+
     int new_tau_distances_id = tau_distances.get_id();
     if(new_tau_distances_id != tau_distances_id) { //recompute_goal_respecting
 	tau_distances_id = new_tau_distances_id;
@@ -431,14 +431,14 @@ int NumericSimulationRelation<T>::update (int lts_id, const LabelledTransitionSy
 	}
     }
 
-  
+
 
     Timer timer;
 
     int num_iterations = 0;
-    bool changes = true;    
+    bool changes = true;
     while (changes) {
-	num_iterations ++;	
+	num_iterations ++;
         changes = false;
         for (int s = 0; s < lts->size(); s++) {
             for (int t = 0; t < lts->size(); t++) { //for each pair of states t, s
@@ -446,7 +446,7 @@ int NumericSimulationRelation<T>::update (int lts_id, const LabelledTransitionSy
 		    cout << "Computation of numeric simulation on LTS " << lts_id
 			 << " with " << lts->size()
 			 << " states cancelled after " << timer() << " seconds." << endl;
-		    
+
 		    cancel_simulation_computation(lts_id, lts);
 		    return num_iterations;
 		}
@@ -458,11 +458,11 @@ int NumericSimulationRelation<T>::update (int lts_id, const LabelledTransitionSy
 	    }
 	}
     }
-        
+
     return num_iterations;
 
-    
-    // for (int s = 0; s < lts->size(); s++) {	
+
+    // for (int s = 0; s < lts->size(); s++) {
     // 	cout << g_fact_names[lts_id][s] << endl;
     // }
     //dump(g_fact_names[lts_id]);
@@ -489,24 +489,24 @@ T NumericSimulationRelation<T>::q_simulates (const State & t, const State & s) c
     int tid = abs->get_abstract_state(t);
     int sid = abs->get_abstract_state(s);
     if(sid == -1 || tid == -1) {
-	return std::numeric_limits<int>::lowest(); 
+	return std::numeric_limits<int>::lowest();
     }
     return q_simulates(tid, sid);
 }
 
-template <typename T> 
+template <typename T>
 T NumericSimulationRelation<T>::q_simulates (const vector<int> & t, const vector<int> & s) const{
     int tid = abs->get_abstract_state(t);
     int sid = abs->get_abstract_state(s);
     if(sid == -1 || tid == -1) {
-	return std::numeric_limits<int>::lowest(); 
+	return std::numeric_limits<int>::lowest();
     }
     return q_simulates(tid, sid);
 }
 
 
 template <typename T>
-void NumericSimulationRelation<T>::dump(const vector<string> & names) const{ 
+void NumericSimulationRelation<T>::dump(const vector<string> & names) const{
     cout << "SIMREL:" << endl;
     for(int j = 0; j < relation.size(); ++j){
         for(int i = 0; i < relation.size(); ++i){
@@ -518,7 +518,7 @@ void NumericSimulationRelation<T>::dump(const vector<string> & names) const{
 }
 
 template <typename T>
-void NumericSimulationRelation<T>::dump() const{ 
+void NumericSimulationRelation<T>::dump() const{
     cout << "SIMREL:" << endl;
     for(int j = 0; j < relation.size(); ++j){
         for(int i = 0; i < relation.size(); ++i){
@@ -577,178 +577,14 @@ void NumericSimulationRelation<T>::statistics() const {
 
     for (auto & it : values) {
 	if(it.first == std::numeric_limits<int>::lowest()) {
-	    cout << "-infinity"; 
+	    cout << "-infinity";
 	} else {
 	    cout << it.first;
 	}
 
 	cout << ": " << it.second << endl;
-    } 
-}
-
-template <typename T>
-void NumericSimulationRelation<T>::precompute_absstate_bdds(SymVariables * vars_){
-    vars = vars_;
-    abs->getAbsStateBDDs(vars, abs_bdds);
-}
-
-template <typename T>
-void NumericSimulationRelation<T>::precompute_bdds(bool dominating, bool quantified, bool use_ADD) {
-    if(!quantified) {
-	if(dominating) {
-	    cout << "Precomputing dominating_bdds ... " << endl;
-	    dominating_bdds.resize(abs->size(), vars->zeroBDD());
-	}else {
-	    cout << "Precomputing dominated_bdds ... " << endl;
-	    
-	    // for (int i = 0; i < abs->size(); i++){
-	    // 	dominated_bdds.push_back(vars->zeroBDD());
-	    // }
-
-	    dominated_bdds.resize(abs->size(), vars->zeroBDD());
-	}
-	
-	for(int i = 0; i < relation.size(); ++i){
-	    for(int j = 0; j < relation.size(); ++j){
-		if(may_simulate(i, j) && q_simulates (i, j) >= 0){
-		    if(dominating) {
-			dominating_bdds[j] += abs_bdds[i];
-		    } else { 
-			dominated_bdds[i] += abs_bdds[j];
-		    }
-		}
-	    }
-	}
-    } else if (use_ADD) {
-	cerr << "use_ADD not supported yet" << endl;
-	exit(0); 
-	// if(dominating) {
-	//     dominating_adds.resize(abs->size(), vars->getADD(0));
-	//     may_dominating_bdds.resize(abs->size(), vars->zeroBDD());
-	// }else {
-	//     dominated_adds.resize(abs->size(), vars->getADD(0));
-	//     may_dominated_bdds.resize(abs->size(), vars->zeroBDD());
-	// }
-	
-	// for(int i = 0; i < relation.size(); ++i){
-	//     for(int j = 0; j < relation.size(); ++j){
-	// 	T value = may_simulate(i, j) ? q_simulates (i, j) : std::numeric_limits<int>::lowest(); 
-
-	// 	ADD val = vars->getADD(value);
-	// 	if(dominating) {
-	// 	    may_dominating_bdds[j] += abs_bdds[i];
-	// 	    dominating_adds[j] += abs_bdds[i].Add()*val;
-	// 	} else { 
-	// 	    may_dominated_bdds[i] +=  abs_bdds[j];
-	// 	    dominated_adds[i] += abs_bdds[j].Add()*val;
-	// 	}
-	//     }
-	// }
-	
-    } else {
-	if(dominating) {
-	    //cout << "Precomputing dominating_bdd_maps ... " << endl;
-
-	    dominating_bdd_maps.resize(abs->size());
-	    may_dominating_bdds.resize(abs->size(), vars->zeroBDD()); 
-	}else {
-	    //cout << "Precomputing dominated_bdd_maps ... " << endl;
-
-	    dominated_bdd_maps.resize(abs->size());
-	    may_dominated_bdds.resize(abs->size(), vars->zeroBDD());
-	}
-	
-	for(int i = 0; i < relation.size(); ++i){
-	    for(int j = 0; j < relation.size(); ++j){
-		if(may_simulate(i, j)) {
-		    T val = q_simulates (i, j);
-		    if(dominating) {
-			may_dominating_bdds[j] += abs_bdds[i];
-			
-			if(dominating_bdd_maps[j].count(val)) {
-			    dominating_bdd_maps[j][val] += abs_bdds[i];
-			} else { 
-			    dominating_bdd_maps[j][val] = abs_bdds[i];
-			}
-		    }else {
-			may_dominated_bdds[i] +=  abs_bdds[j];
-			if(dominated_bdd_maps[i].count(val)) {
-			    dominated_bdd_maps[i][val] += abs_bdds[j];
-			} else { 
-			    dominated_bdd_maps[i][val] = abs_bdds[j];
-			}
-		    }  
-		}
-	    }
-	}
     }
 }
 
-template <typename T>
-BDD NumericSimulationRelation<T>::getSimulatedBDD(const State & state) const{
-    assert(!dominated_bdds.empty());
-    int absstate = abs->get_abstract_state(state);
-    if(absstate == -1) return vars->zeroBDD();
-    else return dominated_bdds[absstate];
-}
-
-template <typename T>
-BDD NumericSimulationRelation<T>::getSimulatingBDD(const State & state) const{
-    assert(!dominated_bdds.empty());
-    int absstate = abs->get_abstract_state(state);
-    if(absstate == -1) return vars->zeroBDD();
-    else return dominating_bdds[absstate];
-}
-
-
-template <typename T>
-const map<T, BDD> & NumericSimulationRelation<T>::getSimulatedBDDMap(const State & state) const{
-    assert(!dominated_bdd_maps.empty());
-    int absstate = abs->get_abstract_state(state);
-    assert(absstate != -1); 
-    return dominated_bdd_maps[absstate];
-}
-
-template <typename T>
-const map<T, BDD> & NumericSimulationRelation<T>::getSimulatingBDDMap(const State & state) const{
-    assert(!dominated_bdd_maps.empty());
-    int absstate = abs->get_abstract_state(state);
-    assert(absstate == -1);
-    return dominating_bdd_maps[absstate];
-}
-
-template <typename T>
-BDD NumericSimulationRelation<T>::getMaySimulatedBDD(const State & state) const{
-    assert(!may_dominated_bdds.empty());
-    int absstate = abs->get_abstract_state(state);
-    if(absstate == -1) return vars->zeroBDD();
-    else return may_dominated_bdds[absstate];
-}
-
-template <typename T>
-BDD NumericSimulationRelation<T>::getMaySimulatingBDD(const State & state) const{
-    assert(!may_dominated_bdds.empty());
-    int absstate = abs->get_abstract_state(state);
-    if(absstate == -1) return vars->zeroBDD();
-    else return may_dominating_bdds[absstate];
-}
-
-template <typename T>
-ADD NumericSimulationRelation<T>::getSimulatedADD(const State & state) const{
-    assert(!dominated_bdds.empty());
-    int absstate = abs->get_abstract_state(state);
-    if(absstate == -1) return vars->getADD(std::numeric_limits<int>::lowest());
-    else return dominated_adds[absstate];
-}
-
-template <typename T>
-ADD NumericSimulationRelation<T>::getSimulatingADD(const State & state) const{
-    assert(!dominated_bdds.empty());
-    int absstate = abs->get_abstract_state(state);
-    if(absstate == -1) return vars->getADD(std::numeric_limits<int>::lowest());
-    else return dominating_adds[absstate];
-}
-
-
-template class NumericSimulationRelation<int>; 
-template class NumericSimulationRelation<IntEpsilon>; 
+template class NumericSimulationRelation<int>;
+template class NumericSimulationRelation<IntEpsilon>;
