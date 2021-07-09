@@ -18,7 +18,7 @@ namespace task_representation {
     }
 
     Labels::Labels(const Labels & other, OperatorCost cost_type) :
-        max_size(other.max_size) {
+        max_size(other.max_size), num_active_entries(other.num_active_entries) {
         for (auto & l  : other.labels) {
             labels.push_back(utils::make_unique_ptr<Label>(*l, cost_type));
         }
