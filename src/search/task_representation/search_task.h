@@ -161,10 +161,10 @@ public:
     bool is_goal_state(const GlobalState &state) const;
 
     bool has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair & fact) const;
-    void apply_operator(
-        const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer) const;
-    void apply_operator(
-        const GlobalState &predecessor, OperatorID op, std::vector<int> & buffer) const;
+    void apply_operator(const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer) const;
+    void apply_operator(const GlobalState &predecessor, OperatorID op, std::vector<int> & buffer) const;
+
+    std::vector<int> generate_successor(const State& predecessor, OperatorID op_id) const;
 
     void generate_applicable_ops(
         const GlobalState &state,
@@ -206,6 +206,10 @@ public:
 
 
         return operators[op.get_index()].get_label();
+    }
+
+    const FTSOperator& get_fts_operator(OperatorID op_id) {
+        return operators[op_id.get_index()];
     }
 };
 

@@ -781,6 +781,20 @@ fast_downward_plugin(
     DEPENDENCY_ONLY
 )
 
+fast_downward_plugin(
+        NAME NUMERIC_DOMINANCE
+        HELP "Plugin containing code for numeric dominance"
+        SOURCES
+            numeric_dominance/breadth_first_search
+            numeric_dominance/dijkstra_search_epsilon
+            numeric_dominance/int_epsilon
+            numeric_dominance/tau_labels
+            numeric_dominance/numeric_dominance_pruning
+            numeric_dominance/numeric_dominance_relation
+            numeric_dominance/numeric_label_relation
+            numeric_dominance/numeric_simulation_relation
+)
+
 fast_downward_add_plugin_sources(PLANNER_SOURCES)
 
 # The order in PLANNER_SOURCES influences the order in which object

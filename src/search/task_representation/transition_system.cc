@@ -750,4 +750,8 @@ const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int 
             
         }
     }
+
+    LabelGroupID TransitionSystem::get_label_group_id_of_label(LabelID label_id) const {
+        return label_equivalence_relation->get_group_id(label_id);
+    }
 }

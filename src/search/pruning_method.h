@@ -28,11 +28,13 @@ public:
        with assertions in derived classes. */
     virtual void prune_operators(const task_representation::State &state,
                                  std::vector<OperatorID> &op_ids) = 0;
+
     // TODO remove this overload once the search uses the task interface.
     virtual void prune_operators(const GlobalState &state,
                                  std::vector<OperatorID> &op_ids);
 
-    virtual void print_statistics() const = 0;
+    // TODO: Do whatever this is
+    virtual void print_statistics() const {};
 };
 
 #endif

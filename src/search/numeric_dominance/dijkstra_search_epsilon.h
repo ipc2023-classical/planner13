@@ -1,28 +1,30 @@
 #ifndef NUMERIC_DOMINANCE_DIJKSTRA_SEARCH_EPSILON_H
 #define NUMERIC_DOMINANCE_DIJKSTRA_SEARCH_EPSILON_H
 
-#include "../priority_queue.h" 
-#include "int_epsilon.h" 
+#include "../algorithms/priority_queues.h"
+#include "int_epsilon.h"
+
+using namespace priority_queues;
 
 //Copied from abstraction.cc (move somewhere else?)
-template <typename T, typename Queue>
-    void dijkstra_search_epsilon(
-    const std::vector<std::vector<std::pair<int, T> > > &graph,
-    Queue &queue,
-    std::vector<T> &distances,
-    std::vector<int> * states_reached) {
+template<typename T, typename Queue>
+void dijkstra_search_epsilon(
+        const std::vector<std::vector<std::pair<int, T> > > &graph,
+        Queue &queue,
+        std::vector<T> &distances,
+        std::vector<int> *states_reached) {
     while (!queue.empty()) {
         std::pair<T, int> top_pair = queue.pop();
         T distance = top_pair.first;
         int state = top_pair.second;
         T state_distance = distances[state];
-	if(states_reached) {
-	    states_reached->push_back(state);
-	}
+        if (states_reached) {
+            states_reached->push_back(state);
+        }
         assert(state_distance <= distance);
         if (state_distance < distance)
             continue;
-        for (int i = 0; i < graph[state].size(); i++) {
+        for (int i = 0; i < int(graph[state].size()); i++) {
             const auto &transition = graph[state][i];
             int successor = transition.first;
             T cost = T(transition.second);
@@ -36,26 +38,24 @@ template <typename T, typename Queue>
 }
 
 inline void dijkstra_search_epsilon(
-    const std::vector<std::vector<std::pair<int, int> > > &graph,
-    int initial_state, std::vector<int> &distances, std::vector<int> & states_reached) {
-    AdaptiveQueue<int, int> queue;
+        const std::vector<std::vector<std::pair<int, int> > > &graph,
+        int initial_state, std::vector<int> &distances, std::vector<int> &states_reached) {
+    AdaptiveQueue<int> queue;
     queue.push(0, initial_state);
     dijkstra_search_epsilon(graph, queue, distances, &states_reached);
 }
 
 
 inline void dijkstra_search_epsilon(
-    const std::vector<std::vector<std::pair<int, IntEpsilon> > > &graph,
-    int initial_state,
-    std::vector<IntEpsilon> &distances,
-    std::vector<int> & states_reached) {
-    HeapQueue<IntEpsilon, int> queue;
+        const std::vector<std::vector<std::pair<int, IntEpsilon> > > &graph,
+        int initial_state,
+        std::vector<IntEpsilon> &distances,
+        std::vector<int> &states_reached) {
+    HeapQueue<int, IntEpsilon> queue;
     IntEpsilon initial_state_cost(0);
     queue.push(initial_state_cost, initial_state);
     dijkstra_search_epsilon(graph, queue, distances, &states_reached);
 }
-
-
 
 
 #endif

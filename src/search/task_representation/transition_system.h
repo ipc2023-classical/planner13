@@ -143,12 +143,9 @@ private:
     */
     void compute_locally_equivalent_labels();
 
-    const std::vector<Transition> &get_transitions_for_group_id(int group_id) const {
-        return transitions_by_group_id[group_id];
-    }
-
     // Statistics and output
     std::string get_description() const;
+
 public:
     TransitionSystem(
         int num_variables,
@@ -173,7 +170,6 @@ public:
         const TransitionSystem &ts1,
         const TransitionSystem &ts2,
         Verbosity verbosity);
-
     /*
       Applies the given state equivalence relation to the transition system.
       abstraction_mapping is a mapping from old states to new states, and it
@@ -194,8 +190,8 @@ public:
     void apply_label_reduction(
         const std::vector<std::pair<int, std::vector<int>>> &label_mapping,
         bool only_equivalent_labels);
-    void apply_label_mapping(const task_transformation::LabelMapping &label_mapping);
 
+    void apply_label_mapping(const task_transformation::LabelMapping &label_mapping);
     bool remove_labels(const std::vector<LabelID> & labels);
 
     TSConstIterator begin() const {
@@ -224,14 +220,18 @@ public:
       sorted (by source, by target) and there are no duplicates.
     */
     bool are_transitions_sorted_unique() const;
-    int compute_total_transitions() const;
 
+    int compute_total_transitions() const;
     bool is_solvable(const Distances &distances) const;
+
     void dump_dot_graph() const;
     void dump_labels_and_transitions() const;
     void statistics() const;
-
     bool is_unit_cost() const;
+
+    const std::vector<Transition> &get_transitions_for_group_id(int group_id) const {
+        return transitions_by_group_id[group_id];
+    }
 
     int get_size() const {
         return num_states;
@@ -263,7 +263,6 @@ public:
 
     bool is_relevant_label (LabelID label) const;
 
-
     int num_label_groups () const;
     bool is_relevant_label_group (LabelGroupID group_id) const;
 
@@ -274,6 +273,8 @@ public:
     }
 
     const LabelGroup &get_label_group(LabelGroupID group_id) const;
+
+    LabelGroupID get_label_group_id_of_label(LabelID label_id) const;
 
     bool is_selfloop_everywhere(LabelID label) const;
 

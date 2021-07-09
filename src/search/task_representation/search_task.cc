@@ -6,6 +6,7 @@
 #include "labels.h"
 #include "sas_task.h"
 #include "transition_system.h"
+#include "state.h"
 
 #include "../globals.h"
 
@@ -249,13 +250,13 @@ void SearchTask::create_fts_operators() {
                 OperatorID fts_op_id = fts_operators[op_index];
                 const FTSOperator &op = operators[fts_op_id.get_index()];
                 assert(label_id == op.get_label());
-                const vector<FactPair> &effects = op.get_effects();
+                const vector<FactPair> &effects_ = op.get_effects();
                 /*
                   ... and find the effect (= target state) relevant to the
                   variable and set the operator to be applicable in the source
                   states relevant to the target state.
                 */
-                for (const auto &var_val : effects) {
+                for (const auto &var_val : effects_) {
                     if (var_val.var == var) { // triggeres exactly once
                         int target = var_val.value;
                         const vector<int> &sources = target_to_sources_by_label_by_ts_index[label_id][ts_index][target];
@@ -326,9 +327,9 @@ void SearchTask::apply_operator(
     // Effects on deterministic TS
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
     const vector<unordered_map<int, int>> &src_to_target_by_ts_index = label_to_info[label].src_to_target_by_ts_index;
-    for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
-        int var = det_ts[ts_index];
-        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[ts_index];
+    for (size_t i = 0; i < det_ts.size(); ++i) {
+        int var = det_ts[i];
+        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[i];
         state_packer->set(buffer, var, src_to_target.at(predecessor[var]));
     }
 
@@ -355,9 +356,9 @@ void SearchTask::apply_operator(
     const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
     const vector<unordered_map<int, int>> &src_to_target_by_ts_index =
         label_to_info[label].src_to_target_by_ts_index;
-    for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
-        int var = det_ts[ts_index];
-        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[ts_index];
+    for (size_t i = 0; i < det_ts.size(); ++i) {
+        int var = det_ts[i];
+        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[i];
         buffer[var] = src_to_target.at(predecessor[var]);
     }
 
@@ -366,6 +367,36 @@ void SearchTask::apply_operator(
         buffer[effect.var] = effect.value;
     }
 }
+
+vector<int> SearchTask::generate_successor(const State& predecessor, OperatorID op_id) const {
+    vector<int> successor(predecessor.get_values());
+
+    const FTSOperator &fts_op = operators[op_id.get_index()];
+
+    LabelID label = fts_op.get_label();
+    // Static Effects
+    for (const auto  & eff : label_to_info[label].static_effects) {
+        successor[eff.var] = eff.value;
+    }
+
+    // Effects on deterministic TS
+    const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
+    const vector<unordered_map<int, int>> &src_to_target_by_ts_index =
+            label_to_info[label].src_to_target_by_ts_index;
+    for (size_t i = 0; i < det_ts.size(); ++i) {
+        int var = det_ts[i];
+        const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[i];
+        successor[var] = src_to_target.at(predecessor[var]);
+    }
+
+    // Effects on non-deterministic TS
+    for (const FactPair &effect : fts_op.get_effects()) {
+        successor[effect.var] = effect.value;
+    }
+
+    return successor;
+}
+
 
 void SearchTask::generate_applicable_ops(
     const GlobalState &state, vector<OperatorID> &applicable_ops) const {
@@ -394,13 +425,13 @@ void SearchTask::generate_applicable_ops(
                 label_to_info[label].applicable_ops_by_ts_index_by_state;
 
             size_t ts_index = 0;
-            int var = non_det_ts[ts_index];
-            boost::dynamic_bitset<> applicable_fts_ops =  applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
+            int var_ = non_det_ts[ts_index];
+            boost::dynamic_bitset<> applicable_fts_ops =  applicable_fts_ops_by_ts_index_by_state[ts_index][state[var_]];
             for (ts_index = 1;
                  ts_index < applicable_fts_ops_by_ts_index_by_state.size(); ++ts_index) {
-                var = non_det_ts[ts_index];
+                var_ = non_det_ts[ts_index];
                 applicable_fts_ops &=
-                    applicable_fts_ops_by_ts_index_by_state[ts_index][state[var]];
+                    applicable_fts_ops_by_ts_index_by_state[ts_index][state[var_]];
             }
 
             size_t op_index = applicable_fts_ops.find_first();

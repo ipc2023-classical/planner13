@@ -1,75 +1,82 @@
 #ifndef NUMERIC_DOMINANCE_NUMERIC_DOMINANCE_PRUNING_H
 #define NUMERIC_DOMINANCE_NUMERIC_DOMINANCE_PRUNING_H
 
-#include "../prune_heuristic.h"
+#include "../pruning_method.h"
 
 #include "tau_labels.h"
 #include "int_epsilon.h"
 #include "numeric_dominance_relation.h"
 
-class LDSimulation;
-class Abstraction;
+using namespace task_representation;
 
-template <typename T>
-class NumericDominancePruning : public PruneHeuristic {
- protected:
+namespace options {
+class OptionParser;
 
-  bool initialized;
-  std::shared_ptr<TauLabelManager<T>> tau_labels;
+class Options;
+}
 
-  const bool prune_dominated_by_parent;
-  const bool prune_dominated_by_initial_state;
-  const bool prune_successors;
+namespace numeric_dominance {
 
-  const int truncate_value;
-  const int max_simulation_time;
-  const int min_simulation_time;
-  const int max_total_time;
+template<typename T>
+class NumericDominancePruning : public PruningMethod {
+protected:
 
-  const int max_lts_size_to_compute_simulation;
-  const int num_labels_to_use_dominates_in;
+    bool initialized;
+    std::shared_ptr<TauLabelManager<T>> tau_labels;
 
-  const bool dump;
-  const bool exit_after_preprocessing;
+    const bool prune_dominated_by_parent;
+    const bool prune_dominated_by_initial_state;
+    const bool prune_successors;
 
-  std::unique_ptr<LDSimulation> ldSimulation;
-  std::unique_ptr<NumericDominanceRelation<T>> numeric_dominance_relation;
-  std::vector<std::unique_ptr<Abstraction> > abstractions;
+    const int truncate_value;
+    const int max_simulation_time;
+    const int min_simulation_time;
+    const int max_total_time;
 
-  bool all_desactivated;
-  bool activation_checked;
+    const int max_lts_size_to_compute_simulation;
+    const int num_labels_to_use_dominates_in;
 
-  int states_inserted; //Count the number of states inserted
-  int states_checked; //Count the number of states inserted
-  int states_pruned; //Count the number of states pruned
-  int deadends_pruned; //Count the number of dead ends detected
+    const bool dump;
+    const bool exit_after_preprocessing;
 
-  void dump_options() const;
+    std::unique_ptr<NumericDominanceRelation<T>> numeric_dominance_relation;
 
-  bool apply_pruning() const;
+    bool all_desactivated;
+    bool activation_checked;
 
- public:
-  virtual void initialize(bool force_initialization = false) override;
+    int states_inserted; //Count the number of states inserted
+    int states_checked; //Count the number of states inserted
+    int states_pruned; //Count the number of states pruned
+    int deadends_pruned; //Count the number of dead ends detected
 
-  //Methods for pruning explicit search
-  virtual void prune_applicable_operators(const State & state, int g, std::vector<const Operator *> & operators, SearchProgress & search_progress) override;
-  virtual bool prune_generation(const State &state, int g, const State &parent, int action_cost) override;
-  virtual bool prune_expansion (const State &state, int g) override;
+    void dump_options() const;
 
-  virtual bool is_dead_end(const State &state) override;
+    bool apply_pruning() const;
 
-  virtual int compute_heuristic(const State &state) override;
+public:
+    void initialize(const std::shared_ptr<task_representation::FTSTask> &task) override;
 
-  NumericDominancePruning(const Options &opts);
-  virtual ~NumericDominancePruning() = default;
+    //Methods for pruning explicit search
+//    virtual void prune_applicable_operators(const State & state, int g, std::vector<const Operator *> & operators, SearchProgress & search_progress) override;
+    //virtual bool prune_generation(const State &state, int g, const State &parent, int action_cost) override;
+    //virtual bool prune_expansion (const State &state, int g) override;
 
-  virtual void print_statistics() override;
+    void prune_operators(const State &state, std::vector<OperatorID> &op_ids) override;
 
-  virtual bool proves_task_unsolvable() const override {
-      return true;
-  }
+    //virtual bool is_dead_end(const State &state) override;
+
+    //virtual int compute_heuristic(const State &state) override;
+
+    explicit NumericDominancePruning(const options::Options &opts);
+
+    ~NumericDominancePruning() override = default;
+
+    //virtual void print_statistics() override;
+
+    //virtual bool proves_task_unsolvable() const override {
+    //    return true;
+    //}
 };
-
-
+}
 
 #endif
