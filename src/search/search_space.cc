@@ -150,6 +150,7 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
 
 void SearchSpace::set_path(const PlanState &state, Plan& _plan, const std::vector<PlanState> &states, const std::vector<OperatorID> &ops,
                            const std::shared_ptr<task_representation::FTSTask> &task) const {
+    (void)state;
     assert(task->is_goal_state(state));
 
     _plan.set_plan(std::vector<PlanState>(states), task->get_search_task()->get_labels_from_operator_IDs(ops));
