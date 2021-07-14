@@ -358,7 +358,8 @@ bool FactoredTransitionSystem::remove_irrelevant_labels () {
 
 vector<LabelID> FactoredTransitionSystem::get_tau_labels (int index) const{
    vector<LabelID> tau_labels;
-   for (LabelGroupID relevant_group : transition_systems[index]->get_relevant_label_groups()) {            for (int l : transition_systems[index]->get_label_group(relevant_group)) {
+   for (LabelGroupID relevant_group : transition_systems[index]->get_relevant_label_groups()) {
+       for (int l : transition_systems[index]->get_label_group(relevant_group)) {
            if (is_tau_label(index, LabelID(l))) {
                tau_labels.push_back(LabelID(l));
            }

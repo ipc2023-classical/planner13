@@ -24,6 +24,30 @@ namespace task_representation {
                                                                                    *labels));
 
         }
+
+#ifndef NDEBUG
+        for (int label = 0; label < this->labels->get_size(); ++label) {
+            assert(this->labels->is_current_label(label));
+        }
+
+        for (const auto &ts : this->transition_systems) {
+            assert(ts);
+            assert(ts->get_size() > 0);
+            for (const auto &tr: *ts) { //assert that there are no dead labels
+                assert(!tr.transitions.empty());
+            }
+
+            //Assert that there are no unreachable or irrelevant states
+            Distances distances (ts);
+            distances.compute_distances(true, true, Verbosity::NORMAL);
+            for (int s = 0; s < distances.get_num_states(); ++s){
+                assert (distances.get_init_distance() < std::numeric_limits<int>::max());
+                assert (distances.get_goal_distance() < std::numeric_limits<int>::max());
+            }
+
+        }
+#endif
+
     }
 
     FTSTask::FTSTask(
@@ -52,7 +76,18 @@ namespace task_representation {
             for (const auto &tr: *ts) { //assert that there are no dead labels
                 assert(!tr.transitions.empty());
             }
+
+            //Assert that there are no unreachable or irrelevant states
+            Distances distances (ts);
+            distances.compute_distances(true, true, Verbosity::NORMAL);
+            for (int s = 0; s < distances.get_num_states(); ++s){
+                assert (distances.get_init_distance() < std::numeric_limits<int>::max());
+                assert (distances.get_goal_distance() < std::numeric_limits<int>::max());
+            }
+
         }
+
+
 #endif
     }
 
