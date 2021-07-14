@@ -90,7 +90,6 @@ public:
 
     void init();
 
-    const std::vector<int>& generate_successor(const State& predecessor, OperatorID op_id) const;
 
 
     //Methods to access the underlying simulation relations

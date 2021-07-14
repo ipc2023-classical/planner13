@@ -7,6 +7,7 @@
 #include "../global_state.h"
 #include "search_task.h"
 #include "../utils/memory.h"
+#include "../task_transformation/distances.h"
 
 #include <cassert>
 
@@ -38,11 +39,11 @@ namespace task_representation {
             }
 
             //Assert that there are no unreachable or irrelevant states
-            Distances distances (ts);
+            task_transformation::Distances distances(*ts);
             distances.compute_distances(true, true, Verbosity::NORMAL);
-            for (int s = 0; s < distances.get_num_states(); ++s){
-                assert (distances.get_init_distance() < std::numeric_limits<int>::max());
-                assert (distances.get_goal_distance() < std::numeric_limits<int>::max());
+            for (int s = 0; s < ts->get_size(); ++s){
+                assert (distances.get_init_distance(s) < std::numeric_limits<int>::max());
+                assert (distances.get_goal_distance(s) < std::numeric_limits<int>::max());
             }
 
         }
@@ -78,13 +79,12 @@ namespace task_representation {
             }
 
             //Assert that there are no unreachable or irrelevant states
-            Distances distances (ts);
+            task_transformation::Distances distances(*ts);
             distances.compute_distances(true, true, Verbosity::NORMAL);
-            for (int s = 0; s < distances.get_num_states(); ++s){
-                assert (distances.get_init_distance() < std::numeric_limits<int>::max());
-                assert (distances.get_goal_distance() < std::numeric_limits<int>::max());
+            for (int s = 0; s < ts->get_size(); ++s){
+                assert (distances.get_init_distance(s) < std::numeric_limits<int>::max());
+                assert (distances.get_goal_distance(s) < std::numeric_limits<int>::max());
             }
-
         }
 
 

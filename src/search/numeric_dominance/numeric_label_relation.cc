@@ -17,8 +17,11 @@ template<typename T>
 bool NumericLabelRelation<T>::update(int ts_id, const TransitionSystem &ts, const NumericSimulationRelation<T> &sim) {
     bool changes = false;
     for (LabelGroupID lg2_id(0); lg2_id < ts.num_label_groups(); ++lg2_id) {
+        if (ts.get_label_group(lg2_id).empty())
+            continue;
+
         for (LabelGroupID lg1_id(0); lg1_id < ts.num_label_groups(); ++lg1_id) {
-            if (lg1_id != lg2_id && may_simulate(lg1_id, lg2_id, ts_id)) {
+            if (lg1_id != lg2_id && !ts.get_label_group(lg1_id).empty() && may_simulate(lg1_id, lg2_id, ts_id)) {
                 T min_value = std::numeric_limits<int>::max();
                 //std::cout << "Check " << l1 << " " << l2 << std::endl;
                 //std::cout << "Num transitions: " << ts->get_transitions_label(l1).size()
@@ -72,7 +75,7 @@ bool NumericLabelRelation<T>::update(int ts_id, const TransitionSystem &ts, cons
             }
         }
 
-        //Does l2 simulates irrelevant_labels in ts?
+        //Does l2 simulate irrelevant_labels in ts?
         old_value = get_simulates_irrelevant(lg2_id, ts_id);
         if (old_value != std::numeric_limits<int>::lowest()) {
             T min_value = std::numeric_limits<int>::max();
