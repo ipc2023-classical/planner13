@@ -38,6 +38,8 @@ public:
 
     explicit TauLabels(const std::vector<TransitionSystem> &tss, const Labels &labels);
 
+    static bool label_may_be_tau_in_other_ts(const TransitionSystem& ts, LabelID l_id);
+
     std::set<int>
     add_recursive_tau_labels(const std::vector<TransitionSystem> &tss,
                              const std::vector<std::unique_ptr<TauDistances<T>>> &tau_distances);

@@ -5,7 +5,7 @@
 
 #include "../task_representation/transition_system.h"
 #include "../task_representation/labels.h"
-
+#include "../algorithms/dynamic_bitset.h"
 
 #include "int_epsilon.h"
 
@@ -33,19 +33,16 @@ TauLabels<T>::TauLabels(const std::vector<TransitionSystem> &tss, const Labels &
     // Enumerate all labels and compute determine for which transitions systems they are relevant
     for (LabelID l(0); l < num_labels; ++l) {
         original_cost[l] = epsilon_if_zero<T>(labels.get_label_cost(l));
-
-        // TODO: Verify that this is a meaningful way of obtaining LabelID
-        LabelID lid = LabelID(l);
-
         assert (original_cost[l] != T(0));
 
         int transition_system_relevant = TAU_IN_ALL;
         for (size_t ts_id = 0; ts_id < tss.size(); ++ts_id) {
-            if (tss[ts_id].is_relevant_label(lid)) {
+            // If the label cannot be tau in other ts, it may be in this one. If it may be in more than one, it is tau
+            // in none.
+            if (!label_may_be_tau_in_other_ts(tss[ts_id], l)) {
                 if (transition_system_relevant == TAU_IN_ALL) {
                     transition_system_relevant = int(ts_id);
                 } else {
-                    // If it is relevant in 2 or more, then it is TAU_IN_NONE
                     transition_system_relevant = TAU_IN_NONE;
                     break;
                 }
@@ -417,6 +414,21 @@ set<int> TauLabels<T>::add_noop_dominance_tau_labels(const NumericLabelRelation<
               << num_labels << "\n";
 
     return ts_with_new_tau_labels;
+}
+
+// This function computes whether this label can be tau in some other transition system than this. This is
+// true if it has a self-loop with this label in all states
+template<typename T>
+bool TauLabels<T>::label_may_be_tau_in_other_ts(const TransitionSystem &ts, LabelID l_id) {
+    dynamic_bitset::DynamicBitset<> state_has_self_loop(ts.get_size());
+    for (const Transition &trs : ts.get_transitions_with_label(l_id)) {
+        if (trs.src == trs.target) {
+            state_has_self_loop.set(trs.src);
+        }
+    }
+
+    // Could be tau in some other ts if all states have self-loops with this label
+    return state_has_self_loop.count() == ts.get_size();
 }
 
 
