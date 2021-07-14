@@ -20,7 +20,7 @@ SEARCH_CONFIGS = {
 }
 
 REVS_CONFIGS = {
-    ("61a0d7fa82f4ced564baab92fc050f5f00a5b8c4", "") : [
+    ("78407f5b8ccfa287a6fe0a26f9e909c593898f38", "") : [
         (config_name(t1, s1), t2+s2) for (t1, t2) in TRANSFORMATION_CONFIGS.items() for (s1, s2) in SEARCH_CONFIGS.items()
     ]
 }
