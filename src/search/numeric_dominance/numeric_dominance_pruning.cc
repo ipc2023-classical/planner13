@@ -106,7 +106,6 @@ void NumericDominancePruning<T>::initialize(const std::shared_ptr<task_represent
 template<typename T>
 void NumericDominancePruning<T>::prune_operators(const State &state, std::vector<OperatorID> &operators) {
     bool applied_action_selection_pruning = false;
-    size_t before = operators.size();
 
     if (prune_successors && operators.size() > 1) {
         applied_action_selection_pruning = true;
@@ -121,9 +120,6 @@ void NumericDominancePruning<T>::prune_operators(const State &state, std::vector
                                                                                prune_dominated_by_parent,
                                                                                prune_dominated_by_initial_state);
     }
-
-    if (operators.size() < before)
-        std::cout << "Pruned " << (before - operators.size()) << " out of " << before << " operators" << std::endl;
 }
 
 

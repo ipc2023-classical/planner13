@@ -14,11 +14,11 @@ NumericLabelRelation<T>::NumericLabelRelation(const Labels &_labels, int num_lab
 }
 
 template<typename T>
-bool NumericLabelRelation<T>::update(int lts_i, const TransitionSystem &ts, const NumericSimulationRelation<T> &sim) {
+bool NumericLabelRelation<T>::update(int ts_id, const TransitionSystem &ts, const NumericSimulationRelation<T> &sim) {
     bool changes = false;
     for (LabelGroupID lg2_id(0); lg2_id < ts.num_label_groups(); ++lg2_id) {
         for (LabelGroupID lg1_id(0); lg1_id < ts.num_label_groups(); ++lg1_id) {
-            if (lg1_id != lg2_id && may_simulate(lg1_id, lg2_id, lts_i)) {
+            if (lg1_id != lg2_id && may_simulate(lg1_id, lg2_id, ts_id)) {
                 T min_value = std::numeric_limits<int>::max();
                 //std::cout << "Check " << l1 << " " << l2 << std::endl;
                 //std::cout << "Num transitions: " << ts->get_transitions_label(l1).size()
@@ -45,13 +45,13 @@ bool NumericLabelRelation<T>::update(int lts_i, const TransitionSystem &ts, cons
                     }
                 }
 
-                changes |= set_lqrel(lg1_id, lg2_id, lts_i, ts, min_value);
+                changes |= set_lqrel(lg1_id, lg2_id, ts_id, ts, min_value);
                 assert(min_value != std::numeric_limits<int>::max());
             }
         }
 
         //Is l2 simulated by irrelevant_labels in ts?
-        T old_value = get_simulated_by_irrelevant(lg2_id, lts_i);
+        T old_value = get_simulated_by_irrelevant(lg2_id, ts_id);
         if (old_value != T(std::numeric_limits<int>::lowest())) {
             T min_value = std::numeric_limits<int>::max();
             for (const auto &tr : ts.get_transitions_for_group_id(lg2_id)) {
@@ -64,16 +64,16 @@ bool NumericLabelRelation<T>::update(int lts_i, const TransitionSystem &ts, cons
             assert(min_value != std::numeric_limits<int>::max());
 
             if (min_value < old_value) {
-                changes |= set_simulated_by_irrelevant(lg2_id, lts_i, ts, min_value);
+                changes |= set_simulated_by_irrelevant(lg2_id, ts_id, ts, min_value);
                 // for (int l : ts->get_irrelevant_labels()){
-                //     changes |= set_lqrel(l, l2, lts_i, min_value);
+                //     changes |= set_lqrel(l, l2, ts_id, min_value);
                 // }
                 old_value = min_value;
             }
         }
 
         //Does l2 simulates irrelevant_labels in ts?
-        old_value = get_simulates_irrelevant(lg2_id, lts_i);
+        old_value = get_simulates_irrelevant(lg2_id, ts_id);
         if (old_value != std::numeric_limits<int>::lowest()) {
             T min_value = std::numeric_limits<int>::max();
             for (int s = 0; s < ts.get_size(); s++) {
@@ -91,17 +91,17 @@ bool NumericLabelRelation<T>::update(int lts_i, const TransitionSystem &ts, cons
             assert(min_value != std::numeric_limits<int>::max());
             if (min_value < old_value) {
                 old_value = min_value;
-                changes |= set_simulates_irrelevant(lg2_id, lts_i, ts, min_value);
+                changes |= set_simulates_irrelevant(lg2_id, ts_id, ts, min_value);
                 // for (int l : ts->get_irrelevant_labels()){
-                //     changes |= set_lqrel(l2, l, lts_i, min_value);
+                //     changes |= set_lqrel(l2, l, ts_id, min_value);
                 // }
             }
         }
     }
 
     // for (int l : ts->get_irrelevant_labels()) {
-    // 	set_simulates_irrelevant(l, lts_i, 0);
-    // 	set_simulated_by_irrelevant(l, lts_i, 0);
+    // 	set_simulates_irrelevant(l, ts_id, 0);
+    // 	set_simulated_by_irrelevant(l, ts_id, 0);
     // }
 
     return changes;

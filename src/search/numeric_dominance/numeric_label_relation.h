@@ -51,7 +51,7 @@ class NumericLabelRelation {
 
     /* std::shared_ptr<TauLabelManager<T>> tau_labels; */
 
-    bool update(int i, const TransitionSystem &ts, const NumericSimulationRelation<T> &sim);
+    bool update(int ts_id, const TransitionSystem &ts, const NumericSimulationRelation<T> &sim);
 
     inline T get_lqrel(LabelGroupID lg1_id, LabelGroupID lg2_id, int lts) const {
         if (lg1_id >= 0) {
@@ -261,8 +261,7 @@ public:
         dominated_by_noop_in.resize(num_labels, DOMINATES_IN_ALL);
         dominates_noop_in.resize(num_labels, DOMINATES_IN_ALL);
 
-        if (num_labels <
-            num_labels_to_use_dominates_in) { // If we have more than 5000 labels, there is not enough space.
+        if (num_labels < num_labels_to_use_dominates_in) { // If we have more than 5000 labels, there is not enough space.
             dominates_in.resize(num_labels);
             for (auto &l1 : dominates_in) {
                 l1.resize(num_labels, DOMINATES_IN_ALL);

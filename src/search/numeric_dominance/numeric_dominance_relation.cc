@@ -343,7 +343,7 @@ void NumericDominanceRelation<T>::prune_dominated_by_parent_or_initial_state(con
             if (!proved_prunable && compare_against_initial_state
                     && ts_initial_state_does_not_simulate_parent.size() <= relevant_simulations.size()) {
 
-                bool all_not_simulated_change = false;
+                bool all_not_simulated_change = true;
                 for (int sim_must_change :  ts_initial_state_does_not_simulate_parent) {
                     bool found = false;
                     for (int sim : relevant_simulations) {

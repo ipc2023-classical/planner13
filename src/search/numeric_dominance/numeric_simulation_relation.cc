@@ -41,6 +41,7 @@ void NumericSimulationRelation<T>::init_goal_respecting() {
     relation.resize(num_states);
     // is_relation_stable.resize(num_states);
     for (int s = 0; s < num_states; s++) {
+        assert(distances.get_goal_distance(s) != std::numeric_limits<int>::max());
         relation[s].resize(num_states);
         // is_relation_stable[s].resize(num_states, false);
         for (int t = 0; t < num_states; t++) {
@@ -53,7 +54,7 @@ void NumericSimulationRelation<T>::init_goal_respecting() {
 
             //Here we have not computed tau distances yet (because
             //with dominated by noop version may change)
-            relation[s][t] = distances.get_goal_distance(t) - distances.get_goal_distance(s);
+            update_value(s, t, distances.get_goal_distance(t) - distances.get_goal_distance(s));
         }
     }
     tau_distances_id = 0;
@@ -80,7 +81,7 @@ void NumericSimulationRelation<IntEpsilon>::init_goal_respecting() {
             // 	relation[s][t] = goal_distances_with_tau[t;]
             // } else {
             IntEpsilonSum rel = IntEpsilonSum(distances.get_goal_distance(t)) - IntEpsilonSum(distances.get_goal_distance(s));
-            relation[s][t] = rel.get_epsilon_negative();
+            update_value(s, t, rel.get_epsilon_negative());
             // }
         }
     }
@@ -111,8 +112,7 @@ T NumericSimulationRelation<T>::compare_noop(int tr_s_target, LabelID tr_s_label
                                              const NumericLabelRelation<T> &label_dominance) const {
 
     // Checking noop
-    if (may_simulate(t, tr_s_target) &&
-        label_dominance.may_dominated_by_noop(tr_s_label, ts_id)) {
+    if (may_simulate(t, tr_s_target) && label_dominance.may_dominated_by_noop(tr_s_label, ts_id)) {
         return tau_distance +
                q_simulates(t, tr_s_target) +
                label_dominance.get_label_cost(tr_s_label) +
@@ -411,8 +411,7 @@ int NumericSimulationRelation<T>::update_pair(const NumericLabelRelation<T> &lab
 
 
 template<typename T>
-int NumericSimulationRelation<T>::update(const NumericLabelRelation<T> &label_dominance,
-                                         int max_time) {
+int NumericSimulationRelation<T>::update(const NumericLabelRelation<T> &label_dominance, int max_time) {
     if (cancelled) {
         cancel_simulation_computation(); //check that tau-labels have not changed
         return 0;

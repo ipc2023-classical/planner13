@@ -64,8 +64,8 @@ public:
     }
 
     inline bool may_simulate(int s, int t) const {
-        //assert(s < int(relation.size()));
-        //assert(t < int(relation[s].size()));
+        assert(s < int(relation.size()));
+        assert(t < int(relation[s].size()));
         return relation[s][t] > std::numeric_limits<int>::lowest();
     }
 
@@ -111,6 +111,7 @@ public:
         /*     // std::cout << value << " rounded to -infty: " << truncate_value << std::endl; */
         /*     value = std::numeric_limits<int>::lowest(); */
         /* } */
+        assert(value != std::numeric_limits<int>::lowest() + 1);
         relation[s][t] = value;
     }
 
