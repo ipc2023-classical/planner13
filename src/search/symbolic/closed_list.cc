@@ -172,7 +172,7 @@ namespace symbolic {
                                 path.push_back(op.get_id());
 
                                 cut = succ;
-                                DEBUG_MSG(cout << "Adding " << cut_with_effect_bdd << endl;);
+                                /*DEBUG_MSG(cout << "Adding " << cut_with_effect_bdd << endl;);*/
                                 foundZeroCost = true;
                                 break;
                             }
@@ -197,10 +197,10 @@ namespace symbolic {
         }
 
         while (h > 0 || steps0 > 0) {
-            DEBUG_MSG(
+            /*DEBUG_MSG(
                     cout << "h=" << h << " and steps0=" << steps0 << endl;
                     cout << "CUT: "; cut.print(0, 1);
-            );
+            );*/
             if (steps0 > 0) {
                 bool foundZeroCost = false;
                 //Apply 0-cost operators
@@ -213,7 +213,7 @@ namespace symbolic {
 
                         for (const auto &op : fts_ops) {
                             // create operatorID bdd
-                            BDD effect_bdd = mgr->zeroBDD();// conjunction of all effects
+                            BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
                             for (auto eff : op.get_effects()) {
                                 effect_bdd *= mgr->bddVar(eff.value);
                             }
@@ -257,7 +257,7 @@ namespace symbolic {
                 }
                 DEBUG_MSG(cout << "FoundZeroCost: " << foundZeroCost << endl;);
                 if (!foundZeroCost) {
-                    DEBUG_MSG(
+                    /*DEBUG_MSG(
                             cout << "Force steps0 = 0" << endl;
                             for (int newSteps0 = 0; newSteps0 <= int(steps0); newSteps0++) {
                                 cout << "Steps0: " << newSteps0 << ": ";
@@ -265,7 +265,7 @@ namespace symbolic {
                                 cout << "CUT: ";
                                 cut.print(0, 1);
                             }
-                    );
+                    );*/
                     steps0 = 0;
                 }
             }

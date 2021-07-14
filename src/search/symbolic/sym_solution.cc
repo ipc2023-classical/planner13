@@ -28,7 +28,7 @@ namespace symbolic {
                     s_i = s_n;
                     ss.emplace_back(move(s_n));
                 }
-                
+
                 newCut = exp_bw->getStateSpace()->getVars()->getStateBDD(ss.back().get_values());
             } else {
                 newCut = cut;

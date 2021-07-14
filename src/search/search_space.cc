@@ -148,11 +148,11 @@ void SearchSpace::trace_path(const GlobalState &goal_state,
 
 }
 
-void SearchSpace::set_path(const PlanState &state, Plan plan, const std::vector<PlanState> &states, const std::vector<OperatorID> &ops,
+void SearchSpace::set_path(const PlanState &state, Plan& _plan, const std::vector<PlanState> &states, const std::vector<OperatorID> &ops,
                            const std::shared_ptr<task_representation::FTSTask> &task) const {
     assert(task->is_goal_state(state));
 
-    plan.set_plan(std::vector<PlanState>(states), task->get_search_task()->get_labels_from_operator_IDs(ops));
+    _plan.set_plan(std::vector<PlanState>(states), task->get_search_task()->get_labels_from_operator_IDs(ops));
 }
 //
 //void SearchSpace::trace_path(const PlanState &goal_state, const std::vector<PlanState>& path,
