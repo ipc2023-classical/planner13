@@ -7,14 +7,23 @@ import subprocess
 def config_name(name1, name2):
     return f"{name1}-{name2}" if len(name1) else name2
 
-REVS_CONFIGS = {
-    ("61a0d7fa82f4ced564baab92fc050f5f00a5b8c4", "") : [
-        (config_name(t1, s1), t2+s2) for (t1, t2) in [('',[]),
-                                                      ('atomiclr', ['--transform', 'transform_merge_and_shrink(label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=false,run_main_loop=false,max_time=900,cost_type=one)'])] for (s1, s2) in [('blind', ["--search", 'astar(blind)'])]
-        ]
+
+TRANSFORMATION_CONFIGS = {
+    '': [],
+    'atomiclr' :  ['--transform', 'transform_merge_and_shrink(label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=false,run_main_loop=false,max_time=900,cost_type=one)']
 }
 
 
+SEARCH_CONFIGS = {
+    'blind-parsucc' : ["--search", "astar(blind(), pruning=num_dominance(tau_labels_self_loops=true, tau_labels_recursive=false, tau_labels_noop=false, truncate_value=10,dump=true, prune_dominated_by_parent=true, prune_successors=true))"],
+    'blind' : ["--search", 'astar(blind)']
+}
+
+REVS_CONFIGS = {
+    ("61a0d7fa82f4ced564baab92fc050f5f00a5b8c4", "") : [
+        (config_name(t1, s1), t2+s2) for (t1, t2) in TRANSFORMATION_CONFIGS.items() for (s1, s2) in SEARCH_CONFIGS.items()
+    ]
+}
 
 template = """#! /usr/bin/env python
 
