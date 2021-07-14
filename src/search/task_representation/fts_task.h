@@ -6,6 +6,7 @@
 
 
 #include "../operator_cost.h"
+#include "../plan.h"
 
 class GlobalState;
 
@@ -53,6 +54,7 @@ public:
     int get_label_cost(int label) const;
     int get_min_operator_cost() const;
     bool is_goal_state (const GlobalState &state) const;
+    bool is_goal_state (const PlanState &state) const;
     const std::vector<int> &get_label_preconditions(int label) const;
     std::vector<int> get_goal_variables() const;
 

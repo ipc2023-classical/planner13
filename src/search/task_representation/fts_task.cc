@@ -7,6 +7,7 @@
 #include "../global_state.h"
 #include "search_task.h"
 #include "../utils/memory.h"
+#include "../plan.h"
 
 #include <cassert>
 
@@ -84,16 +85,27 @@ int FTSTask::get_min_operator_cost() const {
     return minimum_cost;
 }
 
-bool FTSTask::is_goal_state(const GlobalState & state) const {
-    // TODO: this is duplicate with SearchTask. Use SearchTask everywhere?
-    for (size_t i = 0; i < transition_systems.size(); ++i) {
-        const TransitionSystem &ts = *transition_systems[i];
-        if (!ts.is_goal_state(state[i])) {
-            return false;
+    bool FTSTask::is_goal_state(const GlobalState & state) const {
+        // TODO: this is duplicate with SearchTask. Use SearchTask everywhere?
+        for (size_t i = 0; i < transition_systems.size(); ++i) {
+            const TransitionSystem &ts = *transition_systems[i];
+            if (!ts.is_goal_state(state[i])) {
+                return false;
+            }
         }
+        return true;
     }
-    return true;
-}
+
+    //used for symbolic plan-reconstruction
+    bool FTSTask::is_goal_state(const PlanState& state) const {
+        for (size_t i = 0; i < transition_systems.size(); ++i) {
+            const TransitionSystem &ts = *transition_systems[i];
+            if (!ts.is_goal_state(state[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 const std::vector<int> & FTSTask::get_label_preconditions(int label) const {
     if (label_preconditions.empty()) {
@@ -127,7 +139,7 @@ vector<int> FTSTask::get_goal_variables() const {
 
 shared_ptr<SearchTask> FTSTask::get_search_task(bool print_time) const {
     if(!search_task){
-    search_task = make_shared<SearchTask> (*this, print_time);
+        search_task = make_shared<SearchTask> (*this, print_time);
     }
     return search_task;
 }

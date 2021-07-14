@@ -56,8 +56,11 @@ public:
 
     SearchNode get_node(const GlobalState &state);
     void trace_path(const GlobalState &goal_state, Plan &path) const;
+    void set_path(const PlanState &state, Plan plan, const std::vector<PlanState> &states, const std::vector<OperatorID> &ops,
+                  const std::shared_ptr<task_representation::FTSTask> &sharedPtr) const;
 
     void dump() const;
+
     void print_statistics() const;
 };
 

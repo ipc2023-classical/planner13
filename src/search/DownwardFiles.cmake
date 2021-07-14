@@ -82,6 +82,72 @@ fast_downward_plugin(
     CORE_PLUGIN
 )
 
+fast_downward_plugin(
+        NAME SYMBOLIC
+        HELP "Plugin containing the base for symbolic search"
+        SOURCES
+        symbolic/sym_variables.cc
+        symbolic/opt_order.cc
+        symbolic/sym_util.cc
+        symbolic/sym_enums.cc
+        symbolic/transition_relation.cc
+        symbolic/sym_bucket.cc
+        symbolic/sym_controller.cc
+        symbolic/sym_solution.cc
+        symbolic/sym_state_space_manager.cc
+        symbolic/original_state_space.cc
+        symbolic/closed_list.cc
+        symbolic/open_list.cc
+        symbolic/frontier.cc
+        symbolic_astar/sym_heuristic.cc
+        symbolic/sym_estimate.cc
+        symbolic/sym_params_search.cc
+        symbolic/sym_state_space_manager.cc
+        symbolic/sym_search.cc
+        symbolic/unidirectional_search.cc
+        symbolic/uniform_cost_search.cc
+        symbolic/breadth_first_search.cc
+        symbolic/bidirectional_search.cc
+        search_engines/symbolic_search.cc
+        task_utils/causal_graph.cc
+        DEPENDENCY_ONLY
+)
+
+fast_downward_plugin(
+        NAME SYMBOLIC_SEARCH_ENGINE
+        HELP "Symbolic search engine"
+        SOURCES
+        search_engines/symbolic_search.cc
+        DEPENDS SYMBOLIC
+)
+
+fast_downward_plugin(
+        NAME SYMBOLIC_ASTAR
+        HELP "Plugin containing the base for symbolic search"
+        SOURCES
+        symbolic_astar/bd_astar.cc
+        symbolic_astar/sym_astar.cc
+        symbolic_astar/sym_astar_closed.cc
+        symbolic_astar/sym_astar_open.cc
+        symbolic_astar/sym_heuristic.cc
+        DEPENDENCY_ONLY
+)
+
+fast_downward_plugin(
+        NAME SYMBOLIC_PDBS
+        HELP "Plugin containing the base for symbolic search"
+        SOURCES
+        symbolic_pdbs/gamer_pdbs_heuristic.cc
+        symbolic_pdbs/hnode.cc
+        symbolic_pdbs/htree.cc
+        symbolic_pdbs/ph.cc
+        symbolic_pdbs/ph_pdbs.cc
+        symbolic_pdbs/spmas_heuristic.cc
+        symbolic_pdbs/sym_pdb.cc
+        DEPENDENCY_ONLY
+)
+
+
 
 fast_downward_plugin(
     NAME TASK_REPRESENTATION

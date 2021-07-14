@@ -51,6 +51,7 @@
 */
 
 #include <vector>
+#include "../task_representation/fts_task.h"
 
 typedef std::vector<std::vector<int>> IntRelation;
 
@@ -71,6 +72,7 @@ public:
     /* Use the factory function get_causal_graph to create causal graphs
        to avoid creating more than one causal graph per AbstractTask. */
     explicit CausalGraph(const TaskProxy &task_proxy);
+    explicit CausalGraph(const std::shared_ptr<task_representation::FTSTask>& task);
     ~CausalGraph() = default;
 
     /*
@@ -114,7 +116,8 @@ public:
 
 /* Create or retrieve a causal graph from cache. If causal graphs are created
    with this function, we build at most one causal graph per AbstractTask. */
-extern const CausalGraph &get_causal_graph(const AbstractTask *task);
+    extern const CausalGraph &get_causal_graph(const AbstractTask *task);
+    extern const CausalGraph &get_causal_graph(const std::shared_ptr<task_representation::FTSTask>& _task);
 }
 
 #endif

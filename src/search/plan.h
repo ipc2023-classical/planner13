@@ -19,7 +19,7 @@ class OperatorID;
 class PlanState {
     std::vector<int> values;
 public:
-PlanState(std::vector<int> &&values)
+explicit PlanState(std::vector<int> &&values)
     : values(std::move(values)) {
     }
 
