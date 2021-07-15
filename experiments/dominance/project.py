@@ -250,3 +250,27 @@ DEFAULT_SATISFICING_SUITE = [
 
 
 DEFAULT_TEST_SUITE = ["depot:p01.pddl", "gripper:prob01.pddl"]
+
+
+DEFAULT_TABLE_ATTRIBUTES = [
+    "cost",
+    "coverage",
+    "error",
+    "evaluations",
+    "expansions",
+    "expansions_until_last_jump",
+    "generated",
+    "memory",
+    "planner_memory",
+    "planner_time",
+    "quality",
+    "run_dir",
+    "score_evaluations",
+    "score_expansions",
+        "score_generated",
+    "score_memory",
+    "score_search_time",
+    "score_total_time",
+    "search_time",
+    "total_time",
+]
