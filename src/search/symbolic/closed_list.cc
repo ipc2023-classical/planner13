@@ -10,6 +10,7 @@
 #include "../task_representation/fts_operators.h"
 #include "../task_representation/sas_task.h"
 #include "../task_representation/sas_operator.h"
+#include "../task_representation/transition_system.h"
 
 
 #include <iostream>
@@ -126,8 +127,7 @@ namespace symbolic {
 //            DEBUG_MSG(cout << "Steps0 of h=" << h << " is " << steps0 << endl;);
             if (steps0 < zeroCostClosed.at(h).size()) {
                 cut *= zeroCostClosed.at(h)[steps0];
-            }
-            else {
+            } else {
                 DEBUG_MSG(cout << "cut not found with steps0. Try to find with preimage: " << trs.count(0) << endl;
                 );
                 bool foundZeroCost = false;
@@ -143,11 +143,12 @@ namespace symbolic {
 
                     for (const auto &op : fts_ops) {
                         // create operatorID bdd
-                        BDD cut_with_effect_bdd = cut;// conjunction of all effects
+                        BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
                         for (auto eff : op.get_effects()) {
-                            cut_with_effect_bdd *= mgr->bddVar(eff.value);
+                            effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
                         }
 
+                        BDD cut_with_effect_bdd = cut * effect_bdd;
                         if (cut_with_effect_bdd.IsZero()) {
                             break_flag = true;
                             break;
@@ -157,7 +158,7 @@ namespace symbolic {
                         if (fw) {
                             succ = tr.preimage(cut_with_effect_bdd);
                         } else {
-                            succ = tr.image(cut_with_effect_bdd);
+                            succ = tr.image(cut) * effect_bdd;
                         }
                         if (succ.IsZero()) {
                             continue_flag = true;
@@ -215,9 +216,9 @@ namespace symbolic {
                             // create operatorID bdd
                             BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
                             for (auto eff : op.get_effects()) {
-                                effect_bdd *= mgr->bddVar(eff.value);
+                                effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
                             }
-                            BDD cut_with_effect_BDD = cut * effect_bdd;
+                            BDD cut_with_effect_bdd = cut * effect_bdd;
 
                             if (foundZeroCost) {
                                 break_flag = true;
@@ -225,9 +226,9 @@ namespace symbolic {
                             }
                             BDD succ;
                             if (fw) {
-                                succ = tr.preimage(cut_with_effect_BDD);
+                                succ = tr.preimage(cut_with_effect_bdd);
                             } else {
-                                succ = tr.image(cut_with_effect_BDD);
+                                succ = tr.image(cut) * effect_bdd;
                             }
                             if (succ.IsZero()) {
                                 continue_flag = true;
@@ -282,15 +283,15 @@ namespace symbolic {
                         bool break_flag = false;
 //                      DEBUG_MSG(cout << "Check " << tr.getLabels().size() << " " << (*(tr.getLabels().begin())) << " of cost " << key.first << " in h=" << newH << endl;);
 
+                        assert (tr.getLabels().size() == 1);
                         int label = *tr.getLabels().begin();
                         vector<task_representation::FTSOperator> fts_ops = task->get_search_task()
                                 ->get_fts_operators_from_label(label);
-
                         for (const auto &op : fts_ops) {
                             // create operatorID bdd
                             BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
                             for (auto eff : op.get_effects()) {
-                                effect_bdd *= mgr->bddVar(eff.value);
+                                effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
                             }
 
                             BDD cut_with_effect_BDD = cut * effect_bdd;
@@ -299,8 +300,7 @@ namespace symbolic {
                             if (fw) {
                                 succ = tr.preimage(cut_with_effect_BDD);
                             } else {
-                                succ = tr.image(cut);
-                                succ *= effect_bdd;
+                                succ = tr.image(cut) * effect_bdd;
                             }
                             BDD intersection = succ * closed.at(newH);
                             /*DEBUG_MSG(cout << "Image computed: "; succ.print(0,1);
@@ -323,7 +323,7 @@ namespace symbolic {
                                 }
                                 path.push_back(op.get_id());
 
-                                DEBUG_MSG(cout << "Selected " << g_sas_task()->get_operator_name(path.back().get_index()) << endl;);
+//                                DEBUG_MSG(cout << "Selected " << g_sas_task()->get_operator_name(path.back().get_index()) << endl;);
 
                                 found = true;
                                 break_flag = true;

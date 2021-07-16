@@ -240,7 +240,7 @@ namespace task_representation {
             return get_fts_operators(get_operator_IDs_from_label(label));
         }
 
-        std::vector<int> get_labels_from_operator_IDs(std::vector<OperatorID> ops) const {
+        std::vector<int> get_labels_from_operator_IDs(const std::vector<OperatorID>& ops) const {
             std::vector<int> res;
 
             res.reserve(ops.size());

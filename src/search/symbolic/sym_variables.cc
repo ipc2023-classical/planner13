@@ -1,6 +1,7 @@
 #include "sym_variables.h"
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include "../task_representation/labels.h"
 
@@ -25,7 +26,7 @@ SymVariables::SymVariables(const Options &opts, const shared_ptr<task_representa
     cudd_init_available_memory(opts.get<int>("cudd_init_available_memory")),
     gamer_ordering(opts.get<bool>("gamer_ordering")),
     rng(utils::parse_rng_from_options(opts)),
-    task(_task) { }
+    task(_task) { cout << "Creating symvariables" << endl;}
 
 void SymVariables::init() {
     vector <int> _var_order;
@@ -72,10 +73,10 @@ void SymVariables::init(const vector <int> &v_order) {
          << cudd_init_nodes / _numBDDVars << ", "
          << cudd_init_cache_size << ", "
          << cudd_init_available_memory << ")" << endl;
-    _manager = unique_ptr<Cudd> (new Cudd(_numBDDVars, 0,
+    _manager = std::make_unique<Cudd> (_numBDDVars, 0,
                                           cudd_init_nodes / _numBDDVars,
                                           cudd_init_cache_size,
-                                          cudd_init_available_memory));
+                                          cudd_init_available_memory);
 
     _manager->setHandler(exceptionError);
     _manager->setTimeoutHandler(exceptionError);
@@ -109,16 +110,6 @@ void SymVariables::init(const vector <int> &v_order) {
 
     binState.resize(_numBDDVars, 0);
     cout << "Symbolic Variables... Done." << endl;
-
-    // TODO delete? --v
-
-    /*  for(int i = 0; i < g_variable_domain.size(); i++){
-      for(int j = 0; j < g_variable_domain[i]; j++){
-        cout << "Var-val: " << i << "-" << j << endl;
-        preconditionBDDs[i][j].print(1,2);
-        effectBDDs[i][j].print(1,2);
-      }
-      }*/
 }
 
 //BDD SymVariables::getStateBDD(const GlobalState &state) const {
@@ -131,7 +122,7 @@ void SymVariables::init(const vector <int> &v_order) {
 
 BDD SymVariables::getStateBDD(const std::vector<int> &state) const {
     BDD res = _manager->bddOne();
-    for (int i = var_order.size() - 1; i >= 0; i--) {
+    for (int i = int(var_order.size()) - 1; i >= 0; i--) {
         res = res * source_state_BBDs[var_order[i]][state[var_order[i]]];
     }
     return res;
@@ -141,7 +132,7 @@ BDD SymVariables::getInitialStateBDD() const {
     BDD res = _manager->bddOne();
 
     for (int i = var_order.size() - 1; i >= 0 ; --i)
-        res *= source_state_BBDs[var_order[i]][task->get_ts(i).get_init_state()];
+        res *= source_state_BBDs[var_order[i]][task->get_ts(var_order[i]).get_init_state()];
 
     return res;
 }
@@ -149,13 +140,13 @@ BDD SymVariables::getInitialStateBDD() const {
 BDD SymVariables::getGoalBDD() const {
     BDD res = _manager->bddOne();
 
-    for (int i = var_order.size() - 1; i >= 0 ; --i) {
+    for (int i = int(var_order.size()) - 1; i >= 0 ; --i) {
         BDD lts_res = _manager->bddZero();
 
         task_representation::TransitionSystem ts = task->get_ts(var_order[i]);
         std::vector<int> goals = ts.get_goal_states();
         for (auto goal_state : goals) {
-            lts_res += source_state_BBDs[i][goal_state];
+            lts_res += source_state_BBDs[var_order[i]][goal_state];
         }
         res *= lts_res;
     }

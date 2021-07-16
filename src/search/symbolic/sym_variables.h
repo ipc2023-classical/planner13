@@ -170,7 +170,7 @@ public:
     }
 
     inline BDD oneBDD() const {
-	assert(_manager);
+	    assert(_manager);
         return _manager->bddOne();
     }
 
@@ -184,6 +184,10 @@ public:
 
     inline BDD bddVar(int index) const {
         return variables[index];
+    }
+
+    inline BDD bddNewVar(int index) {
+        return _manager->bddVar(index);
     }
 
     inline int usedNodes() const {

@@ -82,12 +82,6 @@ namespace symbolic_search {
 
             vector<task_representation::SASOperator> sas_ops;
 
-            cout << "plan: " << endl;
-            for (auto op : plan) {
-                task_representation::SASOperator sas_op = g_sas_task()->get_operator(op.get_index());
-                cout << sas_op.get_name() << endl;
-            }
-
             std::vector<int> labels = task->get_search_task()->get_labels_from_operator_IDs(plan);
 
             cout << endl;
