@@ -157,6 +157,7 @@ class CommonExperiment(FastDownwardExperiment):
         self.add_parser(self.SINGLE_SEARCH_PARSER)
         self.add_parser(self.PLANNER_PARSER)
         self.add_parser(DIR / "parser.py")
+        self.add_parser(DIR / "parser_symbolic.py")
         self.add_parse_again_step()
 
 
