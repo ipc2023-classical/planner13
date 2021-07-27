@@ -73,7 +73,9 @@ def parse_numeric_dominance (content, props):
 
     for l in content.split("\n"):
         if check:
-            if l == "Init partitions" or l.startswith("Completed preprocessing") or l.startswith("f = "):
+            if l == "------" or len(l.strip()) == 0:
+                continue
+            elif ":" not in l:
                 props['min_negative_dominance'] = min_val
                 props['max_positive_dominance'] = max_val
                 props["has_dominance"] = 1 if (max_val > -100000000) else 0
