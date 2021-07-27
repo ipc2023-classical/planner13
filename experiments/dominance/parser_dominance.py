@@ -72,26 +72,19 @@ def parse_numeric_dominance (content, props):
     num_variables_with_dominance_geq1 = 0
 
     for l in content.split("\n"):
-        if check:
+        if l == "------":
+            if not check:
+                check = True
+            else:
+                num_vars += 1
+            new_var = True
+            new_var_geq0 = True
+            new_var_geq1 = True
+        elif check:
             if l == "------" or len(l.strip()) == 0:
                 continue
-            elif ":" not in l:
-                props['min_negative_dominance'] = min_val
-                props['max_positive_dominance'] = max_val
-                props["has_dominance"] = 1 if (max_val > -100000000) else 0
-                props["has_positive_dominance"] = 1 if (max_val > 0) else 0
-                props["has_negative_dominance"] = 1 if (min_val < 0) and (min_val > -100000000) else 0
-                props["has_qualitative_dominance"] = 1 if num_variables_with_dominance_geq0 > 0 else 0
-                props["num_variables_with_dominance"] = num_variables_with_dominance
-                props["num_variables_with_dominance_geq0"] = num_variables_with_dominance_geq0
-                props["num_variables_with_dominance_geq1"] = num_variables_with_dominance_geq1
 
-                props["percentage_variables_with_dominance"] = num_variables_with_dominance/float(num_vars)
-                props["percentage_variables_with_dominance_geq0"] = num_variables_with_dominance_geq0/float(num_vars)
-                props["percentage_variables_with_dominance_geq1"] = num_variables_with_dominance_geq1/float(num_vars)
-                return
-
-            if ":" in l and not "infinity" in l:
+            if ":" in l and not "infinity" in l and l.split(":")[0].replace('-','',1).isdigit():
                 val = l.split(":")[0]
                 if "(" in val:
                     val = val.split("(")[0]
@@ -110,15 +103,23 @@ def parse_numeric_dominance (content, props):
                 if new_var_geq1 and val >= 1:
                     num_variables_with_dominance_geq1 += 1
                     new_var_geq1 = False
+            elif "infinity" not in l:
+                props['min_negative_dominance'] = min_val
+                props['max_positive_dominance'] = max_val
+                props["has_dominance"] = 1 if (max_val > -100000000) else 0
+                props["has_positive_dominance"] = 1 if (max_val > 0) else 0
+                props["has_negative_dominance"] = 1 if (min_val < 0) and (min_val > -100000000) else 0
+                props["has_qualitative_dominance"] = 1 if num_variables_with_dominance_geq0 > 0 else 0
+                props["num_variables_with_dominance"] = num_variables_with_dominance
+                props["num_variables_with_dominance_geq0"] = num_variables_with_dominance_geq0
+                props["num_variables_with_dominance_geq1"] = num_variables_with_dominance_geq1
 
-        if l == "------":
-            if not check:
-                check = True
-            else:
-                num_vars += 1
-            new_var = True
-            new_var_geq0 = True
-            new_var_geq1 = True
+                props["percentage_variables_with_dominance"] = num_variables_with_dominance/float(num_vars)
+                props["percentage_variables_with_dominance_geq0"] = num_variables_with_dominance_geq0/float(num_vars)
+                props["percentage_variables_with_dominance_geq1"] = num_variables_with_dominance_geq1/float(num_vars)
+                return
+
+
 
 
 
