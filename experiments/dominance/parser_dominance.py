@@ -25,7 +25,7 @@ regexps = [re.compile("Compute LDSim on (?P<lts_num>(\d+)) LTSs. Total size: (?P
            re.compile('Similarity equivalences: (?P<similarity_equivalences>(\d+))'),
            re.compile('Completed preprocessing: (?P<time_completed_preprocessing>(.*))'),
            re.compile('Simulations Found in (?P<num_variables_with_positive_dominance>(\d+)) out of (?P<total_num_variables>(\d+)) variables'),
-           re.compile('Computed tau labels .*: (?P<tau_labels_all>(\d+)) : (?P<tau_labels_some>(\d+)) / (?P<total_labels>(\d+))']
+           re.compile('Computed tau labels .*: (?P<tau_labels_all>(\d+)) : (?P<tau_labels_some>(\d+)) / (?P<total_labels>(\d+))')]
 
 type_atr = {'dead_ops_by_labels' : int, 'perc_dead_ops_by_labels' : float, 'orig_ops' : int,
             'dead_ops_by_stored' : int, 'perc_dead_ops_by_stored' : float,
@@ -73,7 +73,7 @@ def parse_numeric_dominance (content, props):
 
     for l in content.split("\n"):
         if check:
-            if l == "Init partitions" or l.startswith("Completed preprocessing"):
+            if l == "Init partitions" or l.startswith("Completed preprocessing") or l.startswith("f = "):
                 props['min_negative_dominance'] = min_val
                 props['max_positive_dominance'] = max_val
                 props["has_dominance"] = 1 if (max_val > -100000000) else 0
@@ -130,16 +130,11 @@ def fix_error (content, props):
             return
 
 
-def set_algorithm_prop (content, props):
-    if "algorithm" not in props:
-        props["algorithm"] = props["experiment_name"]
-
 eval.add_function(parse_regexps)
 
 eval.add_function(parse_numeric_dominance)
 
 eval.add_function(fix_error)
-eval.add_function(set_algorithm_prop)
 
 def parse_layers (content, props):
 
