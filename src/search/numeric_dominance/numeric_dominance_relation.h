@@ -17,15 +17,10 @@ class Operator;
 
 class SearchProgress;
 
-/*
- * Class that represents the collection of simulation relations for a
- * factored LTS. Uses unique_ptr so that it owns the simulations and
- * it cannot be copied away.
- */
 template<typename T>
-class NumericDominanceRelation {
+class NumericDominanceRelationBuilder {
 
-    const std::shared_ptr<FTSTask>& task;
+    const std::vector<std::unique_ptr<TransitionSystem>> tss;
 
     //Auxiliary data-structures to perform successor pruning
     mutable std::set<int> relevant_simulations;
@@ -39,6 +34,22 @@ class NumericDominanceRelation {
     const int max_simulation_time;
     const int min_simulation_time, max_total_time;
     const int max_lts_size_to_compute_simulation;
+
+public:
+    NumericDominanceRelation<T> compute_ld_simulation(const std::vector<std::unique_ptr<TransitionSystem>> &tss_, const Labels &labels, bool dump) {
+
+    }
+
+};
+
+/*
+ * Class that represents the collection of simulation relations for a
+ * factored LTS. Uses unique_ptr so that it owns the simulations and
+ * it cannot be copied away.
+ */
+template<typename T>
+class NumericDominanceRelation {
+
     NumericLabelRelation<T> label_dominance;
     std::shared_ptr<TauLabelManager<T>> tau_labels;
 
@@ -70,7 +81,6 @@ public:
     }
 
     void compute_ld_simulation(std::vector<TransitionSystem> &tss, const Labels &labels, bool dump);
-
 
 
     bool action_selection_pruning (const State & state, std::vector<OperatorID>& applicable_operators) const;

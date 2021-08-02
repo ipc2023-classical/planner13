@@ -118,8 +118,8 @@ bool NumericDominanceRelation<T>::dominates_parent(const vector<int> &state,
 }
 
 template<typename T>
-void
-NumericDominanceRelation<T>::compute_ld_simulation(vector<TransitionSystem> &tss, const Labels &labels, bool dump) {
+NumericDominanceRelation<T>
+NumericDominanceRelationBuilder<T>::compute_ld_simulation(vector<unique_ptr<TransitionSystem>> &tss, const Labels &labels, bool dump) {
     assert(tss.size() == simulations.size());
     utils::Timer t;
     int num_iterations = 0;
@@ -400,6 +400,10 @@ template <typename T> void NumericDominanceRelation<T>::set_initial_state(const 
         initial_state_ids[i] = initial_state[i];
     }
 }
+
+template class NumericDominanceRelationBuilder<int>;
+
+template class NumericDominanceRelationBuilder<IntEpsilon>;
 
 template
 class NumericDominanceRelation<int>;
