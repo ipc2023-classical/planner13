@@ -7,15 +7,10 @@
 
 #include "../utils/debug_macros.h"
 #include "../task_representation/search_task.h"
-#include "../task_representation/fts_operators.h"
-#include "../task_representation/sas_task.h"
-#include "../task_representation/sas_operator.h"
 #include "../task_representation/transition_system.h"
-
 
 #include <iostream>
 #include <string>
-//#include "../successor_generator.h" // deprecated??
 
 #include "sym_test.h"
 
@@ -119,12 +114,12 @@ namespace symbolic {
 
         if (zeroCostClosed.count(h)) {
             assert(trs.count(0));
-//            DEBUG_MSG(cout << "Check " << steps0 << " of " << zeroCostClosed.at(h).size() << endl;);
+            DEBUG_MSG(cout << "Check " << steps0 << " of " << zeroCostClosed.at(h).size() << endl;);
             while (steps0 < zeroCostClosed.at(h).size() && (cut * zeroCostClosed.at(h)[steps0]).IsZero()) {
 //                DEBUG_MSG(cout << "Steps0 is not " << steps0<< " of " << zeroCostClosed.at(h).size() << endl;);
                 steps0++;
             }
-//            DEBUG_MSG(cout << "Steps0 of h=" << h << " is " << steps0 << endl;);
+            DEBUG_MSG(cout << "Steps0 of h=" << h << " is " << steps0 << endl;);
             if (steps0 < zeroCostClosed.at(h).size()) {
                 cut *= zeroCostClosed.at(h)[steps0];
             } else {
@@ -132,61 +127,55 @@ namespace symbolic {
                 );
                 bool foundZeroCost = false;
                 for (const TransitionRelation &tr : trs.at(0)) {
-                    bool break_flag = false, continue_flag = false;
-
                     if (foundZeroCost) {
                         break;
                     }
+                    assert(tr.getLabels().size() == 1);
                     int label = *tr.getLabels().begin();
                     vector<task_representation::FTSOperator> fts_ops = task->get_search_task()->get_fts_operators_from_label(
                             label);
 
-                    for (const auto &op : fts_ops) {
-                        // create operatorID bdd
-                        BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
-                        for (auto eff : op.get_effects()) {
-                            effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
-                        }
+                    ClosedList::assertOpIdExists(tr, fts_ops);
 
-                        BDD cut_with_effect_bdd = cut * effect_bdd;
-                        if (cut_with_effect_bdd.IsZero()) {
-                            break_flag = true;
-                            break;
-                        }
+                    BDD succ;
+                    if (fw) {
+                        succ = tr.preimage(cut);
+                    } else {
+                        succ = tr.image(cut);
+                    }
+                    if (succ.IsZero()) {
+                        continue;
+                    }
 
-                        BDD succ;
-                        if (fw) {
-                            succ = tr.preimage(cut_with_effect_bdd);
-                        } else {
-                            succ = tr.image(cut) * effect_bdd;
-                        }
-                        if (succ.IsZero()) {
-                            continue_flag = true;
-                            break;
-                        }
-
-                        for (size_t newSteps0 = 0; newSteps0 < steps0; newSteps0++) {
-                            BDD intersection = succ * zeroCostClosed.at(h)[newSteps0];
-                            if (!intersection.IsZero()) {
-                                steps0 = newSteps0;
-
-                                path.push_back(op.get_id());
-
-                                cut = succ;
-                                /*DEBUG_MSG(cout << "Adding " << cut_with_effect_bdd << endl;);*/
-                                foundZeroCost = true;
-                                break;
-                            }
-                        }
-                        if (foundZeroCost) {
-                            break_flag = true;
+                    for (size_t newSteps0 = 0; newSteps0 < steps0; newSteps0++) {
+                        BDD intersection = succ * zeroCostClosed.at(h)[newSteps0];
+                        if (!intersection.IsZero()) {
+                            steps0 = newSteps0;
+                            foundZeroCost = true;
                             break;
                         }
                     }
-                    if (break_flag)
-                        break;
-                    if (continue_flag)
+                    if (!foundZeroCost) {
                         continue;
+                    }
+
+                    bool foundOpId = false;
+
+                    for (const auto &op : fts_ops) {
+                        succ = setSuccWithEffects(cut, op, fw, tr);
+                        if (succ.IsZero()) {
+                            continue;
+                        }
+                        BDD intersection = succ * zeroCostClosed.at(h)[steps0];
+                        if (!intersection.IsZero()) {
+                            path.push_back(op.get_id());
+                            cut = intersection;
+                            foundOpId = true;
+                            break;
+                        }
+                    }
+                    if (foundOpId)
+                        break;
                 }
                 if (!foundZeroCost) {
                     DEBUG_MSG(cout << "cut not found with steps0. steps0=0:" << endl;
@@ -198,80 +187,81 @@ namespace symbolic {
         }
 
         while (h > 0 || steps0 > 0) {
-            /*DEBUG_MSG(
-                    cout << "h=" << h << " and steps0=" << steps0 << endl;
-                    cout << "CUT: "; cut.print(0, 1);
-            );*/
+            cout << "h > 0 || steps0 > 0" << endl;
+            DEBUG_MSG(cout << "h=" << h << " and steps0=" << steps0 << endl;);
             if (steps0 > 0) {
+                cout << "steps0 > 0" << endl;
                 bool foundZeroCost = false;
                 //Apply 0-cost operators
                 if (trs.count(0)) {
                     for (const TransitionRelation &tr : trs.at(0)) {
-                        bool continue_flag = false, break_flag = false;
+                        assert(tr.getLabels().size() == 1);
                         int label = *tr.getLabels().begin();
                         vector<task_representation::FTSOperator> fts_ops = task->get_search_task()
                                 ->get_fts_operators_from_label(label);
+                        ClosedList::assertOpIdExists(tr, fts_ops);
 
-                        for (const auto &op : fts_ops) {
-                            // create operatorID bdd
-                            BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
-                            for (auto eff : op.get_effects()) {
-                                effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
-                            }
-                            BDD cut_with_effect_bdd = cut * effect_bdd;
+                        BDD succ;
+                        if (fw) {
+                            succ = tr.preimage(cut);
+                        } else {
+                            succ = tr.image(cut);
+                        }
+                        if (succ.IsZero()) {
+                            continue;
+                        }
 
-                            if (foundZeroCost) {
-                                break_flag = true;
+                        BDD intersection;
+                        for (size_t newSteps0 = 0; newSteps0 < steps0; newSteps0++) {
+                            intersection = succ * zeroCostClosed.at(h)[newSteps0];
+                            if (!intersection.IsZero()) {
+                                steps0 = newSteps0;
+                                foundZeroCost = true;
                                 break;
-                            }
-                            BDD succ;
-                            if (fw) {
-                                succ = tr.preimage(cut_with_effect_bdd);
-                            } else {
-                                succ = tr.image(cut) * effect_bdd;
-                            }
-                            if (succ.IsZero()) {
-                                continue_flag = true;
-                                break;
-                            }
-
-                            DEBUG_MSG(cout << "SUCC: ";
-                                              succ.print(0, 1);
-                            );
-                            for (size_t newSteps0 = 0; newSteps0 < steps0; newSteps0++) {
-                                BDD intersection = succ * zeroCostClosed.at(h)[newSteps0];
-                                if (!intersection.IsZero()) {
-                                    steps0 = newSteps0;
-                                    path.push_back(op.get_id());
-                                    DEBUG_MSG(cout << "Adding " << (*(tr.getLabels().begin())) << endl;);
-                                    cut = succ; // TODO maybe use intersection
-                                    foundZeroCost = true;
-                                    break;
-                                }
                             }
                         }
-                        if (break_flag)
-                            break;
-                        if (continue_flag)
+                        if (!foundZeroCost) {
                             continue;
+                        }
+
+                        bool foundOpId = false;
+                        for (const auto &op : fts_ops) {
+                            succ = setSuccWithEffects(cut, op, fw, tr);
+
+                            intersection = succ * zeroCostClosed.at(h)[steps0];
+                            if (!intersection.IsZero()) {
+                                path.push_back(op.get_id());
+                                DEBUG_MSG(cout << "Adding " << op.get_id().get_index() << ", cost: "
+                                               << op.get_cost() << endl;);
+                                cut = intersection;
+                                foundOpId = true;
+                                break;
+                            }
+                        }
+                        assert(foundZeroCost);
+                        assert(foundOpId);
+                        break;
                     }
                 }
                 DEBUG_MSG(cout << "FoundZeroCost: " << foundZeroCost << endl;);
                 if (!foundZeroCost) {
-                    /*DEBUG_MSG(
-                            cout << "Force steps0 = 0" << endl;
-                            for (int newSteps0 = 0; newSteps0 <= int(steps0); newSteps0++) {
-                                cout << "Steps0: " << newSteps0 << ": ";
-                                zeroCostClosed.at(h)[newSteps0].print(0, 2);
-                                cout << "CUT: ";
-                                cut.print(0, 1);
-                            }
-                    );*/
+//                    DEBUG_MSG(
+//                            cout << "Force steps0 = 0" << endl;
+//                            for (int newSteps0 = 0; newSteps0 <= int(steps0); newSteps0++) {
+//                                cout << "Steps0: " << newSteps0 << ": ";
+//                                zeroCostClosed.at(h)[newSteps0].print(0, 2);
+//                                cout << "CUT: ";
+//                                cut.print(0, 1);
+//                            }
+//                    );
+                    assert(h > 0);
+
                     steps0 = 0;
                 }
             }
 
             if (h > 0 && steps0 == 0) {
+                DEBUG_MSG(cout << "h=" << h << " and steps0=" << steps0 << endl;);
                 bool found = false;
                 for (auto key : trs) { //TODO: maybe is best to use the inverse order
                     if (found)
@@ -280,27 +270,19 @@ namespace symbolic {
                     if (key.first == 0 || closed.count(newH) == 0)
                         continue;
                     for (TransitionRelation &tr : key.second) {
-                        bool break_flag = false;
-//                      DEBUG_MSG(cout << "Check " << tr.getLabels().size() << " " << (*(tr.getLabels().begin())) << " of cost " << key.first << " in h=" << newH << endl;);
+                        /*DEBUG_MSG(cout << "Check. size: " << tr.getLabels().size() << " label: "
+                                       << (*(tr.getLabels().begin())) << " of cost " << key.first << " in h=" << newH
+                                       << endl;);*/
 
                         assert (tr.getLabels().size() == 1);
                         int label = *tr.getLabels().begin();
                         vector<task_representation::FTSOperator> fts_ops = task->get_search_task()
                                 ->get_fts_operators_from_label(label);
                         for (const auto &op : fts_ops) {
-                            // create operatorID bdd
-                            BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
-                            for (auto eff : op.get_effects()) {
-                                effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
-                            }
-
-                            BDD cut_with_effect_BDD = cut * effect_bdd;
-
                             BDD succ;
-                            if (fw) {
-                                succ = tr.preimage(cut_with_effect_BDD);
-                            } else {
-                                succ = tr.image(cut) * effect_bdd;
+                            succ = setSuccWithEffects(cut, op, fw, tr);
+                            if (succ.IsZero()) {
+                                continue;
                             }
                             BDD intersection = succ * closed.at(newH);
                             /*DEBUG_MSG(cout << "Image computed: "; succ.print(0,1);
@@ -312,30 +294,32 @@ namespace symbolic {
                                 steps0 = 0;
                                 if (zeroCostClosed.count(h)) {
                                     while ((cut * zeroCostClosed.at(h)[steps0]).IsZero()) {
-                                        //DEBUG_MSG(cout << "r Steps0 is not " << steps0<< " of " << zeroCostClosed.at(h).size() << endl;);
+//                                        DEBUG_MSG(cout << "r Steps0 is not " << steps0<< " of " << zeroCostClosed.at(h).size() << endl;);
                                         steps0++;
                                         assert(steps0 < zeroCostClosed.at(newH).size());
                                     }
 
-                                    //DEBUG_MSG(cout << "r Steps0 of h=" << h << " is " << steps0 << endl;);
+//                                    DEBUG_MSG(cout << "r Steps0 of h=" << h << " is " << steps0 << endl;);
 
                                     cut *= zeroCostClosed.at(h)[steps0];
                                 }
                                 path.push_back(op.get_id());
-
-//                                DEBUG_MSG(cout << "Selected " << g_sas_task()->get_operator_name(path.back().get_index()) << endl;);
+                                DEBUG_MSG(
+                                        cout << "Adding " << op.get_id().get_index() << ", cost: " << op.get_cost()
+                                             << endl;);
 
                                 found = true;
-                                break_flag = true;
                                 break;
                             }
+
                         }
-                        if (break_flag)
+                        if (found)
                             break;
                     }
                 }
                 if (!found) {
                     cerr << "Error: ClosedList.cc fail. h: " << h << endl;
+                    cerr << "Error: ClosedList.cc could not find path" << endl;
                     utils::exit_with(utils::ExitCode::CRITICAL_ERROR);
                 }
             }
@@ -343,6 +327,43 @@ namespace symbolic {
 
         DEBUG_MSG(cout << "Sym closed extracted path" << endl;
         );
+    }
+
+    void ClosedList::assertOpIdExists(const TransitionRelation& tr, const vector<task_representation::FTSOperator>& fts_ops) const {
+        BDD all_effects = mgr->zeroBDD();
+        for (const auto& op : fts_ops) {
+            BDD op_eff_bdd = mgr->oneBDD();
+            for (const auto& eff : op.get_effects()) {
+                op_eff_bdd *= mgr->getVars()->targetStateBDD(eff.var, eff.value);
+                assert(!op_eff_bdd.IsZero());
+            }
+            all_effects += op_eff_bdd;
+        }
+
+        assert(tr.getBDD() * all_effects == tr.getBDD());
+    }
+
+    BDD ClosedList::setSuccWithEffects(const BDD &cut,
+                                       const task_representation::FTSOperator &op, int fw,
+                                       const TransitionRelation &tr) const {
+        BDD succ;
+        // create operatorID bdd
+        BDD effect_bdd = mgr->oneBDD();// conjunction of all effects
+        for (auto eff : op.get_effects()) {
+            effect_bdd *= mgr->getVars()->sourceStateBDD(eff.var, eff.value);
+        }
+
+        if (fw) {
+            BDD cut_with_effect_bdd = cut * effect_bdd;
+            if (cut_with_effect_bdd.IsZero())
+                return mgr->zeroBDD();
+
+            succ = tr.preimage(cut_with_effect_bdd);
+        } else {
+            succ = tr.image(cut) * effect_bdd;
+        }
+
+        return succ;
     }
 
     SymSolution ClosedList::checkCut(UnidirectionalSearch *search, const BDD &states, int g, bool fw) const {

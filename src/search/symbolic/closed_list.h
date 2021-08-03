@@ -3,6 +3,7 @@
 
 #include "sym_variables.h"
 #include "unidirectional_search.h"
+#include "../task_representation/fts_operators.h"
 
 #include <vector>
 #include <set>
@@ -88,6 +89,11 @@ public:
     virtual bool exhausted () const override {
 	    return fNotClosed == std::numeric_limits<int>::max();
     }
+
+    BDD setSuccWithEffects(const BDD &cut, const task_representation::FTSOperator &op,
+                           int fw, const TransitionRelation &tr) const;
+
+    void assertOpIdExists(const TransitionRelation &tr, const std::vector<task_representation::FTSOperator> &fts_ops) const;
 };
 }
 
