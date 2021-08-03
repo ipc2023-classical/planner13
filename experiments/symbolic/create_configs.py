@@ -27,7 +27,7 @@ SEARCH_CONFIGS = {
 }
 
 REVS_CONFIGS = {
-    ("e88a387c0267994d95ff90ae60d6df9c6059fb81", "e88") : [
+    ("0a98e74b3a3e90bbd3a733ecd8692a76281fb19c", "21-08-03") : [
         (config_name(t1, s1), t2+s2) for (t1, t2) in TRANSFORMATION_CONFIGS.items() for (s1, s2) in SEARCH_CONFIGS.items()
     ]
 }
