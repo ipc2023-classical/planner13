@@ -93,6 +93,7 @@ bool SearchEngine::check_goal_and_set_plan(const PlanState& goal_state, const st
         solution_found = true;
         return true;
     }
+    cout << "Goal state provided is not actually a goal state." << endl;
     return false;
 }
 

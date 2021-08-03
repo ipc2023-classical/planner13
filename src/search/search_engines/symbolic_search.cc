@@ -79,12 +79,6 @@ namespace symbolic_search {
             vector<PlanState> states;
             vector<OperatorID> plan;
             sol.getPlan(states, plan);
-
-            vector<task_representation::SASOperator> sas_ops;
-
-            std::vector<int> labels = task->get_search_task()->get_labels_from_operator_IDs(plan);
-
-            cout << endl;
             this->check_goal_and_set_plan(states.back(), states, plan, task);
         }
 
