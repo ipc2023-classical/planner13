@@ -224,7 +224,7 @@ namespace symbolic {
                             continue;
                         }
 
-                        bool foundOpId = false;
+                        // bool foundOpId = false;
                         for (const auto &op : fts_ops) {
                             succ = setSuccWithEffects(cut, op, fw, tr);
 
@@ -234,12 +234,12 @@ namespace symbolic {
                                 DEBUG_MSG(cout << "Adding " << op.get_id().get_index() << ", cost: "
                                                << op.get_cost() << endl;);
                                 cut = intersection;
-                                foundOpId = true;
+                                // foundOpId = true;
                                 break;
                             }
                         }
                         assert(foundZeroCost);
-                        assert(foundOpId);
+                        // assert(foundOpId);
                         break;
                     }
                 }
@@ -330,6 +330,7 @@ namespace symbolic {
     }
 
     void ClosedList::assertOpIdExists(const TransitionRelation& tr, const vector<task_representation::FTSOperator>& fts_ops) const {
+        (void) tr;
         BDD all_effects = mgr->zeroBDD();
         for (const auto& op : fts_ops) {
             BDD op_eff_bdd = mgr->oneBDD();
