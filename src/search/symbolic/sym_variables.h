@@ -76,9 +76,10 @@ public:
     void init();
 
     // new FTSTask methods
-    BDD getInitialStateBDD() const; // <-- new
-    BDD getGoalBDD() const; // <-- new
-    BDD getStateBDD(const std::vector<int> &state) const; // <-- same as before
+    BDD getInitialStateBDD() const;
+    BDD getGoalBDD() const;
+    BDD getGoalBDD(const std::set<int>& relevantVars) const;
+    BDD getStateBDD(const std::vector<int> &state) const;
 
     // old global_task methods
 //    State getStateFrom(const BDD & bdd) const;
@@ -267,9 +268,7 @@ private:
     inline int getNumBDDVars() const {
         return numBDDVars;
     }
-
-    BDD getGoalBDD(const std::vector<int> _variables) const;
-};
+    };
 }
 
 #endif

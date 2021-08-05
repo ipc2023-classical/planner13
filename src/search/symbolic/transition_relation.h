@@ -5,8 +5,6 @@
 #include <set>
 #include <vector>
 
-class GlobalOperator;
-
 namespace symbolic {
 class SymStateSpaceManager;
 class OriginalStateSpace;
@@ -31,17 +29,16 @@ class TransitionRelation {
     std::vector<BDD> swapVarsS, swapVarsSp; // Swap variables s to sp and viceversa
     std::vector<BDD> swapVarsA, swapVarsAp; // Swap abstraction variables
 
-    std::set<const GlobalOperator *> ops; //List of operators represented by the TR
+    std::set<const OperatorID *> ops; //List of operators represented by the TR
     std::set<int> labels; //List of labels represented by the TR
 
     const SymStateSpaceManager *absAfterImage;
 public:
     //Constructor for abstraction transitions
-    TransitionRelation(SymStateSpaceManager *mgr,
-                  const DominanceRelation &sim_relations);
+//    TransitionRelation(SymStateSpaceManager *mgr, const DominanceRelation &sim_relations);
 
     //Constructor for transitions irrelevant for the abstraction
-    TransitionRelation(SymVariables *sVars, const GlobalOperator *op, int cost_);
+//    TransitionRelation(SymVariables *sVars, const GlobalOperator *op, int cost_);
 
     TransitionRelation(SymVariables *sVars, int label, const std::shared_ptr<task_representation::FTSTask> &_task);
 
@@ -82,21 +79,12 @@ public:
     inline int nodeCount() const {
         return tBDD.nodeCount();
     }
-//    inline const std::set<const GlobalOperator *> &getOps() const { // <-- deprecated
-//        return ops;
-//    }
+    inline const std::set<const OperatorID *> &getOps() const {
+        return ops;
+    }
     inline const std::set<int> &getLabels() const {
         return labels;
     };
-
-    inline bool hasOp(std::set<const GlobalOperator *> _ops) const {
-        for (const auto &op : _ops) {
-            if (_ops.count(op)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     inline const BDD &getBDD() const {
         return tBDD;

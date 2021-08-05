@@ -6,9 +6,6 @@
 #include "../task_representation/transition_system.h"
 
 #include "sym_state_space_manager.h"
-#include "original_state_space.h"
-
-#include "../utils/timer.h"
 
 using namespace std;
 

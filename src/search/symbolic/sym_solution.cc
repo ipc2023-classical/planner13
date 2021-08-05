@@ -8,7 +8,7 @@
 using namespace std;
 
 namespace symbolic {
-    void SymSolution::getPlan(vector<PlanState>& states, vector<OperatorID>& path) const { // Use OperatorID
+    void SymSolution::getPlan(vector<PlanState> &states, vector<OperatorID> &path) const { // Use OperatorID
         assert (path.empty()); //This code should be modified to allow appending things to paths
         DEBUG_MSG(cout << "Extract path forward: " << g << endl;);
         if (exp_fw) {
@@ -66,32 +66,33 @@ namespace symbolic {
           exit(-1);
           });*/
     }
-    // --v Never called so its commented out for now
-//    ADD SymSolution::getADD() const {
-//        assert(exp_fw || exp_bw);
-//        vector<const GlobalOperator *> path;
-//        getPlan(path);
-//
-//        SymVariables *vars = nullptr;
-//        if (exp_fw) vars = exp_fw->getStateSpace()->getVars();
-//        else if (exp_bw) vars = exp_bw->getStateSpace()->getVars();
-//
-//        ADD hADD = vars->getADD(-1);
-//        int h_val = g + h;
-//
-//        vector<int> s = g_initial_state_data;
-//        BDD sBDD = vars->getStateBDD(s);
-//        hADD += sBDD.Add() * (vars->getADD(h_val + 1));
-//        for (auto op : path) {
-//            h_val -= op->get_cost();
-//            for (const GlobalEffect &eff : op->get_effects()) {
+
+    ADD SymSolution::getADD() const {
+        assert(exp_fw || exp_bw);
+        vector<OperatorID> path;
+        vector<PlanState> states;
+        getPlan(states, path);
+
+        SymVariables *vars = nullptr;
+        if (exp_fw) vars = exp_fw->getStateSpace()->getVars();
+        else if (exp_bw) vars = exp_bw->getStateSpace()->getVars();
+
+        ADD hADD = vars->getADD(-1);
+        int h_val = g + h;
+
+        vector<int> s = task->get_initial_state();
+        BDD sBDD = vars->getStateBDD(s);
+        hADD += sBDD.Add() * (vars->getADD(h_val + 1));
+        for (auto op : path) {
+            h_val -= task->get_label_cost(task->get_search_task()->get_label(op));
+            for (auto eff : task->get_search_task()->get_fts_operator(op).get_effects()) {
 //                if (eff.does_fire(s)) {
-//                    s[eff.var] = eff.val;
+                    s[eff.var] = eff.value;
 //                }
-//            }
-//            sBDD = vars->getStateBDD(s);
-//            hADD += sBDD.Add() * (vars->getADD(h_val + 1));
-//        }
-//        return hADD;
-//    }
+            }
+            sBDD = vars->getStateBDD(s);
+            hADD += sBDD.Add() * (vars->getADD(h_val + 1));
+        }
+        return hADD;
+    }
 }

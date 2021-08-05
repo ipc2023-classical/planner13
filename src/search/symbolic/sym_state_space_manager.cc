@@ -7,6 +7,8 @@
 #include "sym_util.h"
 #include "../options/options.h"
 #include "../options/option_parser.h"
+#include "../task_representation/search_task.h"
+#include "../task_representation/fts_operators.h"
 
 using namespace std;
 
@@ -25,17 +27,6 @@ namespace symbolic {
 	    }
 	}
     }
-
-    // never used --v
-//    bool SymStateSpaceManager::is_relevant_op(const GlobalOperator & op) const {
-//        for (auto eff : op.get_effects()) {
-//            if (relevant_vars.count(eff.var)) {
-//                return true;
-//            };
-//        };
-//
-//        return false;
-//    }
 
 
 void SymStateSpaceManager::addDeadEndStates(bool fw, BDD bdd) {

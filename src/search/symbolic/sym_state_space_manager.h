@@ -83,7 +83,6 @@ protected:
     virtual std::string tag() const = 0;
 
     void init_transitions(const std::map<int, std::vector <TransitionRelation>> & (indTRs));
-    bool is_relevant_op(const GlobalOperator & op) const;
 
 public:
     SymStateSpaceManager(SymVariables *v, const SymParamsMgr &params, const std::shared_ptr<task_representation::FTSTask> &_task,

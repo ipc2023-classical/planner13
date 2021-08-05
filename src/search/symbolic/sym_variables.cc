@@ -9,10 +9,8 @@
 
 #include "../options/options.h"
 #include "../options/option_parser.h"
-#include "../global_state.h"
 #include "opt_order.h"
 #include "../task_representation/transition_system.h"
-#include "../utils/rng.h"
 #include "../utils/rng_options.h"
 
 
@@ -112,14 +110,6 @@ void SymVariables::init(const vector <int> &v_order) {
     cout << "Symbolic Variables... Done." << endl;
 }
 
-//BDD SymVariables::getStateBDD(const GlobalState &state) const {
-//    BDD res = _manager->bddOne();
-//    for (int i = var_order.size() - 1; i >= 0; i--) {
-//        res = res * source_state_BBDs[var_order[i]][state[var_order[i]]];
-//    }
-//    return res;
-//}
-
 BDD SymVariables::getStateBDD(const std::vector<int> &state) const {
     BDD res = _manager->bddOne();
     for (int i = int(var_order.size()) - 1; i >= 0; i--) {
@@ -154,31 +144,22 @@ BDD SymVariables::getGoalBDD() const {
     return res;
 }
 
-//BDD SymVariables::getGoalBDD(const std::set<int> &_variables) const {
-//    BDD res = _manager->bddOne();
-//
-//    for (auto lts_i : _variables) {
-//        BDD lts_res = _manager->bddZero();
-//
-//        task_representation::TransitionSystem lts = task->get_ts(lts_i);
-//        std::vector<int> goals = lts.get_goal_states();
-//        for (auto goal_state : goals) {
-//            lts_res += preconditionBDDs[lts_i][goal_state];
-//        }
-//
-//        res *= lts_res;
-//    }
-//
-//    return res;
-//}
+    BDD SymVariables::getGoalBDD(const set<int>& relevantVars) const { // TODO check with Alvaro
+        BDD res = _manager->bddOne();
 
-//BDD SymVariables::getPartialStateBDD(const vector<pair<int, int>> &state) const {
-//    BDD res = validBDD;
-//    for (int i = state.size() - 1; i >= 0; i--) {
-//        res = res * source_state_BBDs[state[i].first][state[i].second];
-//    }
-//    return res;
-//}
+        for (const auto& rel_var : relevantVars) {
+            BDD lts_res = _manager->bddZero();
+
+            task_representation::TransitionSystem ts = task->get_ts(var_order[rel_var]);
+            std::vector<int> goals = ts.get_goal_states();
+            for (auto goal_state : goals) {
+                lts_res += source_state_BBDs[var_order[rel_var]][goal_state];
+            }
+            res *= lts_res;
+        }
+
+        return res;
+    }
 
 bool SymVariables::isIn(const std::vector<int> &state, const BDD &bdd) const {
     BDD sBDD = getStateBDD(state);
