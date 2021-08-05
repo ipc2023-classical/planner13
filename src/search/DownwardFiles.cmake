@@ -118,7 +118,7 @@ fast_downward_plugin(
         HELP "Symbolic search engine"
         SOURCES
         search_engines/symbolic_search.cc
-        DEPENDS SYMBOLIC
+        DEPENDECY_ONLY
 )
 
 fast_downward_plugin(
@@ -135,16 +135,32 @@ fast_downward_plugin(
 
 fast_downward_plugin(
         NAME SYMBOLIC_PDBS
-        HELP "Plugin containing the base for symbolic search"
+        HELP "Plugin for symbolic pattern databases."
+        SOURCES
+        symbolic_pdbs/sym_pdb.cc
+        DEPENDENCY_ONLY
+)
+
+fast_downward_plugin(
+        NAME SYMBOLIC_GAMER_PDBS
+        HELP "Plugin containing the base for gamer pattern databases with symbolic search."
         SOURCES
         symbolic_pdbs/gamer_pdbs_heuristic.cc
+        DEPENDENCY_ONLY
+        DEPENDS SYMBOLIC_PDBS
+)
+
+fast_downward_plugin(
+        NAME SYMBOLIC_SPMAS
+        HELP "Plugin for SPMAS symbolic search."
+        SOURCES
         symbolic_pdbs/hnode.cc
         symbolic_pdbs/htree.cc
         symbolic_pdbs/ph.cc
         symbolic_pdbs/ph_pdbs.cc
         symbolic_pdbs/spmas_heuristic.cc
-        symbolic_pdbs/sym_pdb.cc
         DEPENDENCY_ONLY
+        DEPENDS SYMBOLIC_PDBS
 )
 
 
