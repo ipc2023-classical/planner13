@@ -23,13 +23,10 @@ using utils::Timer;
 namespace symbolic {
     UniformCostSearch::UniformCostSearch(SymController *eng,
                                          const SymParamsSearch &params, const std::shared_ptr<task_representation::FTSTask> &_task) :
-            UnidirectionalSearch(eng, params), task(_task),
+            UnidirectionalSearch(eng, params, _task), task(_task),
             parent(nullptr),
             estimationCost(params), estimationZero(params),
-    lastStepCost(true){
-        ClosedList c = ClosedList(_task);
-        closed = make_shared<ClosedList>(_task);
-    }
+    lastStepCost(true) { }
 
     bool UniformCostSearch::init(std::shared_ptr<SymStateSpaceManager> manager,
                                  bool forward,

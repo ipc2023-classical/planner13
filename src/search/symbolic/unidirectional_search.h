@@ -16,6 +16,8 @@ namespace symbolic {
 
     class SymController;
 
+    class ClosedList;
+
     class SymExpStatistics {
     public:
         double image_time, image_time_failed;
@@ -92,9 +94,10 @@ namespace symbolic {
         SymExpStatistics stats;
 
         std::shared_ptr<OppositeFrontier> perfectHeuristic;
-    public:
+        std::shared_ptr<ClosedList> closed = nullptr;
 
-        UnidirectionalSearch(SymController *eng, const SymParamsSearch &params);
+    public:
+        UnidirectionalSearch(SymController *eng, const SymParamsSearch &params, const std::shared_ptr<task_representation::FTSTask>& _task);
 
         inline bool isFW() const {
             return fw;
@@ -106,6 +109,9 @@ namespace symbolic {
 
         virtual int getG() const = 0;
 
+        virtual std::shared_ptr<ClosedList> getClosed() {
+            return nullptr;
+        }
     };
 }
 #endif // SYMBOLIC_EXPLORATION

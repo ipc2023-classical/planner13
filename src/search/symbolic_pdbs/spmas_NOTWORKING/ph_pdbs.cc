@@ -2,16 +2,16 @@
 
 #include "hnode.h"
 #include "htree.h"
-#include "sym_pdb.h"
-#include "../symbolic/bidirectional_search.h"
-#include "../symbolic/variable_order_finder.h"
+#include "../sym_pdb.h"
+#include "../../symbolic/bidirectional_search.h"
+#include "../../symbolic/variable_order_finder.h"
 
 
-#include "../option_parser.h"
-#include "../plugin.h"
-#include "../globals.h"
-#include "../utils/rng.h"
-#include "../utils/debug_macros.h"
+#include "../../option_parser.h"
+#include "../../plugin.h"
+#include "../../globals.h"
+#include "../../utils/rng.h"
+#include "../../utils/debug_macros.h"
 
 using namespace std;
 using utils::Timer;

@@ -2,7 +2,7 @@
 #define SYMBOLIC_PH_PDBS_H
 
 #include "ph.h"
-#include "../symbolic/variable_order_finder.h"
+#include "../../symbolic/variable_order_finder.h"
 
 
 namespace symbolic {

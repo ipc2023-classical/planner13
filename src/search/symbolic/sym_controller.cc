@@ -4,7 +4,7 @@
 
 #include "sym_state_space_manager.h"
 #include "bidirectional_search.h"
-#include "../symbolic_pdbs/hnode.h"
+#include "../symbolic_pdbs/spmas_NOTWORKING/hnode.h"
 #include "../utils/debug_macros.h"
 #include "../globals.h"
 // #include "../merge_and_shrink/ld_simulation.h"

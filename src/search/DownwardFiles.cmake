@@ -99,7 +99,7 @@ fast_downward_plugin(
         symbolic/closed_list.cc
         symbolic/open_list.cc
         symbolic/frontier.cc
-        symbolic_astar/sym_heuristic.cc
+        symbolic_astar_NOTWORKING/sym_heuristic.cc
         symbolic/sym_estimate.cc
         symbolic/sym_params_search.cc
         symbolic/sym_state_space_manager.cc
@@ -125,11 +125,11 @@ fast_downward_plugin(
         NAME SYMBOLIC_ASTAR
         HELP "Plugin containing the base for symbolic search"
         SOURCES
-        symbolic_astar/bd_astar.cc
-        symbolic_astar/sym_astar.cc
-        symbolic_astar/sym_astar_closed.cc
-        symbolic_astar/sym_astar_open.cc
-        symbolic_astar/sym_heuristic.cc
+        symbolic_astar_NOTWORKING/bd_astar.cc
+        symbolic_astar_NOTWORKING/sym_astar.cc
+        symbolic_astar_NOTWORKING/sym_astar_closed.cc
+        symbolic_astar_NOTWORKING/sym_astar_open.cc
+        symbolic_astar_NOTWORKING/sym_heuristic.cc
         DEPENDENCY_ONLY
 )
 
@@ -145,7 +145,7 @@ fast_downward_plugin(
         NAME SYMBOLIC_GAMER_PDBS
         HELP "Plugin containing the base for gamer pattern databases with symbolic search."
         SOURCES
-        symbolic_pdbs/gamer_pdbs_heuristic.cc
+        symbolic_pdbs/gamer_pdbs/gamer_pdbs_heuristic.cc
         DEPENDENCY_ONLY
         DEPENDS SYMBOLIC_PDBS
 )
@@ -154,16 +154,14 @@ fast_downward_plugin(
         NAME SYMBOLIC_SPMAS
         HELP "Plugin for SPMAS symbolic search."
         SOURCES
-        symbolic_pdbs/hnode.cc
-        symbolic_pdbs/htree.cc
-        symbolic_pdbs/ph.cc
-        symbolic_pdbs/ph_pdbs.cc
-        symbolic_pdbs/spmas_heuristic.cc
+        symbolic_pdbs/spmas_NOTWORKING/hnode.cc
+        symbolic_pdbs/spmas_NOTWORKING/htree.cc
+        symbolic_pdbs/spmas_NOTWORKING/ph.cc
+        symbolic_pdbs/spmas_NOTWORKING/ph_pdbs.cc
+        symbolic_pdbs/spmas_NOTWORKING/spmas_heuristic.cc
         DEPENDENCY_ONLY
         DEPENDS SYMBOLIC_PDBS
 )
-
-
 
 fast_downward_plugin(
     NAME TASK_REPRESENTATION

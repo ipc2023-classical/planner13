@@ -1,19 +1,19 @@
 #include "spmas_heuristic.h"
 
-#include "../symbolic/sym_enums.h"
-#include "../symbolic/sym_variables.h"
-#include "../symbolic/original_state_space.h"
-#include "../symbolic/bidirectional_search.h"
+#include "../../symbolic/sym_enums.h"
+#include "../../symbolic/sym_variables.h"
+#include "../../symbolic/original_state_space.h"
+#include "../../symbolic/bidirectional_search.h"
 #include "ph.h"
 #include "hnode.h"
 #include "htree.h"
 
-#include "../symbolic_astar/sym_astar_closed.h"
+#include "../../symbolic_astar/sym_astar_closed.h"
 
-#include "../options/option_parser.h"
-#include "../options/options.h"
-#include "../plugin.h"
-#include "../utils/timer.h"
+#include "../../options/option_parser.h"
+#include "../../options/options.h"
+#include "../../plugin.h"
+#include "../../utils/timer.h"
 
 #include <cassert>
 #include <limits>
@@ -24,11 +24,11 @@ using namespace std;
 using utils::Timer;
 
 namespace symbolic {
-SPMASHeuristic::SPMASHeuristic(const options::Options &opts)
-    : Heuristic(opts), SymController(opts),
+SPMASHeuristic::SPMASHeuristic(const options::Options &opts, const shared_ptr<task_representation::FTSTask>& _task)
+    : Heuristic(opts), SymController(opts, _task), task(_task),
       phs(opts.get_list<SymPH *> ("ph")),
       generationTime(opts.get<int> ("generation_time")),
-      generationMemory(opts.get<double> ("generation_memory")) {
+      generationMemory(opts.get<double> ("generation_memory")), solution(_task) {
     for (SymPH *ph : phs)
         ph->set_relax_dir(RelaxDirStrategy::BW);
 }
@@ -87,7 +87,8 @@ void SPMASHeuristic::initialize() {
             if (currentHNode) {
                 currentBDExp = currentHNode->getExp();
                 assert(currentBDExp);
-                currentBDExp->desactivate();     //Desactivates the search, so
+//                currentBDExp->desactivate();
+                //Desactivates the search, so
                 //that no notifications are
                 //performed
                 currentSearch = currentBDExp->getBw();
@@ -98,14 +99,14 @@ void SPMASHeuristic::initialize() {
                 if (!currentSearch->step() ||
                     !currentSearch->isSearchable()) {
                     if (!currentSearch->finished()) {
-                        currentSearch->getHeuristic(sp.heuristicADDs, sp.max_heuristic_value);
+                        currentSearch->getClosed()->getHeuristic(sp.heuristicADDs, sp.max_heuristic_value);
                         currentHNode = ph->relax(currentHNode);
 
                         if (currentHNode) {
                             currentBDExp = currentHNode->getExp();
                             assert(currentBDExp);
 
-                            currentBDExp->desactivate();
+//                            currentBDExp->desactivate();
                             currentSearch = currentBDExp->getBw();
                         }
                     }
@@ -114,7 +115,7 @@ void SPMASHeuristic::initialize() {
 
             cout << "Finished with explorations of PH: " << endl;
             if (currentBDExp) {
-                currentSearch->getHeuristic(sp.heuristicADDs, sp.max_heuristic_value);
+                currentSearch->getClosed()->getHeuristic(sp.heuristicADDs, sp.max_heuristic_value);
             }
 
             for (const auto &heur : ph->get_intermediate_heuristics_fw()) {
@@ -202,7 +203,7 @@ void SPMASHeuristic::dump_options() const {
     cout << "Generation memory: " << generationMemory << endl;
 }
 
-static ScalarEvaluator *_parse(options::OptionParser &parser) {
+static Evaluator *_parse(options::OptionParser &parser) {
     Heuristic::add_options_to_parser(parser);
     SymController::add_options_to_parser(parser, 30e3, 1e7);
     parser.add_list_option<SymPH *>("ph",
@@ -224,10 +225,10 @@ static ScalarEvaluator *_parse(options::OptionParser &parser) {
     if (parser.dry_run()) {
         return 0;
     } else {
-        SPMASHeuristic *result = new SPMASHeuristic(opts);
+        SPMASHeuristic *result = new SPMASHeuristic(opts, g_main_task);
         return result;
     }
 }
 
-static Plugin<ScalarEvaluator> _plugin("spmas", _parse);
+static Plugin<Evaluator> _plugin("spmas_NOTWORKING", _parse);
 }

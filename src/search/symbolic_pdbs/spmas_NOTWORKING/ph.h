@@ -1,9 +1,9 @@
 #ifndef SYMBOLIC_PH_H
 #define SYMBOLIC_PH_H
 
-#include "../option_parser.h"
-#include "../symbolic/sym_enums.h"
-#include "../symbolic/sym_params_search.h"
+#include "../../option_parser.h"
+#include "../../symbolic/sym_enums.h"
+#include "../../symbolic/sym_params_search.h"
 #include "hnode.h"
 
 namespace symbolic {
@@ -46,7 +46,7 @@ protected:
     const int maxNumAbstractions;
     int numAbstractions;
 
-    //Special parameter for spmas heuristic
+    //Special parameter for spmas_NOTWORKING heuristic
     bool ignore_if_useful;
 
     //Other parameters to actually prove that their default values are the right ones :-)
@@ -136,7 +136,7 @@ protected:
     //true. If it does not suceed, returns false and, if the new
     //exploration is not useful, sets the hNode as notUseful.
     bool relax_in(BidirectionalSearch *bdExp, std::unique_ptr<BidirectionalSearch> &newExp,
-                  HNode *hNode, int num_relaxations) const;
+                  HNode *hNode, int num_relaxations, const std::shared_ptr<task_representation::FTSTask>& _task) const;
 
     std::unique_ptr<BidirectionalSearch> createBDExp(Dir dir, BidirectionalSearch *bdExp) const;
 };

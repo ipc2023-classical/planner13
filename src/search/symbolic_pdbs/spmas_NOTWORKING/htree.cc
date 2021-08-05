@@ -1,9 +1,9 @@
 #include "htree.h"
 
 #include "hnode.h"
-#include "../symbolic/original_state_space.h"
-#include "../symbolic/sym_engine.h"
-#include "../symbolic/bidirectional_search.h"
+#include "../../symbolic/original_state_space.h"
+#include "../../symbolic/sym_engine.h"
+#include "../../symbolic/bidirectional_search.h"
 
 
 using namespace std;

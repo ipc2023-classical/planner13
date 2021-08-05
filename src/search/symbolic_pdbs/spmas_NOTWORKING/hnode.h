@@ -1,7 +1,7 @@
 #ifndef SYMBOLIC_HNODE_H
 #define SYMBOLIC_HNODE_H
 
-#include "../symbolic/sym_state_space_manager.h"
+#include "../../symbolic/sym_state_space_manager.h"
 #include <memory>
 #include <vector>
 #include <set>
@@ -37,7 +37,7 @@ private:
 
 public:
     // Constructor for the original state space
-    HNode(HTree *tree, const SymParamsMgr &mgr);
+    HNode(HTree *tree, const SymParamsMgr &mgr, const std::shared_ptr<task_representation::FTSTask> &_task);
 
     // Constructor for abstract state space
     HNode(HNode *o, SymPH *ph, std::unique_ptr<SymStateSpaceManager> abs);

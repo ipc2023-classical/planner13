@@ -31,10 +31,7 @@ namespace symbolic {
  */
     class SymController;
 
-    class ClosedList;
-
     class UniformCostSearch : public UnidirectionalSearch {
-        //FTSTask
         const std::shared_ptr<task_representation::FTSTask> &task;
 
         UnidirectionalSearch *parent; //Parent of the search
@@ -43,7 +40,7 @@ namespace symbolic {
         OpenList open_list;
         Frontier frontier;
 
-        std::shared_ptr<ClosedList> closed;  // Closed list is a shared ptr so that we can share it with other searches
+//        std::shared_ptr<ClosedList> closed;  // Closed list is a shared ptr so that we can share it with other searches
 
         SymStepCostEstimation estimationCost, estimationZero;//Time/nodes estimated
         // NOTE: This was used to estimate the time and nodes needed to
@@ -107,6 +104,10 @@ namespace symbolic {
                   std::shared_ptr<ClosedList> closed_opposite = nullptr); // Init forward or backward search
 
         void getPlan(const BDD &cut, int g, std::vector<OperatorID> &path) const override;
+
+        std::shared_ptr<ClosedList> getClosed() override {
+            return closed;
+        }
 
         virtual ADD getHeuristic() const;
 

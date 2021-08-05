@@ -1,13 +1,14 @@
 #include "unidirectional_search.h"
 
 #include "sym_solution.h"
+#include "closed_list.h"
 
 using namespace std;
 
 namespace symbolic {
-
     OppositeFrontierFixed::OppositeFrontierFixed(BDD bdd, const SymStateSpaceManager & mgr, const std::shared_ptr<task_representation::FTSTask> &_task)
-        : OppositeFrontier(_task), goal (bdd), hNotGoal(mgr.getAbsoluteMinTransitionCost()) { }
+        : OppositeFrontier(_task), goal (bdd), hNotGoal(mgr.getAbsoluteMinTransitionCost()) {
+    }
 
     SymSolution OppositeFrontierFixed::checkCut(UnidirectionalSearch * search, const BDD &states, int g, bool fw) const {
 	BDD cut = states * goal;
@@ -21,8 +22,8 @@ namespace symbolic {
 	    return SymSolution(nullptr, search, 0, g, cut, task);
 
     }
-    UnidirectionalSearch::UnidirectionalSearch(SymController * eng, const SymParamsSearch &params) : 
-	SymSearch(eng, params), fw(true) {}
+    UnidirectionalSearch::UnidirectionalSearch(SymController * eng, const SymParamsSearch &params, const std::shared_ptr<task_representation::FTSTask>& _task) :
+	SymSearch(eng, params), fw(true), closed(make_shared<ClosedList>(_task)) { }
 
 
     void UnidirectionalSearch::statistics() const {

@@ -87,6 +87,7 @@ protected:
 public:
     SymStateSpaceManager(SymVariables *v, const SymParamsMgr &params, const std::shared_ptr<task_representation::FTSTask> &_task,
 			 const std::set<int> & relevant_vars_ = std::set<int> ());
+    virtual ~SymStateSpaceManager() = default;
 
     const std::shared_ptr<task_representation::FTSTask> &task;
 

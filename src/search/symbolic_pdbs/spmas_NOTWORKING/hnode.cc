@@ -2,22 +2,21 @@
 
 #include "htree.h"
 #include "ph.h"
-#include "../symbolic/bidirectional_search.h"
-#include "../symbolic/sym_state_space_manager.h"
-#include "../symbolic/sym_engine.h"
+#include "../../symbolic/bidirectional_search.h"
+#include "../../symbolic/sym_state_space_manager.h"
+#include "../../symbolic/sym_engine.h"
 
-#include "../utils/debug_macros.h"
+#include "../../utils/debug_macros.h"
 
-#include "../symbolic/original_state_space.h"
+#include "../../symbolic/original_state_space.h"
 
 using namespace std;
 
 namespace symbolic {
-HNode::HNode(HTree *tree_, const SymParamsMgr &params) :
+HNode::HNode(HTree *tree_, const SymParamsMgr &params, const shared_ptr<task_representation::FTSTask> &_task) :
     tree(tree_), ph(nullptr),
     state_space(make_shared<OriginalStateSpace>(tree->get_engine()->getVars(),
-						params, 
-						OperatorCostFunction::get_cost_function())) {
+						params, _task)) {
 }
 
 HNode::HNode(HNode *o, SymPH *ph_,

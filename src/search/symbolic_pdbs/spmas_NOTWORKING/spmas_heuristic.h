@@ -1,10 +1,11 @@
 #ifndef SYMBOLIC_SPMAS_HEURISTIC_H
 #define SYMBOLIC_SPMAS_HEURISTIC_H
 
-#include "../symbolic/sym_controller.h"
-#include "../symbolic/sym_variables.h"
-#include "../heuristic.h"
-#include "../symbolic/sym_solution.h"
+#include "../../symbolic/sym_controller.h"
+#include "../../symbolic/sym_variables.h"
+#include "../../heuristic.h"
+#include "../../symbolic/sym_solution.h"
+#include "../../symbolic/closed_list.h"
 #include <memory>
 
 namespace options {
@@ -25,6 +26,8 @@ public:
 };
 
 class SPMASHeuristic : public Heuristic, public SymController {
+    const std::shared_ptr<task_representation::FTSTask>& task;
+
     // Search Behavior parameters
     std::vector<SymPH *> phs;
 
@@ -51,7 +54,7 @@ protected:
     virtual int compute_heuristic(const GlobalState &state);
 
 public:
-    SPMASHeuristic(const options::Options &opts);
+    SPMASHeuristic(const options::Options &opts, const std::shared_ptr<task_representation::FTSTask>& _task);
     virtual ~SPMASHeuristic() {}
 };
 }

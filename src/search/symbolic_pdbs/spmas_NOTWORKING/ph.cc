@@ -2,17 +2,17 @@
 
 #include "htree.h"
 #include "hnode.h"
-#include "sym_pdb.h"
+#include "../sym_pdb.h"
 
-#include "../symbolic/sym_state_space_manager.h"
-#include "../symbolic/bidirectional_search.h"
-#include "../symbolic/sym_controller.h"
+#include "../../symbolic/sym_state_space_manager.h"
+#include "../../symbolic/bidirectional_search.h"
+#include "../../symbolic/sym_controller.h"
 
-#include "../option_parser.h"
-#include "../utils/timer.h"
-#include "../utils/debug_macros.h"
+#include "../../option_parser.h"
+#include "../../utils/timer.h"
+#include "../../utils/debug_macros.h"
 
-#include "../plugin.h"
+#include "../../plugin.h"
 
 using namespace std;
 using options::Options;
@@ -20,6 +20,8 @@ using utils::Timer;
 using utils::g_timer;
 
 namespace symbolic {
+    class ClosedList;
+
 SymPH::SymPH(const Options &opts) :
     vars(nullptr), mgrParams(opts), searchParams(opts),
     phTime(opts.get<double> ("ph_time")), phMemory(opts.get<double> ("ph_memory")),
@@ -44,12 +46,12 @@ bool SymPH::init(HTree *tree_) {
     return init();
 }
 
-unique_ptr<BidirectionalSearch> SymPH::createBDExp(Dir dir) const {
-    return unique_ptr<BidirectionalSearch> (new BidirectionalSearch(searchParams, dir));
-}
+//unique_ptr<BidirectionalSearch> SymPH::createBDExp(Dir dir) const {
+//    return unique_ptr<BidirectionalSearch> (new BidirectionalSearch(searchParams, dir));
+//}
 
 bool SymPH::relax_in(BidirectionalSearch *bdExp, unique_ptr<BidirectionalSearch> &newExp,
-                     HNode *hNode, int num_relaxations) const {
+                     HNode *hNode, int num_relaxations, const shared_ptr<task_representation::FTSTask>& _task) const {
     Timer relax_timer;     //TODO: remove. Only used for debugging
 
     if (!hNode->empty()) {   //Do not repeat the same hnode twice
