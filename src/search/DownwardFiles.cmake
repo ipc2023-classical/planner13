@@ -111,6 +111,15 @@ fast_downward_plugin(
         search_engines/symbolic_search.cc
         task_utils/causal_graph.cc
         DEPENDENCY_ONLY
+        DEPENDS SYMBOLIC_STATE_REORDERING
+)
+
+fast_downward_plugin(
+        NAME SYMBOLIC_STATE_REORDERING
+        HELP "Plugin that reorders states."
+        SOURCES
+        symbolic/state_reordering.cc
+        DEPENDENCY_ONLY
 )
 
 fast_downward_plugin(

@@ -6,6 +6,7 @@
 #include "../utils/timer.h"
 #include "../globals.h"
 #include "../task_representation/fts_task.h"
+#include "../symbolic/state_reordering.h"
 #include <math.h>
 #include <memory>
 #include <iostream>
@@ -39,6 +40,7 @@ class SymVariables {
     const long cudd_init_cache_size; //Initial cache size
     const long cudd_init_available_memory; //Maximum available memory (bytes)
     const bool gamer_ordering;
+    const std::shared_ptr<StateReordering> state_reordering;
 
     std::unique_ptr<Cudd> _manager; //_manager associated with this symbolic search
 
@@ -56,9 +58,6 @@ class SymVariables {
     std::vector<std::vector<BDD>> source_state_BBDs; // BDDs associated with the source states of transitions
     std::vector<std::vector<BDD>> target_state_BDDs; // BDDs associated with the target states of transitions
 
-    // TODO Old --v
-//    std::vector <std::vector <BDD>> preconditionBDDs; // BDDs associated with the precondition of a predicate
-//    std::vector <std::vector <BDD>> effectBDDs;      // BDDs associated with the effect of a predicate
     std::vector<BDD> biimpBDDs;  //BDDs associated with the biimplication of one variable(FD)
     std::vector<BDD> validValues; // BDD that represents the valid values of all the variables
     BDD validBDD;  // BDD that represents the valid values of all the variables
@@ -68,24 +67,17 @@ class SymVariables {
     //Avoid allocating memory during heuristic evaluation
     std::vector <int> binState;
 
-    void init(const std::vector <int> &v_order);
+    void init(const std::vector <int> &v_order, std::map<int, std::vector<int>> var_to_state);
 
 public:
     const std::shared_ptr<task_representation::FTSTask> &task;
     SymVariables(const options::Options &opts, const std::shared_ptr<task_representation::FTSTask> &_task);
     void init();
 
-    // new FTSTask methods
     BDD getInitialStateBDD() const;
     BDD getGoalBDD() const;
     BDD getGoalBDD(const std::set<int>& relevantVars) const;
     BDD getStateBDD(const std::vector<int> &state) const;
-
-    // old global_task methods
-//    State getStateFrom(const BDD & bdd) const;
-//    BDD getStateBDD(const GlobalState &state) const;
-//    BDD getGoalBDD(const std::set<int> &variables) const;
-//    BDD getPartialStateBDD(const std::vector<std::pair<int, int>> &state) const;
 
     double numStates(const BDD &bdd) const; //Returns the number of states in a BDD
     double numStates() const;

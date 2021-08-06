@@ -23,8 +23,12 @@ SymVariables::SymVariables(const Options &opts, const shared_ptr<task_representa
     cudd_init_cache_size(opts.get<int>("cudd_init_cache_size")),
     cudd_init_available_memory(opts.get<int>("cudd_init_available_memory")),
     gamer_ordering(opts.get<bool>("gamer_ordering")),
+    state_reordering(opts.get<shared_ptr<StateReordering>>("state_reordering")),
     rng(utils::parse_rng_from_options(opts)),
-    task(_task) { cout << "Creating symvariables" << endl;}
+    task(_task) {
+        cout << "Creating symvariables" << endl;
+        print_options();
+    }
 
 void SymVariables::init() {
     vector <int> _var_order;
@@ -35,16 +39,20 @@ void SymVariables::init() {
             _var_order.push_back(i);
         }
     }
+
     cout << "Sym variable order: ";
     for (int v : _var_order)
         cout << v << " ";
     cout << endl;
 
-    init(_var_order);
+    map<int, vector<int>> var_to_state = map<int, vector<int>>();
+    state_reordering->computeStateReordering(_var_order, var_to_state, task);
+
+    init(_var_order, var_to_state);
 }
 
 //Constructor that makes use of global variables to initialize the symbolic_search structures
-void SymVariables::init(const vector <int> &v_order) {
+void SymVariables::init(const vector <int> &v_order, map<int, vector<int>> var_to_state) {
     cout << "Initializing Symbolic Variables" << endl;
     var_order = vector<int>(v_order);
     int num_fd_vars = var_order.size();
@@ -94,9 +102,10 @@ void SymVariables::init(const vector <int> &v_order) {
     validBDD = oneBDD();
     //Generate predicate (precondition (s) and effect (s')) BDDs
     for (int var : var_order) {
-        for (int j = 0; j < task->get_ts(var).get_size(); j++) {
-            source_state_BBDs[var].push_back(createPreconditionBDD(var, j));
-            target_state_BDDs[var].push_back(createEffectBDD(var, j));
+        assert(task->get_ts(var).get_size() == int(var_to_state[var].size()));
+        for (int j = 0; j < int(var_to_state[var].size()); j++) {
+            source_state_BBDs[var].push_back(createPreconditionBDD(var, var_to_state[var][j]));
+            target_state_BDDs[var].push_back(createEffectBDD(var, var_to_state[var][j]));
         }
         validValues[var] = zeroBDD();
         for (int j = 0; j < task->get_ts(var).get_size(); j++) {
@@ -256,7 +265,9 @@ void SymVariables::print_options() const {
     cout << "CUDD Init: nodes=" << cudd_init_nodes <<
         " cache=" << cudd_init_cache_size <<
         " max_memory=" << cudd_init_available_memory <<
-        " ordering: " << (gamer_ordering ? "gamer" : "fd") << endl;
+        " ordering: " << (gamer_ordering ? "gamer" : "fd") <<
+        "state_reordering: " << state_reordering->name
+        << endl;
 }
 
 void SymVariables::add_options_to_parser(options::OptionParser &parser) {
@@ -270,6 +281,8 @@ void SymVariables::add_options_to_parser(options::OptionParser &parser) {
                              "Total available memory for the cudd manager.", "0");
 
     parser.add_option<bool> ("gamer_ordering", "Use Gamer ordering optimization", "true");
+
+    parser.add_option<shared_ptr<StateReordering>> ("state_reordering", "Choose state reordering algorithm.", "default");
 
     // Add random_seed option.
     utils::add_rng_options(parser);
