@@ -187,10 +187,8 @@ namespace symbolic {
         }
 
         while (h > 0 || steps0 > 0) {
-            cout << "h > 0 || steps0 > 0" << endl;
             DEBUG_MSG(cout << "h=" << h << " and steps0=" << steps0 << endl;);
             if (steps0 > 0) {
-                cout << "steps0 > 0" << endl;
                 bool foundZeroCost = false;
                 //Apply 0-cost operators
                 if (trs.count(0)) {
@@ -224,7 +222,6 @@ namespace symbolic {
                             continue;
                         }
 
-                        // bool foundOpId = false;
                         for (const auto &op : fts_ops) {
                             succ = setSuccWithEffects(cut, op, fw, tr);
 
@@ -234,12 +231,10 @@ namespace symbolic {
                                 DEBUG_MSG(cout << "Adding " << op.get_id().get_index() << ", cost: "
                                                << op.get_cost() << endl;);
                                 cut = intersection;
-                                // foundOpId = true;
                                 break;
                             }
                         }
                         assert(foundZeroCost);
-                        // assert(foundOpId);
                         break;
                     }
                 }

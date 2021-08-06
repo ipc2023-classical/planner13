@@ -6,8 +6,8 @@
 #include "../utils/timer.h"
 #include "../globals.h"
 #include "../task_representation/fts_task.h"
-#include "../symbolic/state_reordering.h"
-#include <math.h>
+#include "state_reordering.h"
+#include "variable_ordering.h"
 #include <memory>
 #include <iostream>
 #include <fstream>
@@ -34,18 +34,18 @@ extern void exceptionError(std::string message);
 
 class SymVariables {
 // Var order used by the algorithm.
-    //const VariableOrderType variable_ordering;
+    //const VariableOrderType VariableOrdering;
     //Parameters to initialize the CUDD manager
     const long cudd_init_nodes; //Number of initial nodes
     const long cudd_init_cache_size; //Initial cache size
     const long cudd_init_available_memory; //Maximum available memory (bytes)
-    const bool gamer_ordering;
+    const std::shared_ptr<VariableOrdering> variable_ordering;
     const std::shared_ptr<StateReordering> state_reordering;
 
     std::unique_ptr<Cudd> _manager; //_manager associated with this symbolic search
 
     // random number generator used for optOrder and VariableOrder
-    std::shared_ptr<utils::RandomNumberGenerator> rng;
+//    std::shared_ptr<utils::RandomNumberGenerator> rng;
 
     int numBDDVars; //Number of binary variables (just one set, the total number is numBDDVars*2
     std::vector<BDD> variables; // BDD variables

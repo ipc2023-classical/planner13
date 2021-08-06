@@ -87,6 +87,7 @@ fast_downward_plugin(
         HELP "Plugin containing the base for symbolic search"
         SOURCES
         symbolic/sym_variables.cc
+        symbolic/variable_ordering.cc
         symbolic/opt_order.cc
         symbolic/sym_util.cc
         symbolic/sym_enums.cc

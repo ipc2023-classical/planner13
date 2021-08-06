@@ -58,6 +58,7 @@ namespace symbolic {
         }
     }
 
+    // Plugin
     static shared_ptr<DefaultStateReordering> _parse_default(options::OptionParser &parser) {
         parser.document_synopsis(
                 "Default state reordering. Does nothing",
@@ -74,7 +75,7 @@ namespace symbolic {
     static PluginShared<StateReordering> _plugin_default("default", _parse_default);
 
 
-    static shared_ptr<RandomStateReordering> _parse_random(options::OptionParser &parser) {
+    static shared_ptr<RandomStateReordering> _parse_gamer(options::OptionParser &parser) {
         parser.document_synopsis(
                 "Random state reordering. Does nothing",
                 "State reordering");
@@ -90,7 +91,7 @@ namespace symbolic {
         return std::make_shared<RandomStateReordering>(opts);
     }
 
-    static PluginShared<StateReordering> _plugin_random("random", _parse_random);
+    static PluginShared<StateReordering> _plugin_random("random", _parse_gamer);
 
     static PluginTypePlugin<StateReordering> _type_plugin("state_reordering", "This describes the strategy for computing state ordering for the BDD construction. ");
 }

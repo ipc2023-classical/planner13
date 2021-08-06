@@ -3,15 +3,14 @@
 #include <iostream>
 #include <memory>
 #include <string>
+
+#include "opt_order.h"
+
 #include "../task_representation/labels.h"
-
+#include "../task_representation/transition_system.h"
 #include "../utils/debug_macros.h"
-
 #include "../options/options.h"
 #include "../options/option_parser.h"
-#include "opt_order.h"
-#include "../task_representation/transition_system.h"
-#include "../utils/rng_options.h"
 
 
 using namespace std;
@@ -19,26 +18,19 @@ using options::Options;
 
 namespace symbolic {
 SymVariables::SymVariables(const Options &opts, const shared_ptr<task_representation::FTSTask> &_task) :
-    cudd_init_nodes(opts.get<int>("cudd_init_nodes")),
-    cudd_init_cache_size(opts.get<int>("cudd_init_cache_size")),
-    cudd_init_available_memory(opts.get<int>("cudd_init_available_memory")),
-    gamer_ordering(opts.get<bool>("gamer_ordering")),
-    state_reordering(opts.get<shared_ptr<StateReordering>>("state_reordering")),
-    rng(utils::parse_rng_from_options(opts)),
-    task(_task) {
+        cudd_init_nodes(opts.get<int>("cudd_init_nodes")),
+        cudd_init_cache_size(opts.get<int>("cudd_init_cache_size")),
+        cudd_init_available_memory(opts.get<int>("cudd_init_available_memory")),
+        variable_ordering(opts.get<shared_ptr<VariableOrdering>>("variable_ordering")),
+        state_reordering(opts.get<shared_ptr<StateReordering>>("state_reordering")),
+        task(_task) {
         cout << "Creating symvariables" << endl;
         print_options();
     }
 
 void SymVariables::init() {
     vector <int> _var_order;
-    if (gamer_ordering) {
-        InfluenceGraph::compute_gamer_ordering(_var_order, task, rng);
-    } else {
-        for (size_t i = 0; i < size_t(task->get_size()); ++i) {
-            _var_order.push_back(i);
-        }
-    }
+    variable_ordering->compute_variable_ordering(_var_order, task);
 
     cout << "Sym variable order: ";
     for (int v : _var_order)
@@ -263,10 +255,10 @@ void SymVariables::print() {
 
 void SymVariables::print_options() const {
     cout << "CUDD Init: nodes=" << cudd_init_nodes <<
-        " cache=" << cudd_init_cache_size <<
-        " max_memory=" << cudd_init_available_memory <<
-        " ordering: " << (gamer_ordering ? "gamer" : "fd") <<
-        "state_reordering: " << state_reordering->name
+         " cache=" << cudd_init_cache_size <<
+         " max_memory=" << cudd_init_available_memory <<
+         " variable ordering: " << variable_ordering->name <<
+         " state_reordering: " << state_reordering->name
         << endl;
 }
 
@@ -280,11 +272,8 @@ void SymVariables::add_options_to_parser(options::OptionParser &parser) {
     parser.add_option<int> ("cudd_init_available_memory",
                              "Total available memory for the cudd manager.", "0");
 
-    parser.add_option<bool> ("gamer_ordering", "Use Gamer ordering optimization", "true");
+    parser.add_option<shared_ptr<VariableOrdering>> ("variable_ordering", "Use Gamer ordering optimization", "gamer");
 
     parser.add_option<shared_ptr<StateReordering>> ("state_reordering", "Choose state reordering algorithm.", "default");
-
-    // Add random_seed option.
-    utils::add_rng_options(parser);
 }
 }

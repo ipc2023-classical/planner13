@@ -1,19 +1,10 @@
 #ifndef FAST_DOWNWARD_STATE_REORDERING_H
 #define FAST_DOWNWARD_STATE_REORDERING_H
 
-#include "sym_bucket.h"
-#include "../utils/timer.h"
 #include "../globals.h"
-#include "../task_representation/fts_task.h"
-#include <memory>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
-#include <set>
 #include <string>
 #include <map>
-#include <cassert>
 
 namespace options {
     class Options;
