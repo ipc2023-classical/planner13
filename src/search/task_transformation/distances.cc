@@ -22,7 +22,8 @@ Distances::~Distances() {
 }
 
 void Distances::clear_distances() {
-    distances_computed = false;
+    are_init_distances_computed = false;
+    are_goal_distances_computed = false;
     init_distances.clear();
     goal_distances.clear();
 }
@@ -201,7 +202,8 @@ void Distances::compute_distances(
         if (verbosity >= Verbosity::VERBOSE) {
             cout << "empty transition system, no distances to compute" << endl;
         }
-        distances_computed = true;
+        are_init_distances_computed = compute_init_distances;
+        are_goal_distances_computed = compute_goal_distances;
         return;
     }
 
@@ -233,7 +235,8 @@ void Distances::compute_distances(
         }
     }
 
-    distances_computed = true;
+    are_init_distances_computed = compute_init_distances;
+    are_goal_distances_computed = compute_goal_distances;
     assert(are_distances_computed());
 }
 

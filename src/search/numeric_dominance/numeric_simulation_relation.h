@@ -10,6 +10,8 @@
 #include "../task_representation/fts_task.h"
 #include "../task_representation/state.h"
 
+bool applyPostSrc(const TransitionSystem& ts, int src, std::function<bool(const Transition & t, LabelGroupID lg_id)> && f);
+
 template<typename T>
 class NumericSimulationRelation {
 protected:

@@ -77,21 +77,19 @@ void NumericDominancePruning<T>::initialize(const std::shared_ptr<task_represent
         initialized = true;
 
         if (apply_pruning()) {
-            numeric_dominance_relation = make_unique<NumericDominanceRelation<T>>(task,
-                                                                                  truncate_value, max_simulation_time,
-                                                                                  min_simulation_time, max_total_time,
-                                                                                  max_lts_size_to_compute_simulation,
-                                                                                  num_labels_to_use_dominates_in,
-                                                                                  tau_labels);
 
-            vector<TransitionSystem> tss;
-            tss.reserve(task->get_size());
-            for (int i = 0; i < task->get_size(); i++) {
-                tss.push_back(task->get_ts(i));
-            }
+            auto tss = task->get_transition_systems();
 
-            numeric_dominance_relation->init();
-            numeric_dominance_relation->compute_ld_simulation(tss, task->get_labels(), dump);
+            auto ndr_builder = NumericDominanceRelationBuilder<T>(
+                      tss, task->get_labels(),
+                      truncate_value, max_simulation_time,
+                      min_simulation_time, max_total_time,
+                      max_lts_size_to_compute_simulation,
+                      num_labels_to_use_dominates_in,
+                      tau_labels);
+
+            ndr_builder.init();
+            numeric_dominance_relation = ndr_builder.compute_ld_simulation(dump);
         }
 
         //cout << "Completed preprocessing: " << g_timer() << endl;
@@ -109,13 +107,13 @@ void NumericDominancePruning<T>::prune_operators(const State &state, std::vector
 
     if (prune_successors && operators.size() > 1) {
         applied_action_selection_pruning = true;
-        if (numeric_dominance_relation->action_selection_pruning(state, operators)) {
+        if (numeric_dominance_relation->action_selection_pruning(task, state, operators)) {
             return;
         }
     }
 
     if (prune_dominated_by_parent || prune_dominated_by_initial_state) {
-        numeric_dominance_relation->prune_dominated_by_parent_or_initial_state(state, operators,
+        numeric_dominance_relation->prune_dominated_by_parent_or_initial_state(task, state, operators,
                                                                                applied_action_selection_pruning,
                                                                                prune_dominated_by_parent,
                                                                                prune_dominated_by_initial_state);
@@ -177,7 +175,7 @@ static shared_ptr<PruningMethod> _parse(options::OptionParser &parser) {
                            "1000000");
 
     parser.add_option<int>("num_labels_to_use_dominates_in",
-                           "Use dominates_in for instances that have less than this amount of labels",
+                           "Use _may_dominate_in for instances that have less than this amount of labels",
                            "0");
 
     parser.add_option<bool>("prune_successors",
@@ -189,9 +187,7 @@ static shared_ptr<PruningMethod> _parse(options::OptionParser &parser) {
     Options opts = parser.parse();
     //auto cost_type = OperatorCost(opts.get_enum("cost_type"));
 
-    // TODO: Make sure this is valid
-    bool task_has_zero_cost = g_main_task->get_min_operator_cost() ==
-                              0;//cost_type == OperatorCost::ZERO || (cost_type == OperatorCost::NORMAL && g_min_action_cost == 0);
+    bool task_has_zero_cost = g_main_task->get_min_operator_cost() == 0;
 
     if (parser.dry_run()) {
         return 0;

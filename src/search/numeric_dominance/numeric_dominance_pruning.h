@@ -39,7 +39,7 @@ protected:
     const bool dump;
     const bool exit_after_preprocessing;
 
-    std::unique_ptr<NumericDominanceRelation<T>> numeric_dominance_relation;
+    std::shared_ptr<    NumericDominanceRelation<T>> numeric_dominance_relation;
 
     bool all_desactivated;
     bool activation_checked;

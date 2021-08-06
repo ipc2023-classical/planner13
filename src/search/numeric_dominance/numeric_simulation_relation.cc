@@ -11,12 +11,12 @@
 using namespace std;
 
 bool applyPostSrc(const TransitionSystem& ts, int src, std::function<bool(const Transition & t, LabelGroupID lg_id)> && f) {
-    // TODO: This inefficiently goes through all transitions each time, could be ordered by src state
     for (LabelGroupID lg_id(0); lg_id < ts.num_label_groups(); ++lg_id) {
-        for (const Transition t : ts.get_transitions_for_group_id(lg_id)) {
-            if (t.src != src) continue;
-
-            if (f(t, lg_id)) return true;
+        vector<Transition> trs = ts.get_transitions_for_group_id(lg_id);
+        auto tr = lower_bound(trs.begin(),  trs.end(), Transition(src, 0));
+        auto end = upper_bound(trs.begin(),  trs.end(), Transition(src, std::numeric_limits<int>::max()));
+        for (; tr != end; ++tr) {
+            if (f(*tr, lg_id)) return true;
         }
     }
     return false;
@@ -219,7 +219,7 @@ int NumericSimulationRelation<T>::update_pair_stable(const NumericLabelRelation<
                 // is_relation_stable[s][t] = ts->applyPostSrc(t2,[&](const LTSTransition & trt) {
                 // 	    if(is_relation_stable[trs.target][trt.target] || (trs.target == s && trt.target == t)) {
                 // 		for(int tr_t_label : ts->get_labels(trt.label_group)) {
-                // 		    max_value_stable = max(max_value_stable, compare_transitions(ts_id, trs.target, tr_s_label, trt.target, tr_t_label, tau_distance, label_dominance));
+                // 		    max_value_stable = max(max_value_stable, compare_transitions(ts_id, trs.target, tr_s_label, trt.target, tr_t_label, tau_distance, label_relation));
                 // 		    if (max_value_stable == max_value) {
                 // 			//break if we have found a transition that simulates with the best result possible
                 // 			return true;
@@ -256,14 +256,14 @@ int NumericSimulationRelation<T>::update_pair_stable(const NumericLabelRelation<
               std::cout << "  Simulates? "
               << q_simulates(t, trs.target);
               std::cout << "  domnoop? "
-              << label_dominance.may_dominated_by_noop(tr_s_label, ts_id) << "   " << endl;
-              // label_dominance.dump(trs.label);
+              << label_relation.may_dominated_by_noop(tr_s_label, ts_id) << "   " << endl;
+              // label_relation.dump(trs.label);
               // for (auto trt : ts->get_transitions(t)) {
               // std::cout << "Tried with: "
               // 	  << ts->name(trt.src) << " => "
               // 	  << ts->name(trt.target) << " ("
               // 	  << trt.label << ")" << " label dom: "
-              // 	  << label_dominance.q_dominates(trt.label,
+              // 	  << label_relation.q_dominates(trt.label,
               // 					 trs.label, ts_id)
               // 	  << " target sim "
               // 	  << q_simulates(trt.target, trs.target)
@@ -363,14 +363,14 @@ int NumericSimulationRelation<T>::update_pair(const NumericLabelRelation<T> &lab
               std::cout << "  Simulates? "
               << q_simulates(t, trs.target);
               std::cout << "  domnoop? "
-              << label_dominance.may_dominated_by_noop(tr_s_label, lts_id) << "   " << endl;
-              // label_dominance.dump(trs.label);
+              << label_relation.may_dominated_by_noop(tr_s_label, lts_id) << "   " << endl;
+              // label_relation.dump(trs.label);
               // for (auto trt : lts->get_transitions(t)) {
               // std::cout << "Tried with: "
               // 	  << lts->name(trt.src) << " => "
               // 	  << lts->name(trt.target) << " ("
               // 	  << trt.label << ")" << " label dom: "
-              // 	  << label_dominance.q_dominates(trt.label,
+              // 	  << label_relation.q_dominates(trt.label,
               // 					 trs.label, lts_id)
               // 	  << " target sim "
               // 	  << q_simulates(trt.target, trs.target)

@@ -64,9 +64,7 @@ public:
         return *transition_systems[index];
     }
 
-    const std::vector<std::unique_ptr<TransitionSystem>>& get_transition_systems() const {
-        return transition_systems;
-    }
+    std::vector<TransitionSystem> get_transition_systems() const;
 
     const Labels &get_labels() const {
         return *labels;

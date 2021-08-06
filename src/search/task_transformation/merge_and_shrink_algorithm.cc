@@ -20,6 +20,7 @@
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
 
+#include "../numeric_dominance/numeric_dominance_fts_pruning.h"
 
 #include "../utils/markup.h"
 #include "../utils/math.h"
@@ -45,28 +46,29 @@ static void print_time(const utils::Timer &timer, string text) {
 }
 
 MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
-    merge_strategy_factory(
+        merge_strategy_factory(
         opts.get<shared_ptr<MergeStrategyFactory>>("merge_strategy", nullptr)),
-    shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy", nullptr)),
-    shrink_atomic_fts(opts.get<bool>("shrink_atomic_fts")),
-    run_atomic_loop(opts.get<bool>("run_atomic_loop")),
-    run_final_lr_shrink(opts.get<bool>("run_final_lr_shrink")),
-    reduce_labels_final_fts(opts.get<bool>("reduce_labels_final_fts")),
-    shrink_final_fts(opts.get<bool>("shrink_final_fts")),
-    run_final_loop(opts.get<bool>("run_final_loop")),
-    num_states_to_trigger_shrinking(opts.get<int>("num_states_to_trigger_shrinking")),
-    max_states(opts.get<int>("max_states")),
-    label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
-    prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
-    prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
-    prune_transitions_from_goal(opts.get<bool>("prune_transitions_from_goal")),
-    verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
-    run_main_loop(opts.get<bool>("run_main_loop")),
-    max_time(opts.get<double>("max_time")),
-    num_transitions_to_abort(opts.get<int>("num_transitions_to_abort")),
-    num_transitions_to_exclude(opts.get<int>("num_transitions_to_exclude")),
-    cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
-    starting_peak_memory(0) {
+        shrink_strategy(opts.get<shared_ptr<ShrinkStrategy>>("shrink_strategy", nullptr)),
+        shrink_atomic_fts(opts.get<bool>("shrink_atomic_fts")),
+        run_atomic_loop(opts.get<bool>("run_atomic_loop")),
+        run_final_lr_shrink(opts.get<bool>("run_final_lr_shrink")),
+        reduce_labels_final_fts(opts.get<bool>("reduce_labels_final_fts")),
+        shrink_final_fts(opts.get<bool>("shrink_final_fts")),
+        run_final_loop(opts.get<bool>("run_final_loop")),
+        num_states_to_trigger_shrinking(opts.get<int>("num_states_to_trigger_shrinking")),
+        max_states(opts.get<int>("max_states")),
+        label_reduction(opts.get<shared_ptr<LabelReduction>>("label_reduction", nullptr)),
+        prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
+        prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
+        prune_transitions_from_goal(opts.get<bool>("prune_transitions_from_goal")),
+        fts_transition_pruning(opts.get<shared_ptr<numeric_dominance::FTSTransitionPruning>>("fts_transition_pruning", nullptr)),
+        verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
+        run_main_loop(opts.get<bool>("run_main_loop")),
+        max_time(opts.get<double>("max_time")),
+        num_transitions_to_abort(opts.get<int>("num_transitions_to_abort")),
+        num_transitions_to_exclude(opts.get<int>("num_transitions_to_exclude")),
+        cost_type(static_cast<OperatorCost>(opts.get_enum("cost_type"))),
+        starting_peak_memory(0) {
     assert(num_states_to_trigger_shrinking > 0);
     assert(max_states > 0);
     if (run_main_loop && (!shrink_strategy || !merge_strategy_factory)) {
@@ -250,6 +252,7 @@ bool MergeAndShrinkAlgorithm::remove_dead_labels(FactoredTransitionSystem &fts,
 
         dead_labels.clear();
         for (int index : ts_to_check) {
+            fts.recompute_distances(index);
             if (prune_unreachable_states || prune_irrelevant_states) {
                 bool pruned_factor = prune_step(fts, index,
                                                 prune_unreachable_states,
@@ -268,7 +271,7 @@ bool MergeAndShrinkAlgorithm::remove_dead_labels(FactoredTransitionSystem &fts,
     return false;
 }
 
-bool MergeAndShrinkAlgorithm::prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const {
+bool MergeAndShrinkAlgorithm::prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer, bool prune_transitions = true) const {
    /*
      Prune all factors according to the chosen options. Stop early if one factor is unsolvable. Return true iff unsolvable.
    */
@@ -279,39 +282,51 @@ bool MergeAndShrinkAlgorithm::prune_fts(FactoredTransitionSystem &fts, const uti
        fts.remove_transitions_from_goal();
    }
 
-   vector<int> check_dead_labels_in;
-   for (int index = 0; index < fts.get_size(); ++index) {
-       if (!fts.is_active(index)) {
-           continue;
-       }
-       if (prune_unreachable_states || prune_irrelevant_states) {
-           bool pruned_factor = prune_step(
+    vector<int> check_dead_labels_in;
+    for (int index = 0; index < fts.get_size(); ++index) {
+        if (!fts.is_active(index)) {
+            continue;
+        }
+        if (prune_unreachable_states || prune_irrelevant_states) {
+            bool pruned_factor = prune_step(
                fts,
                index,
                prune_unreachable_states,
                prune_irrelevant_states,
                verbosity);
 
-           if (pruned_factor) {
-               check_dead_labels_in.push_back(index);
-               pruned = true;
-           }
-       }
+            if (pruned_factor) {
+                check_dead_labels_in.push_back(index);
+                pruned = true;
+            }
+        }
 
-       if (!fts.is_factor_solvable(index)) {
-           return true;
-       }
-   }
+        if (!fts.is_factor_solvable(index)) {
+            return true;
+        }
+    }
 
-   if (pruned) {
-       if(check_dead_labels(fts, check_dead_labels_in)) {
-           return true;
-       }
 
-       fts.remove_irrelevant_transition_systems(verbosity);
-   }
+    if (pruned) {
+        if(check_dead_labels(fts, check_dead_labels_in)) {
+            return true;
+        }
 
-   if (verbosity >= Verbosity::NORMAL && pruned) {
+        fts.remove_irrelevant_transition_systems(verbosity);
+    }
+
+    if (prune_transitions && fts_transition_pruning) {
+        // TODO: Here we should only prune affected transition systems, and only need to recompute the distances of them aswell.
+        // however, the
+        vector<int> affected_ts = fts_transition_pruning->prune_transitions(fts);
+        for (int ts_id = 0; ts_id < fts.get_size(); ts_id++) {
+            fts.recompute_distances(ts_id);
+        }
+
+        prune_fts(fts, timer, false);
+    }
+
+    if (verbosity >= Verbosity::NORMAL && pruned) {
        print_time(timer, "after pruning atomic factors");
    }
    return false;
@@ -741,6 +756,12 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
        "prune_transitions_from_goal",
        "If true, prune transitions that can only be applied in goal states",
        "true");
+
+   parser.add_option<shared_ptr<numeric_dominance::FTSTransitionPruning>>(
+           "fts_transition_pruning",
+            "Pruning transitions of FTS.",
+            OptionParser::NONE
+           );
 
     vector<string> verbosity_levels;
     vector<string> verbosity_level_docs;

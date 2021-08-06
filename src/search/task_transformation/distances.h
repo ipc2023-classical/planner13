@@ -4,6 +4,7 @@
 #include "types.h"
 
 #include <vector>
+#include <cassert>
 
 /*
   TODO: Possible interface improvements for this class:
@@ -25,7 +26,8 @@ class Distances {
     const TransitionSystem &transition_system;
     std::vector<int> init_distances;
     std::vector<int> goal_distances;
-    bool distances_computed;
+    bool are_goal_distances_computed;
+    bool are_init_distances_computed;
 
     void clear_distances();
     int get_num_states() const;
@@ -40,13 +42,21 @@ public:
     ~Distances();
 
     bool are_distances_computed() const {
-        return distances_computed;
+        return are_goal_distances_computed || are_init_distances_computed;
     }
 
     void compute_distances(
         bool compute_init_distances,
         bool compute_goal_distances,
         Verbosity verbosity);
+
+    void recompute_distances() {
+        assert(are_distances_computed());
+        bool compute_init_distances = are_init_distances_computed;
+        bool compute_goal_distances = are_goal_distances_computed;
+        clear_distances();
+        compute_distances(compute_init_distances, compute_goal_distances, Verbosity::SILENT);
+    }
 
     /*
       Update distances according to the given abstraction. If the abstraction

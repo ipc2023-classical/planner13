@@ -77,15 +77,17 @@ TauLabels<T>::add_recursive_tau_labels(const std::vector<TransitionSystem> &tss,
         int transition_system_relevant = TAU_IN_ALL;
         for (int ts_id = 0; ts_id < int(tss.size()); ++ts_id) {
             assert(tau_distances[ts_id]);
-            if (tss[ts_id].is_relevant_label(l) && !tau_distances[ts_id]->is_fully_invertible()) {
-                if (transition_system_relevant == TAU_IN_ALL) {
-                    transition_system_relevant = ts_id;
+            if (label_may_be_tau_in_other_ts(tss[ts_id], l)) {
+                if (!tau_distances[ts_id]->is_fully_invertible()) {
+                    if (transition_system_relevant == TAU_IN_ALL) {
+                        transition_system_relevant = ts_id;
+                    } else {
+                        transition_system_relevant = TAU_IN_NONE;
+                        break;
+                    }
                 } else {
-                    transition_system_relevant = TAU_IN_NONE;
-                    break;
+                    total_tau_cost += tau_distances[ts_id]->get_cost_fully_invertible();
                 }
-            } else if (tss[ts_id].is_relevant_label(l)) {
-                total_tau_cost += tau_distances[ts_id]->get_cost_fully_invertible();
             }
         }
 
@@ -395,7 +397,7 @@ set<int> TauLabels<T>::add_noop_dominance_tau_labels(const NumericLabelRelation<
             label_relevant_for[l] = TAU_IN_ALL;
 
         } else if (label_dominance.dominates_noop_in_some(l)) {
-            int lts_id = label_dominance.get_dominates_noop_in(l);
+            int lts_id = label_dominance.get_may_dominates_noop_in(l);
             if (label_relevant_for[l] == TAU_IN_NONE) {
                 num_tau_labels_for_some++;
                 tau_labels[lts_id].push_back(l);

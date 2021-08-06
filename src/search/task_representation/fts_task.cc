@@ -217,4 +217,13 @@ vector<int> FTSTask::get_initial_state() const {
         // }
         return os;
     }
+
+    std::vector<TransitionSystem> FTSTask::get_transition_systems() const {
+        std::unique_ptr<std::vector<TransitionSystem>> tss = make_unique<std::vector<TransitionSystem>>();
+        tss->reserve(transition_systems.size());
+        for (size_t i = 0; i < transition_systems.size(); i++) {
+            tss->push_back(get_ts(i));
+        }
+        return *tss;
+    }
 }
