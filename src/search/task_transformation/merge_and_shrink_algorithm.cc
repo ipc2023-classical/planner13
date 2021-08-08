@@ -317,7 +317,7 @@ bool MergeAndShrinkAlgorithm::prune_fts(FactoredTransitionSystem &fts, const uti
 
     if (prune_transitions && fts_transition_pruning) {
         // TODO: Here we should only prune affected transition systems, and only need to recompute the distances of them aswell.
-        // however, the
+        // however, the returned value is currently not correct due to fts remove_labels not returning the correct tss
         vector<int> affected_ts = fts_transition_pruning->prune_transitions(fts);
         for (int ts_id = 0; ts_id < fts.get_size(); ts_id++) {
             fts.recompute_distances(ts_id);

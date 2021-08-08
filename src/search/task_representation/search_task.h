@@ -204,7 +204,6 @@ public:
     LabelID get_label(OperatorID op) const {
         assert(std::find(label_to_info[operators[op.get_index()].get_label()].fts_operators.begin(), label_to_info[operators[op.get_index()].get_label()].fts_operators.end(), op) != label_to_info[operators[op.get_index()].get_label()].fts_operators.end());
 
-
         return operators[op.get_index()].get_label();
     }
 
