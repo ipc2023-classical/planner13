@@ -373,6 +373,34 @@ namespace task_representation {
         }
     }
 
+    // We only need predecessor to access certain variables' values.
+    void SearchTask::apply_operator(
+            const std::vector<int> &predecessor, const OperatorID &op_id, vector<int> &buffer) const {
+        // Ideally, we would assert that the operator is applicable.
+        const FTSOperator &fts_op = operators[op_id.get_index()];
+
+        LabelID label = fts_op.get_label();
+        // Static Effects
+        for (const auto &eff : label_to_info[label].static_effects) {
+            buffer[eff.var] = eff.value;
+        }
+
+        // Effects on deterministic TS
+        const vector<int> &det_ts = label_to_info[label].relevant_deterministic_transition_systems;
+        const vector<unordered_map<int, int>> &src_to_target_by_ts_index =
+                label_to_info[label].src_to_target_by_ts_index;
+        for (size_t ts_index = 0; ts_index < det_ts.size(); ++ts_index) {
+            int var = det_ts[ts_index];
+            const unordered_map<int, int> &src_to_target = src_to_target_by_ts_index[ts_index];
+            buffer[var] = src_to_target.at(predecessor[var]);
+        }
+
+        // Effects on non-deterministic TS
+        for (const FactPair &effect : fts_op.get_effects()) {
+            buffer[effect.var] = effect.value;
+        }
+    }
+
     vector<int> SearchTask::generate_successor(const State &predecessor, OperatorID op_id) const {
         vector<int> successor(predecessor.get_values());
 

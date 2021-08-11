@@ -175,6 +175,8 @@ namespace task_representation {
 
         void apply_operator(const GlobalState &predecessor, OperatorID op, std::vector<int> &buffer) const;
 
+        void apply_operator(const std::vector<int> &predecessor, const OperatorID &op_id, std::vector<int> &buffer) const;
+
         std::vector<int> generate_successor(const State &predecessor, OperatorID op_id) const;
 
         void generate_applicable_ops(

@@ -786,8 +786,7 @@ const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int 
         for (label_index = 0; label_index < label_ids.size(); label_index++) {
             if (!new_transitions[label_index].empty()) {
                 label_equivalence_relation->add_label_group(std::vector<int> {label_ids[label_index]});
-                LabelGroupID new_lg_id = get_label_group_id_of_label(label_ids[label_index]);
-                assert(new_lg_id == int(transitions_by_group_id.size()));
+                assert(get_label_group_id_of_label(label_ids[label_index]) == int(transitions_by_group_id.size()));
                 transitions_by_group_id.push_back(new_transitions[label_index]);
             }
         }
