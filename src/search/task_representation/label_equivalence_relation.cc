@@ -229,10 +229,15 @@ int LabelEquivalenceRelation::add_label_group(const vector<int> &new_labels) {
 
         // Remove old labels from group
         for (int old_label_no : removed_labels) {
+            // Ignore already deleted labels
+            if (label_to_positions[old_label_no].first == -1)
+                continue;
+
             LabelIter label_it = label_to_positions[old_label_no].second;
             LabelGroupID group = get_group_id(old_label_no);
             affected_group_ids.insert(group);
             grouped_labels[get_group_id(old_label_no)].erase(label_it);
+            label_to_positions[old_label_no].first = LabelGroupID(-1);
         }
     
 

@@ -17,7 +17,6 @@ void PruningMethod::initialize(const shared_ptr<task_representation::FTSTask> &t
     task = task_;
 }
 
-// TODO remove this overload once the search uses the task interface.
 void PruningMethod::prune_operators(const GlobalState &global_state,
                                     vector<OperatorID> &op_ids) {
     assert(task);

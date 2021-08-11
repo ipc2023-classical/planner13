@@ -26,20 +26,24 @@
   different implementations in and out.
  */
 namespace priority_queues {
-template<typename Value>
+template<typename Value, typename Key = int>
 class AbstractQueue {
 public:
-    typedef std::pair<int, Value> Entry;
+    typedef std::pair<Key, Value> Entry;
 
-    AbstractQueue() {}
-    virtual ~AbstractQueue() {}
+    AbstractQueue() = default;
 
-    virtual void push(int key, const Value &value) = 0;
+    virtual ~AbstractQueue() = default;
+
+    virtual void push(Key key, const Value &value) = 0;
+
     virtual Entry pop() = 0;
+
     virtual bool empty() const = 0;
+
     virtual void clear() = 0;
 
-    virtual AbstractQueue<Value> *convert_if_necessary(int /*key*/) {
+    virtual AbstractQueue<Value, Key> *convert_if_necessary(Key /*key*/) {
         /* Determine if this queue would still offer adequate
            performance after pushing another element with the given
            key.
@@ -65,9 +69,9 @@ public:
 };
 
 
-template<typename Value>
-class HeapQueue : public AbstractQueue<Value> {
-    typedef typename AbstractQueue<Value>::Entry Entry;
+template<typename Value, typename Key = int>
+class HeapQueue : public AbstractQueue<Value, Key> {
+    typedef typename AbstractQueue<Value, Key>::Entry Entry;
 
     struct compare_func {
         bool operator()(const Entry &lhs, const Entry &rhs) const {
@@ -76,7 +80,7 @@ class HeapQueue : public AbstractQueue<Value> {
     };
 
     class Heap
-        : public std::priority_queue<Entry, std::vector<Entry>, compare_func> {
+            : public std::priority_queue<Entry, std::vector<Entry>, compare_func> {
         // We inherit since our friend needs access to the underlying
         // container c which is a protected member.
         friend class HeapQueue;
@@ -84,13 +88,11 @@ class HeapQueue : public AbstractQueue<Value> {
 
     Heap heap;
 public:
-    HeapQueue() {
-    }
+    HeapQueue() = default;
 
-    virtual ~HeapQueue() {
-    }
+    virtual ~HeapQueue() = default;
 
-    virtual void push(int key, const Value &value) {
+    virtual void push(Key key, const Value &value) {
         heap.push(std::make_pair(key, value));
     }
 
@@ -109,11 +111,11 @@ public:
         heap.c.clear();
     }
 
-    static HeapQueue<Value> *create_from_sorted_entries_destructively(
-        std::vector<Entry> &entries) {
+    static HeapQueue<Value, Key> *create_from_sorted_entries_destructively(
+            std::vector<Entry> &entries) {
         // Create a new heap from the entries, which must be sorted.
         // The passed-in vector is cleared as a side effect.
-        HeapQueue<Value> *result = new HeapQueue<Value>;
+        auto *result = new HeapQueue<Value, Key>;
         result->heap.c.swap(entries);
         // Since the entries are sorted, we do not need to heapify.
         return result;
@@ -124,21 +126,20 @@ public:
 };
 
 
-template<typename Value>
-class BucketQueue : public AbstractQueue<Value> {
+template<typename Value, typename Key = int>
+class BucketQueue : public AbstractQueue<Value, Key> {
     static const int MIN_BUCKETS_BEFORE_SWITCH = 100;
 
-    typedef typename AbstractQueue<Value>::Entry Entry;
+    typedef typename AbstractQueue<Value, Key>::Entry Entry;
 
     typedef std::vector<Value> Bucket;
     std::vector<Bucket> buckets;
-    mutable int current_bucket_no;
-    int num_entries;
-    int num_pushes;
+    mutable size_t current_bucket_no;
+    size_t num_entries;
+    size_t num_pushes;
 
     void update_current_bucket_no() const {
-        int num_buckets = buckets.size();
-        while (current_bucket_no < num_buckets &&
+        while (current_bucket_no < buckets.size() &&
                buckets[current_bucket_no].empty())
             ++current_bucket_no;
     }
@@ -148,7 +149,7 @@ class BucketQueue : public AbstractQueue<Value> {
         // order, removing them from this queue as a side effect.
         assert(result.empty());
         result.reserve(num_entries);
-        for (int key = current_bucket_no; num_entries != 0; ++key) {
+        for (size_t key = current_bucket_no; num_entries; ++key) {
             Bucket &bucket = buckets[key];
             for (size_t i = 0; i < bucket.size(); ++i)
                 result.push_back(std::make_pair(key, bucket[i]));
@@ -158,27 +159,26 @@ class BucketQueue : public AbstractQueue<Value> {
         }
         current_bucket_no = 0;
     }
+
 public:
     BucketQueue() : current_bucket_no(0), num_entries(0), num_pushes(0) {
     }
 
-    virtual ~BucketQueue() {
-    }
+    virtual ~BucketQueue() = default;
 
-    virtual void push(int key, const Value &value) {
+    virtual void push(Key key, const Value &value) {
         ++num_entries;
         ++num_pushes;
-        assert(num_pushes > 0); // Check against overflow.
-        int num_buckets = buckets.size();
-        if (key >= num_buckets)
+        assert(num_pushes); // Check against overflow.
+        if (key >= int(buckets.size()))
             buckets.resize(key + 1);
-        else if (key < current_bucket_no)
+        else if (key < int(current_bucket_no))
             current_bucket_no = key;
         buckets[key].push_back(value);
     }
 
     virtual Entry pop() {
-        assert(num_entries > 0);
+        assert(num_entries);
         --num_entries;
         update_current_bucket_no();
         Bucket &current_bucket = buckets[current_bucket_no];
@@ -192,11 +192,10 @@ public:
     }
 
     virtual void clear() {
-        for (int i = current_bucket_no; num_entries != 0; ++i) {
-            assert(utils::in_bounds(i, buckets));
-            int bucket_size = buckets[i].size();
-            assert(bucket_size <= num_entries);
-            num_entries -= bucket_size;
+        for (size_t i = current_bucket_no; num_entries; ++i) {
+            assert(i < buckets.size());
+            assert(buckets[i].size() <= num_entries);
+            num_entries -= buckets[i].size();
             buckets[i].clear();
         }
         current_bucket_no = 0;
@@ -204,15 +203,15 @@ public:
         num_pushes = 0;
     }
 
-    virtual AbstractQueue<Value> *convert_if_necessary(int key) {
-        if (key >= MIN_BUCKETS_BEFORE_SWITCH && key > num_pushes) {
+    virtual AbstractQueue<Value, Key> *convert_if_necessary(Key key) {
+        if (key >= MIN_BUCKETS_BEFORE_SWITCH && key > int(num_pushes)) {
             std::cout << "Switch from bucket-based to heap-based queue "
                       << "at key = " << key
                       << ", num_pushes = " << num_pushes << std::endl;
             std::vector<Entry> entries;
             extract_sorted_entries(entries);
-            return HeapQueue<Value>::create_from_sorted_entries_destructively(
-                entries);
+            return HeapQueue<Value, Key>::create_from_sorted_entries_destructively(
+                    entries);
         }
         return this;
     }
@@ -223,24 +222,27 @@ public:
 };
 
 
-template<typename Value>
+template<typename Value, typename Key = int>
 class AdaptiveQueue {
-    AbstractQueue<Value> *wrapped_queue;
-    // Forbid assigning or copying -- would need to implement them properly.
-    AdaptiveQueue &operator=(const AdaptiveQueue<Value> &);
-    AdaptiveQueue(const AdaptiveQueue<Value> &);
-public:
-    typedef std::pair<int, Value> Entry;
+    AbstractQueue<Value, Key> *wrapped_queue;
 
-    AdaptiveQueue() : wrapped_queue(new BucketQueue<Value>) {
+    // Forbid assigning or copying -- would need to implement them properly.
+    AdaptiveQueue &operator=(const AdaptiveQueue<Value, Key> &);
+
+    AdaptiveQueue(const AdaptiveQueue<Value, Key> &);
+
+public:
+    typedef std::pair<Key, Value> Entry;
+
+    AdaptiveQueue() : wrapped_queue(new BucketQueue<Value, Key>) {
     }
 
     ~AdaptiveQueue() {
         delete wrapped_queue;
     }
 
-    void push(int key, const Value &value) {
-        AbstractQueue<Value> *q = wrapped_queue->convert_if_necessary(key);
+    void push(Key key, const Value &value) {
+        AbstractQueue<Value, Key> *q = wrapped_queue->convert_if_necessary(key);
         if (q != wrapped_queue) {
             delete wrapped_queue;
             wrapped_queue = q;
@@ -265,5 +267,4 @@ public:
     }
 };
 }
-
 #endif

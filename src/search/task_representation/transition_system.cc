@@ -450,6 +450,7 @@ void TransitionSystem::apply_label_mapping(
 
 
 bool TransitionSystem::remove_labels(const vector<LabelID> & labels) {
+    // TODO: This doesn't correctly determine if this ts needs pruning (maybe because there are labels with -1 label group?)
     std::vector<LabelGroupID> empty_groups = label_equivalence_relation->remove_labels(labels);
     bool relevant_label_group_removed = false;
     for (LabelGroupID empty_group : empty_groups) {
@@ -635,7 +636,10 @@ const std::vector<int> & TransitionSystem::get_label_precondition(LabelID label)
     }
 
     bool TransitionSystem::is_relevant_label (LabelID label) const {
-        return is_relevant_label_group(label_equivalence_relation->get_group_id(label));
+        LabelGroupID lg_id = label_equivalence_relation->get_group_id(label);
+        if (lg_id == -1)
+            return false;
+        return is_relevant_label_group(lg_id);
     }
     bool TransitionSystem::is_relevant_label_group (LabelGroupID group_id) const {
         if (!label_equivalence_relation->is_empty_group(group_id)) {
@@ -750,4 +754,50 @@ const std::vector<Transition> &TransitionSystem::get_transitions_with_label(int 
             
         }
     }
+
+    void TransitionSystem::remove_transitions_for_labels(std::unordered_map<int, std::set<Transition>>& label_to_transitions) {
+        // TODO: Maybe this could be optimised (by quite a bit) by creating groupings of LabelID in the same label group that
+        // need to have the same transitions removed.
+        vector<vector<Transition>> new_transitions(label_to_transitions.size());
+        vector<LabelID> label_ids;
+
+        // The label index, i.e. the index of the label in the label_ids
+        size_t label_index = 0;
+        for (std::pair<int, set<Transition>> kv_pair : label_to_transitions) {
+            label_ids.emplace_back(kv_pair.first);
+            LabelGroupID lg_id = get_label_group_id_of_label(LabelID(kv_pair.first));
+
+            assert(is_sorted(transitions_by_group_id[lg_id].begin(), transitions_by_group_id[lg_id].end()));
+
+            // Insert all old transitions that are not in trs_by_label into new_transitions[label_index]
+            size_t new_size = transitions_by_group_id[lg_id].size() - kv_pair.second.size();
+            if (new_size != 0) {
+                new_transitions[label_index].resize(new_size, Transition(0,0));
+                set_difference(transitions_by_group_id[lg_id].begin(),  transitions_by_group_id[lg_id].end(),
+                               kv_pair.second.begin(),  kv_pair.second.end(),
+                               new_transitions[label_index].begin());
+            }
+
+            label_index++;
+        }
+
+        label_equivalence_relation->remove_labels(label_ids);
+
+        for (label_index = 0; label_index < label_ids.size(); label_index++) {
+            if (!new_transitions[label_index].empty()) {
+                label_equivalence_relation->add_label_group(std::vector<int> {label_ids[label_index]});
+                LabelGroupID new_lg_id = get_label_group_id_of_label(label_ids[label_index]);
+                assert(new_lg_id == int(transitions_by_group_id.size()));
+                transitions_by_group_id.push_back(new_transitions[label_index]);
+            }
+        }
+
+        compute_locally_equivalent_labels();
+    }
+
+
+    LabelGroupID TransitionSystem::get_label_group_id_of_label(LabelID label_id) const {
+        return label_equivalence_relation->get_group_id(label_id);
+    }
+
 }

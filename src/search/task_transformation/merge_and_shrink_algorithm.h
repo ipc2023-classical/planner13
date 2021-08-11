@@ -21,6 +21,10 @@ class TransitionSystem;
 class LabelID;
 }
 
+namespace numeric_dominance {
+class FTSTransitionPruning;
+}
+
 using namespace task_representation;
 
 namespace task_transformation {
@@ -54,6 +58,8 @@ class MergeAndShrinkAlgorithm {
     const bool prune_irrelevant_states;
     const bool prune_transitions_from_goal;
 
+    std::shared_ptr<numeric_dominance::FTSTransitionPruning> fts_transition_pruning;
+
     const Verbosity verbosity;
 
     const bool run_main_loop;
@@ -72,7 +78,7 @@ class MergeAndShrinkAlgorithm {
     bool too_many_transitions(const FactoredTransitionSystem &fts) const;
     bool exclude_if_too_many_transitions() const;
     // Return true iff fts has been detected to be unsolvable.
-    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer) const;
+    bool prune_fts(FactoredTransitionSystem &fts, const utils::Timer &timer, bool prune_transitions) const;
     bool check_dead_labels(FactoredTransitionSystem &fts,
                            const std::vector<int> & ts_to_check_initially) const;
 

@@ -166,18 +166,16 @@ namespace task_representation {
         SearchTask(const FTSTask &fts_task, bool print_time);
 
         bool is_goal_state(const GlobalState &state) const;
+
         bool is_goal_state(const PlanState &state) const;
 
         bool has_effect(const GlobalState &predecessor, OperatorID op_id, const FactPair &fact) const;
 
-        void apply_operator(
-                const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer) const;
+        void apply_operator(const GlobalState &predecessor, OperatorID op, PackedStateBin *buffer) const;
 
-        void apply_operator(
-                const GlobalState &predecessor, OperatorID op, std::vector<int> &buffer) const;
+        void apply_operator(const GlobalState &predecessor, OperatorID op, std::vector<int> &buffer) const;
 
-        void apply_operator(
-                const std::vector<int> &predecessor, const OperatorID &op, std::vector<int> &buffer) const;
+        std::vector<int> generate_successor(const State &predecessor, OperatorID op_id) const;
 
         void generate_applicable_ops(
                 const GlobalState &state,
@@ -240,7 +238,7 @@ namespace task_representation {
             return get_fts_operators(get_operator_IDs_from_label(label));
         }
 
-        std::vector<int> get_labels_from_operator_IDs(const std::vector<OperatorID>& ops) const {
+        std::vector<int> get_labels_from_operator_IDs(const std::vector<OperatorID> &ops) const {
             std::vector<int> res;
 
             res.reserve(ops.size());
@@ -260,6 +258,5 @@ namespace task_representation {
             return res;
         }
     };
-
 }
 #endif

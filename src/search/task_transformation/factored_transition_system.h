@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "label_map.h"
+#include "../task_representation/transition_system.h"
 
 #include <memory>
 #include <vector>
@@ -165,9 +166,17 @@ public:
         return *transition_systems[index];
     }
 
+    task_representation::TransitionSystem& get_ts_mutable(int index) const {
+        return *transition_systems[index];
+    }
+
+    void get_transition_systems(std::vector<task_representation::TransitionSystem>& tss) const;
+
     const Distances &get_distances(int index) const {
         return *distances[index];
     }
+
+    void recompute_distances(int index);
 
     /*
       A factor is solvabe iff the distance of the initial state to some goal
@@ -211,6 +220,9 @@ public:
     bool remove_irrelevant_transition_systems(Verbosity verbosity);
     void remove_transitions_from_goal();
 
+    const task_representation::Labels& get_labels() {
+        return *labels;
+    }
 
     bool is_tau_label(int index, task_representation::LabelID label) const;
     std::vector<task_representation::LabelID> get_tau_labels(int index) const;

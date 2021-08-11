@@ -59,16 +59,19 @@ public:
     std::vector<int> get_goal_variables() const;
 
     int get_size() const {
-        return transition_systems.size();
+        return int(transition_systems.size());
     }
 
     const TransitionSystem &get_ts(int index) const {
         return *transition_systems[index];
     }
 
+    std::vector<TransitionSystem> get_transition_systems() const;
+
     const Labels &get_labels() const {
         return *labels;
     }
+
 
     std::vector<int> get_initial_state() const ;
     bool trivially_solved() const;
