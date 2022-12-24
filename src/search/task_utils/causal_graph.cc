@@ -183,37 +183,6 @@ struct CausalGraphBuilder {
             }
         }
 
-//        // Handle pre->eff links from preconditions.
-//        for (FactProxy pre : op.get_preconditions()) {
-//            int pre_var_id = pre.get_variable().get_id();
-//            for (EffectProxy eff : effects) {
-//                int eff_var_id = eff.get_fact().get_variable().get_id();
-//                if (pre_var_id != eff_var_id)
-//                    handle_pre_eff_arc(pre_var_id, eff_var_id);
-//            }
-//        }
-
-        // Handle pre->eff links from effect conditions.
-//        for (auto eff : fts_op.get_effects()) {
-//            int ts_id1 = eff.var;
-//            for (FactProxy pre : eff.get_conditions()) {
-//                int pre_var_id = pre.get_variable().get_id();
-//                if (pre_var_id != eff_var_id)
-//                    handle_pre_eff_arc(pre_var_id, ts_id1);
-//            }
-//        }
-//
-//        // Handle pre->eff links from effect conditions.
-//        for (EffectProxy eff : effects) {
-//            VariableProxy eff_var = eff.get_fact().get_variable();
-//            int eff_var_id = eff_var.get_id();
-//            for (FactProxy pre : eff.get_conditions()) {
-//                int pre_var_id = pre.get_variable().get_id();
-//                if (pre_var_id != eff_var_id)
-//                    handle_pre_eff_arc(pre_var_id, eff_var_id);
-//            }
-//        }
-
         // Handle eff->eff links using FTSTask
         for (auto eff1 : effects) {
             int ts_id1 = eff1.var;
@@ -224,15 +193,6 @@ struct CausalGraphBuilder {
             }
         }
 
-        // Handle eff->eff links.
-//        for (size_t i = 0; i < effects.size(); ++i) {
-//            int eff1_var_id = effects[i].get_fact().get_variable().get_id();
-//            for (size_t j = i + 1; j < effects.size(); ++j) {
-//                int eff2_var_id = effects[j].get_fact().get_variable().get_id();
-//                if (eff1_var_id != eff2_var_id)
-//                    handle_eff_eff_edge(eff1_var_id, eff2_var_id);
-//            }
-//        }
     }
 };
 
@@ -283,7 +243,7 @@ const CausalGraph &get_causal_graph(const AbstractTask *task) {
 
 CausalGraph::CausalGraph(const shared_ptr<task_representation::FTSTask>& task) {
     utils::Timer timer;
-    cout << "building causal graph..." << flush;
+    cout << "building causal graph...";
     int num_ts = task->get_size();
     CausalGraphBuilder cg_builder(num_ts);
 

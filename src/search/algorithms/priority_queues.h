@@ -192,7 +192,7 @@ public:
     }
 
     virtual void clear() {
-        for (size_t i = current_bucket_no; num_entries; ++i) {
+        for (size_t i = current_bucket_no; num_entries != 0; ++i) {
             assert(i < buckets.size());
             assert(buckets[i].size() <= num_entries);
             num_entries -= buckets[i].size();

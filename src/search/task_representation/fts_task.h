@@ -72,7 +72,6 @@ public:
         return *labels;
     }
 
-
     std::vector<int> get_initial_state() const ;
     bool trivially_solved() const;
 

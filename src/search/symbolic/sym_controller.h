@@ -34,7 +34,7 @@ protected:
     SymSolution solution; 
 public:
     SymController(const options::Options &opts, const std::shared_ptr<task_representation::FTSTask> &task);
-    virtual ~SymController() {}
+    virtual ~SymController() = default;
 
     virtual void new_solution(const SymSolution & sol);
     void setLowerBound(int lower);

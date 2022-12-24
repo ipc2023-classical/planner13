@@ -33,7 +33,6 @@ public:
     virtual void prune_operators(const GlobalState &state,
                                  std::vector<OperatorID> &op_ids);
 
-    // TODO: Do whatever this is
     virtual void print_statistics() const {};
 };
 
