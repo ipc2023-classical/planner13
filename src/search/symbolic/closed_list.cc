@@ -3,7 +3,6 @@
 #include "sym_state_space_manager.h"
 #include "sym_solution.h"
 #include "sym_util.h"
-#include "../symbolic_astar_NOTWORKING/sym_astar.h"
 
 #include "../utils/debug_macros.h"
 #include "../task_representation/search_task.h"

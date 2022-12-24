@@ -1,16 +1,16 @@
 #include "gamer_pdbs_heuristic.h"
 
-#include "../../symbolic/sym_variables.h"
-#include "../sym_pdb.h"
-#include "../../symbolic/uniform_cost_search.h"
-#include "../../symbolic/original_state_space.h"
+#include "../symbolic/sym_variables.h"
+#include "sym_pdb.h"
+#include "../symbolic/uniform_cost_search.h"
+#include "../symbolic/original_state_space.h"
 
-#include "../../symbolic/sym_enums.h"
-#include "../../option_parser.h"
-#include "../../plugin.h"
-#include "../../globals.h"
-#include "../../task_utils/causal_graph.h"
-#include "../../utils/debug_macros.h"
+#include "../symbolic/sym_enums.h"
+#include "../option_parser.h"
+#include "../plugin.h"
+#include "../globals.h"
+#include "../task_utils/causal_graph.h"
+#include "../utils/debug_macros.h"
 
 
 #include <cassert>

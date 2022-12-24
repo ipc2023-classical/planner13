@@ -2,7 +2,6 @@
 #define SYMBOLIC_UNIFORM_COST_SEARCH_H
 
 #include "unidirectional_search.h"
-#include "../symbolic_astar_NOTWORKING/sym_heuristic.h"
 #include "sym_state_space_manager.h"
 #include "sym_bucket.h"
 #include "closed_list.h"

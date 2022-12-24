@@ -86,40 +86,31 @@ fast_downward_plugin(
         NAME SYMBOLIC
         HELP "Plugin containing the base for symbolic search"
         SOURCES
-        symbolic/sym_variables.cc
-        symbolic/variable_ordering.cc
-        symbolic/opt_order.cc
-        symbolic/sym_util.cc
-        symbolic/sym_enums.cc
-        symbolic/transition_relation.cc
-        symbolic/sym_bucket.cc
-        symbolic/sym_controller.cc
-        symbolic/sym_solution.cc
-        symbolic/sym_state_space_manager.cc
-        symbolic/original_state_space.cc
-        symbolic/closed_list.cc
-        symbolic/open_list.cc
-        symbolic/frontier.cc
-        symbolic_astar_NOTWORKING/sym_heuristic.cc
-        symbolic/sym_estimate.cc
-        symbolic/sym_params_search.cc
-        symbolic/sym_state_space_manager.cc
-        symbolic/sym_search.cc
-        symbolic/unidirectional_search.cc
-        symbolic/uniform_cost_search.cc
-        symbolic/breadth_first_search.cc
-        symbolic/bidirectional_search.cc
-        search_engines/symbolic_search.cc
-        task_utils/causal_graph.cc
-        DEPENDENCY_ONLY
-        DEPENDS SYMBOLIC_STATE_REORDERING
-)
-
-fast_downward_plugin(
-        NAME SYMBOLIC_STATE_REORDERING
-        HELP "Plugin that reorders states."
-        SOURCES
-        symbolic/state_reordering.cc
+        symbolic/sym_variables
+        symbolic/variable_ordering
+        symbolic/opt_order
+        symbolic/sym_util
+        symbolic/sym_enums
+        symbolic/transition_relation
+        symbolic/sym_bucket
+        symbolic/sym_controller
+        symbolic/sym_solution
+        symbolic/sym_state_space_manager
+        symbolic/original_state_space
+        symbolic/closed_list
+        symbolic/open_list
+        symbolic/frontier
+        symbolic_astar_NOTWORKING/sym_heuristic
+        symbolic/sym_estimate
+        symbolic/sym_params_search
+        symbolic/sym_state_space_manager
+        symbolic/sym_search
+        symbolic/unidirectional_search
+        symbolic/uniform_cost_search
+        symbolic/breadth_first_search
+        symbolic/bidirectional_search
+        task_utils/causal_graph
+        symbolic/state_reordering
         DEPENDENCY_ONLY
 )
 
@@ -127,50 +118,31 @@ fast_downward_plugin(
         NAME SYMBOLIC_SEARCH_ENGINE
         HELP "Symbolic search engine"
         SOURCES
-        search_engines/symbolic_search.cc
+        search_engines/symbolic_search
+        DEPENDS SYMBOLIC
         DEPENDECY_ONLY
 )
 
-fast_downward_plugin(
-        NAME SYMBOLIC_ASTAR
-        HELP "Plugin containing the base for symbolic search"
-        SOURCES
-        symbolic_astar_NOTWORKING/bd_astar.cc
-        symbolic_astar_NOTWORKING/sym_astar.cc
-        symbolic_astar_NOTWORKING/sym_astar_closed.cc
-        symbolic_astar_NOTWORKING/sym_astar_open.cc
-        symbolic_astar_NOTWORKING/sym_heuristic.cc
-        DEPENDENCY_ONLY
-)
+#fast_downward_plugin(
+#        NAME SYMBOLIC_ASTAR
+#        HELP "Plugin containing the base for symbolic search"
+#        SOURCES
+#        symbolic_astar_NOTWORKING/bd_astar
+#        symbolic_astar_NOTWORKING/sym_astar
+#        symbolic_astar_NOTWORKING/sym_astar_closed
+#        symbolic_astar_NOTWORKING/sym_astar_open
+#        symbolic_astar_NOTWORKING/sym_heuristic
+#        DEPENDENCY_ONLY
+#)
 
 fast_downward_plugin(
         NAME SYMBOLIC_PDBS
         HELP "Plugin for symbolic pattern databases."
         SOURCES
-        symbolic_pdbs/sym_pdb.cc
+        symbolic_pdbs/sym_pdb
+        symbolic_pdbs/gamer_pdbs/gamer_pdbs_heuristic
+        DEPENDS SYMBOLIC
         DEPENDENCY_ONLY
-)
-
-fast_downward_plugin(
-        NAME SYMBOLIC_GAMER_PDBS
-        HELP "Plugin containing the base for gamer pattern databases with symbolic search."
-        SOURCES
-        symbolic_pdbs/gamer_pdbs/gamer_pdbs_heuristic.cc
-        DEPENDENCY_ONLY
-        DEPENDS SYMBOLIC_PDBS
-)
-
-fast_downward_plugin(
-        NAME SYMBOLIC_SPMAS
-        HELP "Plugin for SPMAS symbolic search."
-        SOURCES
-        symbolic_pdbs/spmas_NOTWORKING/hnode.cc
-        symbolic_pdbs/spmas_NOTWORKING/htree.cc
-        symbolic_pdbs/spmas_NOTWORKING/ph.cc
-        symbolic_pdbs/spmas_NOTWORKING/ph_pdbs.cc
-        symbolic_pdbs/spmas_NOTWORKING/spmas_heuristic.cc
-        DEPENDENCY_ONLY
-        DEPENDS SYMBOLIC_PDBS
 )
 
 fast_downward_plugin(

@@ -1,9 +1,9 @@
 #ifndef SYMBOLIC_GAMER_PDBS_HEURISTIC_H
 #define SYMBOLIC_GAMER_PDBS_HEURISTIC_H
 
-#include "../../symbolic/sym_controller.h"
-#include "../../heuristic.h"
-#include "../../symbolic/sym_solution.h"
+#include "../symbolic/sym_controller.h"
+#include "../heuristic.h"
+#include "../symbolic/sym_solution.h"
 
 
 namespace symbolic {
