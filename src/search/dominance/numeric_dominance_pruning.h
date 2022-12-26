@@ -3,9 +3,9 @@
 
 #include "../pruning_method.h"
 
-#include "tau_labels.h"
-#include "int_epsilon.h"
-#include "numeric_dominance_relation.h"
+#include "dominance_check.h"
+#include "dominance_function.h"
+#include "dominance_function_builder.h"
 
 using namespace task_representation;
 
@@ -15,39 +15,23 @@ class OptionParser;
 class Options;
 }
 
-namespace numeric_dominance {
+namespace dominance {
 
 template<typename T>
 class NumericDominancePruning : public PruningMethod {
 protected:
 
     bool initialized;
-    std::shared_ptr<TauLabelManager<T>> tau_labels;
+    std::shared_ptr<DominanceFunctionBuilder> dominance_function_builder;
+    std::shared_ptr<DominanceFunction<T>> numeric_dominance_relation;
+    DominanceCheck<T> dominance_check;
 
     const bool prune_dominated_by_parent;
     const bool prune_dominated_by_initial_state;
     const bool prune_successors;
 
-    const int truncate_value;
-    const int max_simulation_time;
-    const int min_simulation_time;
-    const int max_total_time;
-
-    const int max_lts_size_to_compute_simulation;
-    const int num_labels_to_use_dominates_in;
-
     const bool dump;
     const bool exit_after_preprocessing;
-
-    std::shared_ptr<    NumericDominanceRelation<T>> numeric_dominance_relation;
-
-    bool all_desactivated;
-    bool activation_checked;
-
-    int states_inserted; //Count the number of states inserted
-    int states_checked; //Count the number of states inserted
-    int states_pruned; //Count the number of states pruned
-    int deadends_pruned; //Count the number of dead ends detected
 
     void dump_options() const;
 

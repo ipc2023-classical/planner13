@@ -109,8 +109,8 @@ fast_downward_plugin(
         symbolic/uniform_cost_search
         symbolic/breadth_first_search
         symbolic/bidirectional_search
-        task_utils/causal_graph
         symbolic/state_reordering
+        DEPENDS CAUSAL_GRAPH
         DEPENDENCY_ONLY
 )
 
@@ -213,8 +213,9 @@ fast_downward_plugin(
         task_transformation/utils
         task_transformation/variable_order_finder
     CORE_PLUGIN
-    DEPENDS EQUIVALENCE_RELATION
-    )
+    DEPENDS EQUIVALENCE_RELATION DOMINANCE
+
+)
 
 fast_downward_plugin(
     NAME OPTIONS
@@ -307,6 +308,18 @@ fast_downward_plugin(
         algorithms/dynamic_bitset
     DEPENDENCY_ONLY
 )
+
+
+fast_downward_plugin(
+        NAME BASIC_SEARCH_ALGORTIHMS
+        HELP "Implementation of breadth first search and dijkstra search on small transition systems"
+        SOURCES
+        algorithms/breadth_first_search
+        algorithms/dijkstra_search_epsilon
+        DEPENDENCY_ONLY
+)
+
+
 
 fast_downward_plugin(
     NAME EQUIVALENCE_RELATION
@@ -648,13 +661,13 @@ fast_downward_plugin(
     #DEPENDENCY_ONLY
 #)
 
-#fast_downward_plugin(
-    #NAME CAUSAL_GRAPH
-    #HELP "Causal Graph"
-    #SOURCES
-        #task_utils/causal_graph
-    #DEPENDENCY_ONLY
-#)
+fast_downward_plugin(
+    NAME CAUSAL_GRAPH
+    HELP "Causal Graph"
+    SOURCES
+    task_utils/causal_graph
+    DEPENDENCY_ONLY
+)
 
 #fast_downward_plugin(
     #NAME SAMPLING
@@ -844,19 +857,29 @@ fast_downward_plugin(
 )
 
 fast_downward_plugin(
-        NAME NUMERIC_DOMINANCE
+        NAME DOMINANCE
         HELP "Plugin containing code for numeric dominance"
         SOURCES
-            numeric_dominance/breadth_first_search
-            numeric_dominance/dijkstra_search_epsilon
-            numeric_dominance/int_epsilon
-            numeric_dominance/tau_labels
-            numeric_dominance/numeric_dominance_fts_pruning
-            numeric_dominance/numeric_dominance_pruning
-            numeric_dominance/numeric_dominance_relation
-            numeric_dominance/numeric_label_relation
-            numeric_dominance/numeric_simulation_relation
+        dominance/dominance_function
+        dominance/dominance_function_builder
+        dominance/int_epsilon
+        dominance/label_dominance_function
+        dominance/local_dominance_function
+        dominance/numeric_dominance_fts_pruning
+        dominance/tau_labels
+        DEPENDS BASIC_SEARCH_ALGORTIHMS
+        DEPENDENCY_ONLY
 )
+
+fast_downward_plugin(
+        NAME DOMINANCE_PRUNING
+        HELP "Plugin containing code for numeric dominance"
+        SOURCES
+        dominance/dominance_check
+        dominance/numeric_dominance_pruning
+        DEPENDS DOMINANCE
+)
+
 
 fast_downward_add_plugin_sources(PLANNER_SOURCES)
 

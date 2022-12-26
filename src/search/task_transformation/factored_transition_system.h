@@ -108,6 +108,7 @@ public:
         const bool compute_goal_distances,
         Verbosity verbosity,
         const bool lossy);
+
     FactoredTransitionSystem(FactoredTransitionSystem &&other);
     ~FactoredTransitionSystem();
 
@@ -169,8 +170,6 @@ public:
     task_representation::TransitionSystem& get_ts_mutable(int index) const {
         return *transition_systems[index];
     }
-
-    void get_transition_systems(std::vector<task_representation::TransitionSystem>& tss) const;
 
     const Distances &get_distances(int index) const {
         return *distances[index];
@@ -240,6 +239,7 @@ public:
     std::shared_ptr<PlanReconstruction> get_plan_reconstruction();
     std::shared_ptr<task_representation::FTSTask> get_transformed_fts_task();
     Mapping get_mapping();
+    const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &get_transition_systems() const;
 
 
 };

@@ -20,7 +20,7 @@
 #include "../task_representation/labels.h"
 #include "../task_representation/transition_system.h"
 
-#include "../numeric_dominance/numeric_dominance_fts_pruning.h"
+#include "../dominance/numeric_dominance_fts_pruning.h"
 
 #include "../utils/markup.h"
 #include "../utils/math.h"
@@ -61,7 +61,7 @@ MergeAndShrinkAlgorithm::MergeAndShrinkAlgorithm(const Options &opts) :
         prune_unreachable_states(opts.get<bool>("prune_unreachable_states")),
         prune_irrelevant_states(opts.get<bool>("prune_irrelevant_states")),
         prune_transitions_from_goal(opts.get<bool>("prune_transitions_from_goal")),
-        fts_transition_pruning(opts.get<shared_ptr<numeric_dominance::FTSTransitionPruning>>("fts_transition_pruning", nullptr)),
+        fts_transition_pruning(opts.get<shared_ptr<dominance::FTSTransitionPruning>>("fts_transition_pruning", nullptr)),
         verbosity(static_cast<Verbosity>(opts.get_enum("verbosity"))),
         run_main_loop(opts.get<bool>("run_main_loop")),
         max_time(opts.get<double>("max_time")),
@@ -757,7 +757,7 @@ void add_merge_and_shrink_algorithm_options_to_parser(OptionParser &parser) {
        "If true, prune transitions that can only be applied in goal states",
        "true");
 
-   parser.add_option<shared_ptr<numeric_dominance::FTSTransitionPruning>>(
+   parser.add_option<shared_ptr<dominance::FTSTransitionPruning>>(
            "fts_transition_pruning",
             "Pruning transitions of FTS.",
             OptionParser::NONE

@@ -46,6 +46,8 @@ public:
     FTSTask(const FTSTask & other, OperatorCost cost_type);
 
     ~FTSTask();
+
+    // We forbid moving tasks around. Ideally, we should use shared_pointers, or references to refer to them.
     FTSTask(FTSTask &&other) = delete;
     FTSTask(const FTSTask &other) = delete;
     FTSTask &operator=(const FTSTask &) = delete;
@@ -66,7 +68,9 @@ public:
         return *transition_systems[index];
     }
 
-    std::vector<TransitionSystem> get_transition_systems() const;
+    const std::vector<std::unique_ptr<TransitionSystem>> & get_transition_systems () const {
+        return transition_systems;
+    }
 
     const Labels &get_labels() const {
         return *labels;

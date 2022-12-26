@@ -21,7 +21,7 @@ class TransitionSystem;
 class LabelID;
 }
 
-namespace numeric_dominance {
+namespace dominance {
 class FTSTransitionPruning;
 }
 
@@ -58,7 +58,7 @@ class MergeAndShrinkAlgorithm {
     const bool prune_irrelevant_states;
     const bool prune_transitions_from_goal;
 
-    std::shared_ptr<numeric_dominance::FTSTransitionPruning> fts_transition_pruning;
+    std::shared_ptr<dominance::FTSTransitionPruning> fts_transition_pruning;
 
     const Verbosity verbosity;
 

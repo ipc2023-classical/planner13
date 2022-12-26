@@ -538,15 +538,12 @@ Mapping FactoredTransitionSystem::get_mapping() {
                    label_map);
 }
 
-void FactoredTransitionSystem::get_transition_systems(std::vector<TransitionSystem>& tss) const {
-    tss.reserve(transition_systems.size());
-    for (size_t i = 0; i < transition_systems.size(); i++) {
-        tss.push_back(get_ts(i));
-    }
-}
-
 void FactoredTransitionSystem::recompute_distances(int index) {
     distances[index]->recompute_distances();
+}
+
+const vector<std::unique_ptr<task_representation::TransitionSystem>> & FactoredTransitionSystem::get_transition_systems() const {
+    return transition_systems;
 }
 
 
