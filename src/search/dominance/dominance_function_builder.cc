@@ -5,6 +5,7 @@
 #include "dominance_function.h"
 
 using namespace std;
+using namespace task_representation;
 
 namespace dominance {
 

@@ -4,6 +4,7 @@
 #include "../algorithms/dijkstra_search_epsilon.h"
 #include "../algorithms/breadth_first_search.h"
 #include "../task_transformation/distances.h"
+#include "../task_representation/label_equivalence_relation.h"
 #include "../utils/timer.h"
 
 #include <map>

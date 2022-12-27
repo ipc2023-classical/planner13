@@ -1,15 +1,17 @@
 #ifndef FTS_REPRESENTATION_LABEL_EQUIVALENCE_RELATION_H
 #define FTS_REPRESENTATION_LABEL_EQUIVALENCE_RELATION_H
 
-#include "types.h"
 
 #include <list>
 #include <unordered_set>
 #include <vector>
 
-#include "../task_transformation/label_map.h"
-
 #include "../algorithms/segmented_vector.h"
+#include "types.h"
+
+namespace task_transformation {
+    class LabelMapping;
+}
 
 namespace task_representation {
 class Labels;

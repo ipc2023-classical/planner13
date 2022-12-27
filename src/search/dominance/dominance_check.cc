@@ -2,6 +2,7 @@
 
 #include "../task_representation/search_task.h"
 using namespace std;
+using namespace task_representation;
 
 namespace dominance {
 
@@ -94,6 +95,7 @@ namespace dominance {
                                                               total_value += val;
                                                           }
 
+                                                          //TODO: Use adjusted_cost instead?
                                                           proved_prunable = may_simulate && (total_value >= 0 ||
                                                                                              total_value +
                                                                                              fts_op.get_cost() > 0);
@@ -141,7 +143,6 @@ namespace dominance {
 
                                                       relevant_simulations.clear();
 
-                                                      //TODO: Use adjusted cost instead.
                                                       return proved_prunable;
                                                   }), applicable_operators.end());
 
@@ -168,6 +169,9 @@ namespace dominance {
         for (auto op_id: applicable_operators) {
             FTSOperator fts_op = search_task->get_fts_operator(op_id);
 
+            //TODO: If operator (both op_id) touches a "forbidden" variable/value, then we can insert it in the list of applicable_operators and  skip the rest.
+            // We can precompute such a list of relevant operators. A forbidden variable is one where there
+            // is no possibility of finding any dominance. A forbidden value is a refinement of that.
             succ = search_task->generate_successor(state, op_id);
 
             for (size_t i = 0; i < succ.size(); i++) {

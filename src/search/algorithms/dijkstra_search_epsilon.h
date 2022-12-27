@@ -5,8 +5,6 @@
 #include "../dominance/int_epsilon.h"
 namespace dominance {
 
-    using namespace priority_queues;
-
    //Copied from abstraction.cc (move somewhere else?)
     template<typename T, typename Queue>
     void dijkstra_search_epsilon(
@@ -41,7 +39,7 @@ namespace dominance {
     inline void dijkstra_search_epsilon(
             const std::vector<std::vector<std::pair<int, int> > > &graph,
             int initial_state, std::vector<int> &distances, std::vector<int> &states_reached) {
-        AdaptiveQueue<int> queue;
+        priority_queues::AdaptiveQueue<int> queue;
         queue.push(0, initial_state);
         dijkstra_search_epsilon(graph, queue, distances, &states_reached);
     }
@@ -52,7 +50,7 @@ namespace dominance {
             int initial_state,
             std::vector<IntEpsilon> &distances,
             std::vector<int> &states_reached) {
-        HeapQueue<int, IntEpsilon> queue;
+        priority_queues::HeapQueue<int, IntEpsilon> queue;
         IntEpsilon initial_state_cost(0);
         queue.push(initial_state_cost, initial_state);
         dijkstra_search_epsilon(graph, queue, distances, &states_reached);

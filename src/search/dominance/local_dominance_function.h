@@ -10,14 +10,19 @@
 #include "../task_representation/fts_task.h"
 #include "../task_representation/state.h"
 
+namespace task_representation {
+    class TransitionSystem;
+    class Transition;
+}
+
 namespace dominance {
     bool
-    applyPostSrc(const TransitionSystem &ts, int src, std::function<bool(const Transition &t, LabelGroupID lg_id)> &&f);
+    applyPostSrc(const task_representation::TransitionSystem &ts, int src, std::function<bool(const task_representation::Transition &t, task_representation::LabelGroupID lg_id)> &&f);
 
     template<typename T>
     class LocalDominanceFunction {
         // This is a local dominance function computed for a transition system using the following parameters
-        const TransitionSystem &ts;
+        const task_representation::TransitionSystem &ts;
         const int ts_id;
         const int truncate_value;
 
@@ -30,13 +35,13 @@ namespace dominance {
 
         bool cancelled;
 
-        T compare_noop(int tr_s_target, LabelID tr_s_label, int t,
+        T compare_noop(int tr_s_target, task_representation::LabelID tr_s_label, int t,
                        T tau_distance,
                        const LabelDominanceFunction<T> &label_dominance) const;
 
 
-        T compare_transitions(int tr_s_target, LabelID tr_s_label,
-                              int tr_t_target, LabelID tr_t_label,
+        T compare_transitions(int tr_s_target, task_representation::LabelID tr_s_label,
+                              int tr_t_target, task_representation::LabelID tr_t_label,
                               T tau_distance,
                               const LabelDominanceFunction<T> &label_dominance) const;
 
@@ -49,7 +54,7 @@ namespace dominance {
                                int s, int t);
 
     public:
-        LocalDominanceFunction(const TransitionSystem &ts, int ts_id, int truncate_value,
+        LocalDominanceFunction(const task_representation::TransitionSystem &ts, int ts_id, int truncate_value,
                                std::shared_ptr<TauLabelInfo<T>> tau_labels_mgr);
 
         void init_goal_respecting();

@@ -24,13 +24,13 @@ namespace dominance {
 
     public:
         //Initialize must be called before calling any other method
-        void initialize (std::shared_ptr<DominanceFunction<T>> qdf, const FTSTask & task);
+        void initialize (std::shared_ptr<DominanceFunction<T>> qdf, const task_representation::FTSTask & task);
 
-        bool strictly_dominates_initial_state(const State &) const;
+        bool strictly_dominates_initial_state(const task_representation::State &) const;
 
-        bool action_selection_pruning(const FTSTask & task, const State &state, std::vector<OperatorID> &applicable_operators) const;
+        bool action_selection_pruning(const task_representation::FTSTask & task, const task_representation::State &state, std::vector<OperatorID> &applicable_operators) const;
 
-        void prune_dominated_by_parent_or_initial_state(const FTSTask & task, const State &op_id,
+        void prune_dominated_by_parent_or_initial_state(const task_representation::FTSTask & task, const task_representation::State &op_id,
                                                         std::vector<OperatorID> &applicable_operators,
                                                         bool parent_ids_stored,
                                                         bool compare_against_parent,

@@ -7,8 +7,6 @@
 #include "dominance_function.h"
 #include "dominance_function_builder.h"
 
-using namespace task_representation;
-
 namespace options {
 class OptionParser;
 
@@ -45,7 +43,7 @@ public:
     //virtual bool prune_generation(const State &state, int g, const State &parent, int action_cost) override;
     //virtual bool prune_expansion (const State &state, int g) override;
 
-    void prune_operators(const State &state, std::vector<OperatorID> &op_ids) override;
+    void prune_operators(const task_representation::State &state, std::vector<OperatorID> &op_ids) override;
 
     //virtual bool is_dead_end(const State &state) override;
 

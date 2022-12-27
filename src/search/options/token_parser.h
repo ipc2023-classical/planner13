@@ -4,6 +4,7 @@
 #include "predefinitions.h"
 
 #include <sstream>
+#include <limits>
 
 class Evaluator;
 class Heuristic;

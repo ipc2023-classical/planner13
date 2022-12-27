@@ -6,11 +6,14 @@
 #include "../options/option_parser.h"
 #include "../plugin.h"
 #include "../globals.h"
+#include "../task_representation/state.h"
+#include "../task_representation/label_equivalence_relation.h"
 
 #include <set>
 #include <memory>
 
 using namespace std;
+using namespace task_representation;
 
 namespace dominance {
 

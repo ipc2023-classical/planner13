@@ -10,6 +10,12 @@
 #include "../algorithms/breadth_first_search.h"
 #include "../algorithms/dijkstra_search_epsilon.h"
 
+#include "../task_representation/labels.h"
+#include "../task_representation/transition_system.h"
+#include "label_dominance_function.h"
+
+using namespace task_representation;
+
 namespace dominance {
     const int TAU_IN_ALL = -1;
     const int TAU_IN_NONE = -2;

@@ -5,20 +5,20 @@
 #include <vector>
 #include <memory>
 
-#include "../task_representation/labels.h"
-#include "../task_representation/fts_task.h"
-#include "../task_representation/state.h"
-
 #include "local_dominance_function.h"
 #include "label_dominance_function.h"
 
-#include "../utils/timer.h"
+namespace task_representation {
+    class State;
+    class FTSTask;
+    class Labels;
+}
 
 namespace dominance {
 
 /*
  * Class that represents the collection of local dominance functions for a factored LTS.
- * Uses unique_ptr so that it owns the local functions and it cannot be copied away.
+ * Uses unique_ptr so that it owns the local functions, and it cannot be copied away.
  */
     template<typename TCost>
     class DominanceFunction {
@@ -31,12 +31,12 @@ namespace dominance {
                 local_functions (std::move(_local_functions)), label_relation (_label_relation) {
         }
 
-        bool dominates(const State &t, const State &s, int g_diff) const;
+        bool dominates(const task_representation::State &t, const task_representation::State &s, int g_diff) const;
         bool dominates_parent(const std::vector<int> &state, const std::vector<int> &parent_state, int action_cost) const;
-        bool strictly_dominates(const State &dominating_state, const State &dominated_state) const;
-        bool propagate_transition_pruning(int ts_id, const TransitionSystem &ts, int src, LabelID l_id, int target) const;
+        bool strictly_dominates(const task_representation::State &dominating_state, const task_representation::State &dominated_state) const;
+        bool propagate_transition_pruning(int ts_id, const task_representation::TransitionSystem &ts, int src, task_representation::LabelID l_id, int target) const;
 
-     //TODO: Add evaluation returning TCost?
+        // TODO: Add evaluation returning TCost?
 
         const LabelDominanceFunction<TCost> &get_label_relation() {
             return label_relation;

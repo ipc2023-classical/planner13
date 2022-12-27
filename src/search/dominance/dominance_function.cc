@@ -7,10 +7,13 @@
 #include "../search_progress.h"
 #include "../task_representation/state.h"
 #include "../task_representation/search_task.h"
+#include "../task_representation/state.h"
+#include "../task_representation/label_equivalence_relation.h"
 
 #include <memory>
 
 using namespace std;
+using namespace task_representation;
 namespace dominance {
 
 // int DominanceFunction<T>::get_cost(const State &state) const{

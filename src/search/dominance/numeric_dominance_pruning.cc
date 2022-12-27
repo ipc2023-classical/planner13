@@ -1,13 +1,13 @@
 #include "numeric_dominance_pruning.h"
 
 #include "local_dominance_function.h"
-#include "dominance_function.h"
 #include "dominance_function_builder.h"
 
 #include "../globals.h"
 #include <vector>
 
 using namespace std;
+using namespace task_representation;
 
 namespace dominance {
 
@@ -18,8 +18,8 @@ NumericDominancePruning<TCost>::NumericDominancePruning(const options::Options &
           prune_dominated_by_parent(opts.get<bool>("prune_dominated_by_parent")),
           prune_dominated_by_initial_state(opts.get<bool>("prune_dominated_by_initial_state")),
           prune_successors(opts.get<bool>("prune_successors")),
-          dump(opts.get<bool>("dump")), exit_after_preprocessing(opts.get<bool>("exit_after_preprocessing"))
-          {
+          dump(opts.get<bool>("dump")),
+          exit_after_preprocessing(opts.get<bool>("exit_after_preprocessing")) {
 }
 
 template<typename TCost>

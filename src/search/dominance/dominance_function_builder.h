@@ -35,11 +35,11 @@ namespace dominance {
         std::shared_ptr<TauLabelManager> tau_label_manager;
 
     public:
-        DominanceFunctionBuilder(const options::Options &opts);
+        explicit DominanceFunctionBuilder(const options::Options &opts);
 
         //TODO: Check if only reachability is actually used. Otherwise, consider removing it.
         template<typename TCostType>
-        std::shared_ptr<DominanceFunction<TCostType>> compute_dominance_function(const FTSTask & fts_task,
+        std::shared_ptr<DominanceFunction<TCostType>> compute_dominance_function(const task_representation::FTSTask & fts_task,
                                                                                  bool only_reachability = false) const;
 
         template<typename TCostType>
@@ -48,8 +48,8 @@ namespace dominance {
 
         template<typename TCostType>
         std::shared_ptr<DominanceFunction<TCostType>>
-        compute_dominance_function(const std::vector<std::unique_ptr<TransitionSystem>> & tss,
-                                   const Labels & labels, bool only_reachability ) const;
+        compute_dominance_function(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> & tss,
+                                   const task_representation::Labels & labels, bool only_reachability ) const;
 
         void dump_options() const;
 

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <utility>
 #include <map>
+#include <limits>
 
 using namespace task_representation;
 using namespace std;

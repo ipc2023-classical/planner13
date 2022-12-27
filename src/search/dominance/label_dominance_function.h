@@ -1,13 +1,17 @@
 #ifndef NUMERIC_DOMINANCE_NUMERIC_LABEL_RELATION_H
 #define NUMERIC_DOMINANCE_NUMERIC_LABEL_RELATION_H
 
-#include "../task_representation/label_equivalence_relation.h"
+#include "../task_representation/labels.h"
+#include "../task_representation/transition_system.h"
 
 #include <iostream>
 #include <vector>
-#include "../task_representation/labels.h"
-#include "../task_representation/transition_system.h"
-#include "int_epsilon.h"
+#include <limits>
+#include <cassert>
+
+namespace task_representation {
+    class TransitionSystem;
+}
 
 namespace dominance {
 
@@ -20,15 +24,13 @@ namespace dominance {
     template<typename TCost>
     class LocalDominanceFunction;
 
-    using namespace task_representation;
-
 /*
  * Label relation represents the preorder relations on labels that
  * occur in a set of LTS
  */
     template<typename TCost>
     class LabelDominanceFunction {
-        const Labels &labels;
+        const task_representation::Labels &labels;
         int num_labels;
         int num_tss;
 
@@ -41,15 +43,15 @@ namespace dominance {
         std::vector<TCost> cost_of_label;
 
         // Maps ts id and label id to the label group id
-        std::vector<std::vector<LabelGroupID> > ts_label_id_to_label_group_id;
-        std::vector<std::vector<LabelGroupID>> irrelevant_label_groups_ts;
+        std::vector<std::vector<task_representation::LabelGroupID> > ts_label_id_to_label_group_id;
+        std::vector<std::vector<task_representation::LabelGroupID>> irrelevant_label_groups_ts;
         std::vector<std::vector<std::vector<TCost> > > lqrel;
         std::vector<std::vector<TCost> > simulated_by_irrelevant;
         std::vector<std::vector<TCost> > simulates_irrelevant;
 
-        bool update(int ts_id, const TransitionSystem &ts, const LocalDominanceFunction<TCost> &sim);
+        bool update(int ts_id, const task_representation::TransitionSystem &ts, const LocalDominanceFunction<TCost> &sim);
 
-        inline TCost get_lqrel(LabelGroupID lg1_id, LabelGroupID lg2_id, int lts) const {
+        inline TCost get_lqrel(task_representation::LabelGroupID lg1_id, task_representation::LabelGroupID lg2_id, int lts) const {
             if (lg1_id >= 0) {
                 if (lg2_id >= 0) {
                     return lqrel[lts][lg1_id][lg2_id];
@@ -65,12 +67,12 @@ namespace dominance {
             }
         }
 
-        inline TCost get_lqrel(LabelID l1_id, LabelID l2_id, int ts) const {
+        inline TCost get_lqrel(task_representation::LabelID l1_id, task_representation::LabelID l2_id, int ts) const {
             return get_lqrel(ts_label_id_to_label_group_id[ts][l1_id], ts_label_id_to_label_group_id[ts][l2_id], ts);
         }
 
         inline bool
-        set_lqrel(LabelGroupID lg1_id, LabelGroupID lg2_id, int ts_id, const TransitionSystem &ts, TCost value) {
+        set_lqrel(task_representation::LabelGroupID lg1_id, task_representation::LabelGroupID lg2_id, int ts_id, const task_representation::TransitionSystem &ts, TCost value) {
             assert(value != std::numeric_limits<int>::lowest() + 1);
             /* assert(_may_dominate_in.empty() ||
                _may_dominate_in[l1][l2] == DOMINATES_IN_ALL || _may_dominate_in[l1][l2] != ts_id); */
@@ -102,17 +104,17 @@ namespace dominance {
             return false;
         }
 
-        inline TCost get_simulated_by_irrelevant(LabelID l, int ts) const {
+        inline TCost get_simulated_by_irrelevant(task_representation::LabelID l, int ts) const {
             // TODO: Check that label group is not dead
             return simulated_by_irrelevant[ts][ts_label_id_to_label_group_id[ts][l]];
         }
 
-        inline TCost get_simulated_by_irrelevant(LabelGroupID lgroup, int lts) const {
+        inline TCost get_simulated_by_irrelevant(task_representation::LabelGroupID lgroup, int lts) const {
             // TODO: Check that label group is not dead
             return simulated_by_irrelevant[lts][lgroup];
         }
 
-        inline bool set_simulated_by_irrelevant(LabelGroupID lg_id, int ts_id, const TransitionSystem &ts, TCost value) {
+        inline bool set_simulated_by_irrelevant(task_representation::LabelGroupID lg_id, int ts_id, const task_representation::TransitionSystem &ts, TCost value) {
             //Returns if there were changes in _may_dominated_by_noop_in
             //int pos = position_of_label[ts_id][l];
             assert(lg_id >= 0);
@@ -131,7 +133,7 @@ namespace dominance {
                             _may_dominated_by_noop_in[l_id] = DOMINATES_IN_NONE;
                         }
                         if (!_may_dominate_in.empty()) {
-                            for (LabelGroupID lg2_id: irrelevant_label_groups_ts[ts_id]) {
+                            for (task_representation::LabelGroupID lg2_id: irrelevant_label_groups_ts[ts_id]) {
                                 for (int l2_id: ts.get_label_group(lg2_id)) {
                                     if (_may_dominate_in[l2_id][l_id] == DOMINATES_IN_ALL) {
                                         _may_dominate_in[l2_id][l_id] = ts_id;
@@ -148,7 +150,7 @@ namespace dominance {
             return false;
         }
 
-        inline bool set_simulates_irrelevant(LabelGroupID lg_id, int ts_id, const TransitionSystem &ts, TCost value) {
+        inline bool set_simulates_irrelevant(task_representation::LabelGroupID lg_id, int ts_id, const task_representation::TransitionSystem &ts, TCost value) {
             //std::cout << "simulates irrelevant: " << g_operators[l].get_name() << " in " << g_fact_names[ts_id][0] << ": " << value << std::endl;
             assert(value != std::numeric_limits<int>::lowest() + 1);
             assert(lg_id >= 0);
@@ -167,7 +169,7 @@ namespace dominance {
                         }
                         if (!_may_dominate_in.empty()) {
                             for (int lg2: irrelevant_label_groups_ts[ts_id]) {
-                                for (int l2: ts.get_label_group(LabelGroupID(lg2))) {
+                                for (int l2: ts.get_label_group(task_representation::LabelGroupID(lg2))) {
                                     if (_may_dominate_in[l][l2] == DOMINATES_IN_ALL) {
                                         _may_dominate_in[l][l2] = ts_id;
                                     } else if (_may_dominate_in[l][l2] != ts_id) {
@@ -184,86 +186,15 @@ namespace dominance {
         }
 
     public:
-        LabelDominanceFunction(const Labels &labels);
+        explicit LabelDominanceFunction(const task_representation::Labels &labels);
 
         //Initializes label relation (only the first time, to reinitialize call reset instead
         // If use_may_dominate is true, it will use the summary tables. This speeds up a little bit dominance checks but
         // requires memory quadratic in the number of labels so it is not recommended if there are more than 1000 labels.
-        void init(const std::vector<std::unique_ptr<TransitionSystem>> &tss,
-                  const std::vector<std::unique_ptr<LocalDominanceFunction<TCost>>> & local_dominance_functions, bool use_may_dominate) {
-            num_labels = labels.get_size();
-            num_tss = int(tss.size());
+        void init(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss,
+                  const std::vector<std::unique_ptr<LocalDominanceFunction<TCost>>> & local_dominance_functions, bool use_may_dominate);
 
-            std::cout << "Init label dominance: " << num_labels << " labels " << tss.size() << " systems.\n";
-
-
-            std::vector<TCost>().swap(cost_of_label);
-            std::vector<std::vector<LabelGroupID> >().swap(ts_label_id_to_label_group_id);
-            std::vector<std::vector<std::vector<TCost> > >().swap(lqrel);
-            std::vector<std::vector<TCost> >().swap(simulates_irrelevant);
-            std::vector<std::vector<TCost> >().swap(simulated_by_irrelevant);
-
-            irrelevant_label_groups_ts.resize(tss.size());
-            ts_label_id_to_label_group_id.resize(tss.size());
-            simulates_irrelevant.resize(tss.size());
-            simulated_by_irrelevant.resize(tss.size());
-            lqrel.resize(tss.size());
-
-            cost_of_label.resize(num_labels);
-            for (LabelID l(0); l < num_labels; ++l) {
-                cost_of_label[l] = labels.get_label_cost(l);
-            }
-
-            for (int i = 0; i < num_tss; ++i) {
-
-                int num_label_groups = tss[i]->num_label_groups();
-
-                // Compute the map from label_id to label group id for this transition system
-                ts_label_id_to_label_group_id[i].resize(labels.get_size());
-                for (LabelID l_id(0); l_id < labels.get_size(); ++l_id) {
-                    ts_label_id_to_label_group_id[i][l_id] = tss[i]->get_label_group_id_of_label(l_id);
-                }
-
-                // Compute irrelevant label groups for this ts
-                for (LabelGroupID lg_id(0); lg_id < num_label_groups; ++lg_id) {
-                    if (!tss[i]->is_relevant_label_group(lg_id)) {
-                        irrelevant_label_groups_ts[i].push_back(lg_id);
-                    }
-                }
-
-                /* std::cout << "Relevant label groups: " << num_label_groups << "\n"; */
-                simulates_irrelevant[i].resize(num_label_groups, std::numeric_limits<int>::max());
-                simulated_by_irrelevant[i].resize(num_label_groups, std::numeric_limits<int>::max());
-                lqrel[i].resize(num_label_groups);
-
-                for (int j = 0; j < num_label_groups; j++) {
-                    lqrel[i][j].resize(num_label_groups, std::numeric_limits<int>::max());
-                    lqrel[i][j][j] = 0;
-                }
-            }
-
-            std::cout << "Dominating.\n";
-            std::vector<std::vector<int> >().swap(_may_dominate_in);
-            std::vector<int>().swap(_may_dominated_by_noop_in);
-            std::vector<int>().swap(_may_dominates_noop_in);
-            _may_dominated_by_noop_in.resize(num_labels, DOMINATES_IN_ALL);
-            _may_dominates_noop_in.resize(num_labels, DOMINATES_IN_ALL);
-
-            if (use_may_dominate) { // If we have more than 5000 labels, there is not enough space.
-                _may_dominate_in.resize(num_labels);
-                for (auto &l1: _may_dominate_in) {
-                    l1.resize(num_labels, DOMINATES_IN_ALL);
-                }
-            }
-            std::cout << "Update label dominance: " << num_labels << " labels " << tss.size() << " systems.\n";
-
-            for (int i = 0; i < num_tss; ++i) {
-                update(i, *(tss[i]), *(local_dominance_functions[i]));
-            }
-
-        }
-
-        bool update(const std::vector<std::unique_ptr<TransitionSystem>> &tss,
+        bool update(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss,
                     const std::vector<std::unique_ptr<LocalDominanceFunction<TCost>>> & local_dominance_functions) {
             bool changes = false;
 
@@ -288,33 +219,33 @@ namespace dominance {
             return num_labels;
         }
 
-        inline bool may_dominated_by_noop(LabelID l, int ts_id) const {
+        inline bool may_dominated_by_noop(task_representation::LabelID l, int ts_id) const {
             return _may_dominated_by_noop_in[l] == DOMINATES_IN_ALL || _may_dominated_by_noop_in[l] == ts_id;
         }
 
-        inline bool may_dominate_noop_in(LabelID l, int ts_id) const {
+        inline bool may_dominate_noop_in(task_representation::LabelID l, int ts_id) const {
             return _may_dominates_noop_in[l] == DOMINATES_IN_ALL || _may_dominates_noop_in[l] == ts_id;
         }
 
-        inline bool dominates_noop_in_all(LabelID l) const {
+        inline bool dominates_noop_in_all(task_representation::LabelID l) const {
             return _may_dominates_noop_in[l] == DOMINATES_IN_ALL;
         }
 
-        inline int get_may_dominates_noop_in(LabelID l) const {
+        inline int get_may_dominates_noop_in(task_representation::LabelID l) const {
             return _may_dominates_noop_in[l];
         }
 
-        inline int get_may_dominated_by_noop_in(LabelID l) const {
+        inline int get_may_dominated_by_noop_in(task_representation::LabelID l) const {
             return _may_dominated_by_noop_in[l];
         }
 
-        inline int dominates_noop_in_some(LabelID l) const {
+        inline int dominates_noop_in_some(task_representation::LabelID l) const {
             return _may_dominates_noop_in[l] >= 0;
         }
 
 
         //Returns true if l dominates l2 in ts_id (simulates l2 in all j \neq ts_id)
-        inline bool may_dominate(LabelID l1, LabelID l2, int ts_id) const {
+        inline bool may_dominate(task_representation::LabelID l1, task_representation::LabelID l2, int ts_id) const {
             if (_may_dominate_in.empty()) {
                 for (int ts2_id = 0; ts2_id < num_tss; ++ts2_id) {
                     if (ts2_id != ts_id && get_lqrel(l1, l2, ts2_id) == std::numeric_limits<int>::lowest()) {
@@ -344,7 +275,7 @@ namespace dominance {
         }
 
         //Returns true if l1 simulates l2 in ts_id
-        inline bool may_simulate(LabelGroupID lg1_id, LabelGroupID lg2_id, int ts_id) const {
+        inline bool may_simulate(task_representation::LabelGroupID lg1_id, task_representation::LabelGroupID lg2_id, int ts_id) const {
             return get_lqrel(lg1_id, lg2_id, ts_id) != std::numeric_limits<int>::lowest();
         }
 
@@ -360,7 +291,7 @@ namespace dominance {
 
 
         //Returns true if l1 dominates l2 in ts_id
-        TCost q_dominates(LabelID l1, LabelID l2, int ts_id) const {
+        TCost q_dominates(task_representation::LabelID l1, task_representation::LabelID l2, int ts_id) const {
             if (may_dominate(l1, l2, ts_id)) {
                 TCost total_sum = 0;
 
@@ -380,7 +311,7 @@ namespace dominance {
             }
         }
 
-        TCost q_dominates_noop(LabelID l, int exclude_ts_id = -2) const {
+        TCost q_dominates_noop(task_representation::LabelID l, int exclude_ts_id = -2) const {
             if (may_dominate_noop_in(l, exclude_ts_id)) {
                 TCost total_sum = 0;
 
@@ -399,7 +330,7 @@ namespace dominance {
         }
 
         // -2 indicates none are excluded and it must therefore may_dominate in all
-        TCost q_dominated_by_noop(LabelID l, int exclude_ts = -2) const {
+        TCost q_dominated_by_noop(task_representation::LabelID l, int exclude_ts = -2) const {
             if (may_dominated_by_noop(l, exclude_ts)) {
                 TCost total_sum = 0;
 
@@ -418,20 +349,20 @@ namespace dominance {
             }
         }
 
-        inline TCost get_simulates_irrelevant(LabelGroupID lgroup, int ts_id) const {
+        inline TCost get_simulates_irrelevant(task_representation::LabelGroupID lgroup, int ts_id) const {
             // TODO: Check that label group is not dead
             return simulates_irrelevant[ts_id][lgroup];
         }
 
-        inline TCost get_label_simulates_irrelevant(LabelID l_id, int ts_id) const {
+        inline TCost get_label_simulates_irrelevant(task_representation::LabelID l_id, int ts_id) const {
             return simulates_irrelevant[ts_id][ts_label_id_to_label_group_id[ts_id][l_id]];
         }
 
-        TCost get_label_cost(LabelID label) const {
+        TCost get_label_cost(task_representation::LabelID label) const {
             return cost_of_label[label];
         }
 
-        void dump(const TransitionSystem &ts, int ts_id) const;
+        void dump(const task_representation::TransitionSystem &ts, int ts_id) const;
 
     };
 }

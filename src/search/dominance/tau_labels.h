@@ -7,8 +7,9 @@
 #include <cassert>
 #include <set>
 #include <limits>
-#include "label_dominance_function.h"
 #include "../utils/id.h"
+#include "../task_representation/types.h"
+
 
 namespace options {
 class OptionParser;
@@ -16,9 +17,10 @@ class OptionParser;
 class Options;
 }
 
-namespace task_representation { class FTSTask;}
+namespace task_representation { class FTSTask; class TransitionSystem; class Labels;}
 
 namespace dominance {
+    template <typename TCost> class LabelDominanceFunction;
 
     template<typename TCost>
     class TauDistances;
@@ -37,12 +39,12 @@ namespace dominance {
         std::vector<std::vector<int>> tau_labels;
 
     public:
-        explicit TauLabels(const std::vector<std::unique_ptr<TransitionSystem>> &tss, const Labels &labels);
+        explicit TauLabels(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss, const task_representation::Labels &labels);
 
-        static bool label_may_be_tau_in_other_ts(const TransitionSystem &ts, LabelID l_id);
+        static bool label_may_be_tau_in_other_ts(const task_representation::TransitionSystem &ts, task_representation::LabelID l_id);
 
         std::set<int>
-        add_recursive_tau_labels(const std::vector<std::unique_ptr<TransitionSystem>> &tss,
+        add_recursive_tau_labels(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss,
                                  const std::vector<std::unique_ptr<TauDistances<TCost>>> &tau_distances);
 
         bool empty() const {
@@ -96,7 +98,7 @@ namespace dominance {
                 id(0), num_tau_labels(0), cost_fully_invertible(std::numeric_limits<int>::max()) {
         }
 
-        bool precompute(const TauLabels<TCost> &tau_labels, const TransitionSystem &ts, int ts_id, bool only_reachability);
+        bool precompute(const TauLabels<TCost> &tau_labels, const task_representation::TransitionSystem &ts, int ts_id, bool only_reachability);
 
         bool empty() const {
             return num_tau_labels == 0;
@@ -150,11 +152,11 @@ namespace dominance {
         bool are_distances_required;
 
         public:
-        TauLabelInfo (TauLabels<TCost> tau_labels, const std::vector<std::unique_ptr<TransitionSystem>> &tss, bool are_distances_required);
+        TauLabelInfo (TauLabels<TCost> tau_labels, const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss, bool are_distances_required);
 
-        bool add_recursive_tau_labels(const std::vector<std::unique_ptr<TransitionSystem>> &tss);
+        bool add_recursive_tau_labels(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss);
 
-        bool add_noop_dominance_tau_labels(const std::vector<std::unique_ptr<TransitionSystem>> &tss,
+        bool add_noop_dominance_tau_labels(const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss,
                                            const LabelDominanceFunction<TCost> &label_dominance);
 
         const TauDistances<TCost> &get_tau_distances(int lts_id) const {
@@ -172,14 +174,14 @@ namespace dominance {
         const bool recursive;
         const bool noop_dominance;
     public:
-        TauLabelManager(const options::Options &opts);
+        explicit TauLabelManager(const options::Options &opts);
 
         template <typename TCost>
-        std::shared_ptr<TauLabelInfo<TCost>> compute_tau_labels (const std::vector<std::unique_ptr<TransitionSystem>> &tss,
-                                                const Labels &labels, bool only_reachability) const;
+        std::shared_ptr<TauLabelInfo<TCost>> compute_tau_labels (const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss,
+                                                const task_representation::Labels &labels, bool only_reachability) const;
 
         template <typename TCost>
-        bool recompute_tau_labels(TauLabelInfo<TCost> & tau_labels, const std::vector<std::unique_ptr<TransitionSystem>> &tss,
+        bool recompute_tau_labels(TauLabelInfo<TCost> & tau_labels, const std::vector<std::unique_ptr<task_representation::TransitionSystem>> &tss,
                                   const LabelDominanceFunction<TCost> &label_dominance) const;
 
         void print_config() const;

@@ -56,7 +56,7 @@ void MergeAndShrinkRepresentationLeaf::apply_abstraction_to_lookup_table(
     domain_size = new_domain_size;
 }
 
-int MergeAndShrinkRepresentationLeaf::get_value(const State &state) const {
+int MergeAndShrinkRepresentationLeaf::get_value(const task_representation::State &state) const {
     int value = state[var_id];
     return lookup_table[value];
 }
@@ -115,7 +115,7 @@ void MergeAndShrinkRepresentationMerge::apply_abstraction_to_lookup_table(
 }
 
 int MergeAndShrinkRepresentationMerge::get_value(
-    const State &state) const {
+    const task_representation::State &state) const {
     int state1 = left_child->get_value(state);
     int state2 = right_child->get_value(state);
     if (state1 == PRUNED_STATE || state2 == PRUNED_STATE)
