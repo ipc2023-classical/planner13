@@ -158,7 +158,7 @@ namespace dominance {
     bool DominanceCheck<TCost>::action_selection_pruning(const FTSTask & fts_task, const State &state,
                                                         std::vector<OperatorID> &applicable_operators) const {
         const shared_ptr<SearchTask> &search_task = fts_task.get_search_task();
-
+        assert(qdf);
         //TODO: Apply transformation if needed
         for (size_t i = 0; i < qdf->size(); ++i) {
             parent[i] = state[i];

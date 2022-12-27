@@ -14,7 +14,7 @@ namespace dominance {
 template<typename TCost>
 NumericDominancePruning<TCost>::NumericDominancePruning(const options::Options &opts)
         : initialized(false),
-          dominance_function_builder(opts.get<std::shared_ptr<DominanceFunctionBuilder>>("dominance_analysis")),
+          dominance_function_builder(opts.get<std::shared_ptr<DominanceFunctionBuilder>>("analysis")),
           prune_dominated_by_parent(opts.get<bool>("prune_dominated_by_parent")),
           prune_dominated_by_initial_state(opts.get<bool>("prune_dominated_by_initial_state")),
           prune_successors(opts.get<bool>("prune_successors")),
@@ -54,6 +54,7 @@ void NumericDominancePruning<TCost>::initialize(const std::shared_ptr<task_repre
 
         if (apply_pruning()) {
             numeric_dominance_relation = dominance_function_builder->compute_dominance_function<TCost>(*task);
+            dominance_check.initialize(numeric_dominance_relation, *task);
         }
 
         //cout << "Completed preprocessing: " << g_timer() << endl;
@@ -98,22 +99,21 @@ static shared_ptr<PruningMethod> _parse(options::OptionParser &parser) {
 
     parser.add_option<bool>("prune_dominated_by_parent",
                             "Prunes a state if it is dominated by its parent",
-                            "false");
+                            "true");
 
     parser.add_option<bool>("prune_dominated_by_initial_state",
                             "Prunes a state if it is dominated by the initial state",
                             "false");
 
-
     parser.add_option<bool>("prune_successors",
                             "Prunes all siblings if any successor dominates the parent by enough margin",
-                            "false");
+                            "true");
 
 
     parser.add_option<shared_ptr<DominanceFunctionBuilder>>(
             "analysis",
             "Method to perform dominance analysis",
-            "num_dominance");
+            "qld_simulation");
 
 
 
@@ -133,9 +133,7 @@ static shared_ptr<PruningMethod> _parse(options::OptionParser &parser) {
     }
 }
 
-
 static PluginShared<PruningMethod> _plugin("dominance", _parse);
-
 
 template
 class NumericDominancePruning<int>;
