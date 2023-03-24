@@ -35,7 +35,7 @@ struct UnaryOperator {
               // includes operator cost (base_cost)
     UnaryOperator(const std::vector<Proposition *> &pre, Proposition *eff,
                   RelaxedPlanStep step, int base)
-    : rp_step(step), precondition(pre), effect(eff), base_cost(base) {}
+        : rp_step(step), precondition(pre), effect(eff), base_cost(base), unsatisfied_preconditions(pre.size()), cost (base) {}
 };
 
 struct Proposition {
@@ -59,16 +59,16 @@ struct Proposition {
 class RelaxationHeuristic : public Heuristic {
     void simplify();
 
-    void insert_outside_condition(task_representation::LabelID l, 
+    void insert_outside_condition(task_representation::LabelID l,
 				  std::map<std::vector<Proposition *>, task_representation::LabelID> & result,
                                   const std::vector<Proposition * > & new_outside_condition) const;
 
 
-    void insert_all_combinations (task_representation::LabelID l, 
+    void insert_all_combinations (task_representation::LabelID l,
 				  const std::vector<std::vector<Proposition * > > & psets,
                                   std::map<std::vector<Proposition *> , task_representation::LabelID> & result) const ;
 
-    void insert_all_combinations_recursive (task_representation::LabelID l, 
+    void insert_all_combinations_recursive (task_representation::LabelID l,
 					    const std::vector<std::vector<Proposition * > > & psets,
 					    std::vector<Proposition * > & new_combination,
 					    std::map<std::vector<Proposition *>,
@@ -92,4 +92,3 @@ public:
 }
 
 #endif
-

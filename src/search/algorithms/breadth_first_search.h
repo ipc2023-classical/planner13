@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <limits>
+
+#include <stddef.h>
+
 namespace dominance {
 
     template<typename T>
@@ -35,9 +38,3 @@ namespace dominance {
 }
 
 #endif
-
-
-
-
-
-

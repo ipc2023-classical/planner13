@@ -147,6 +147,15 @@ ALIASES["seq-opt-lmcut"] = [
     "--search", "astar(lmcut())"]
 
 
+miasm1000_bisim =  ["--transform", "transform_merge_and_shrink(shrink_strategy=shrink_bisimulation(greedy=false),merge_strategy=merge_stateless(merge_selector=score_based_filtering(scoring_functions=[product_size(1000),sf_miasm(shrink_strategy=shrink_bisimulation(greedy=false),max_states=100,threshold_before_merge=1),total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=exact(max_time=300,atomic_fts=true,before_shrinking=true,before_merging=false),shrink_atomic_fts=true,run_main_loop=true,max_time=900)"]
+
+ALIASES["seq-opt-ftsmiasm100-sbd"] = miasm1000_bisim + ["--search", "sbd()"]
+
+
+ALIASES["seq-opt-ftsmiasm100-ms"] =  miasm1000_bisim  + ["--search", "astar(merge_and_shrink(shrink_strategy=mas_shrink_bisimulation(greedy=false),merge_strategy=mas_merge_stateless(merge_selector=mas_score_based_filtering(scoring_functions=[mas_sf_miasm(shrink_strategy=mas_shrink_bisimulation(greedy=false),max_states=50000,threshold_before_merge=1),mas_total_order(atomic_ts_order=reverse_level,product_ts_order=new_to_old,atomic_before_product=false)])),label_reduction=mas_exact(before_shrinking=true,before_merging=false),max_states=50000,threshold_before_merge=1))"]
+
+
+
 PORTFOLIOS = {}
 for portfolio in os.listdir(PORTFOLIO_DIR):
     name, ext = os.path.splitext(portfolio)

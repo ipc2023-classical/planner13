@@ -8,6 +8,7 @@ import sys
 from . import aliases
 from . import arguments
 from . import cleanup
+from . import limits
 from . import run_components
 
 
@@ -26,10 +27,16 @@ def main():
         cleanup.cleanup_temporary_files(args)
         sys.exit()
 
+    limits.print_limits("planner", args.overall_time_limit, args.overall_memory_limit)
+    print()
+
     exitcode = None
     for component in args.components:
         if component == "translate":
             (exitcode, continue_execution) = run_components.run_translate(args)
+            if continue_execution and args.transform_task:
+                print()
+                run_components.transform_task(args)
         elif component == "search":
             (exitcode, continue_execution) = run_components.run_search(args)
             if not args.keep_sas_file:
