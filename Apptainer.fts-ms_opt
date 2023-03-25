@@ -53,12 +53,12 @@ Stage: run
         --overall-time-limit 30m \
         --transform-task /builds/release64/bin/preprocess-h2 \
         --transform-task-options h2_time_limit,240 \
-        "tmp-domain.pddl" "tmp-problem.pddl"
+        "$DOMAINFILE" "$PROBLEMFILE"
 
 %labels
 Name   FTSPlan
-Description Optimal planner based on reformulation and search under the merge-and-shrink representation search.
-Authors     Alvaro Torralba <alto@cs.aau.dk>
+Description Optimal planner based on reformulation and search under the merge-and-shrink representation search. After reformulation uses A* with the merge-and-shink heuristic.
+Authors     Alvaro Torralba <alto@cs.aau.dk> Silvan Sievers <silvan.sievers@unibas.ch>
 License     GPL 3
 Tracks      optimal
 SupportsDerivedPredicates                       no

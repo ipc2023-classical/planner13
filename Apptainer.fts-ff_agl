@@ -48,7 +48,7 @@ Stage: run
     pypy3 /fast-downward.py \
         --plan-file "$PLANFILE" \
         --build release64 \
-        --alias "seq-opt-fts-sbd" \
+        --alias "seq-agl-fts-ff" \
         --overall-memory-limit 8000M \
         --overall-time-limit 30m \
         --transform-task /builds/release64/bin/preprocess-h2 \
@@ -57,10 +57,10 @@ Stage: run
 
 %labels
 Name   FTSPlan
-Description Optimal planner based on reformulation and search under the merge-and-shrink representation search. After reformulation uses symbolic bidirectional search
-Authors     Alvaro Torralba <alto@cs.aau.dk> Silvan Sievers <silvan.sievers@unibas.ch> Kristian Ødum Nielsen <kani18@student.aau.dk> Rasmus Grønkjær Tollund <rtollu18@student.aau.dk>
+Description Optimal planner based on reformulation and search under the merge-and-shrink representation search. After reformulation uses Greedy Best First Search with the FF heuristic.
+Authors     Alvaro Torralba <alto@cs.aau.dk> Silvan Sievers <silvan.sievers@unibas.ch>
 License     GPL 3
-Tracks      optimal
+Tracks      agile
 SupportsDerivedPredicates                       no
 SupportsUniversallyQuantifiedPreconditions      yes
 SupportsExistentiallyQuantifiedPreconditions    partially, only quantification over static predicates
