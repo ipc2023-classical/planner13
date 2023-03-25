@@ -27,6 +27,8 @@ Bootstrap: docker
 From: ubuntu:kinetic
 Stage: run
 
+
+
 %files from build
     fast-downward.py
     driver
@@ -46,12 +48,12 @@ Stage: run
     pypy3 /fast-downward.py \
         --plan-file "$PLANFILE" \
         --build release64 \
-        --alias "seq-opt-ftsmiasm1000-ms" \
+        --alias "seq-opt-fts-ms" \
         --overall-memory-limit 8000M \
         --overall-time-limit 30m \
         --transform-task /builds/release64/bin/preprocess-h2 \
         --transform-task-options h2_time_limit,240 \
-        "$DOMAINFILE" "$PROBLEMFILE"
+        "tmp-domain.pddl" "tmp-problem.pddl"
 
 %labels
 Name   FTSPlan

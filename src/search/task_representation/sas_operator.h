@@ -28,6 +28,11 @@ struct SASCondition {
         return !(*this == other);
     }
 
+    bool operator<(const SASCondition &other) const {
+        return var < other.var || (var == other.var && val < other.val);
+    }
+
+
     void dump() const;
 };
 
@@ -45,6 +50,13 @@ struct SASEffect {
         return true;
     }
 
+    bool operator<(const SASEffect &other) const {
+        //TODO: Conditions are ignored
+        return var < other.var || (var == other.var && val < other.val);
+    }
+
+
+
     void dump() const;
 };
 
@@ -59,6 +71,17 @@ class SASOperator {
 public:
     explicit SASOperator(std::istream &in, bool is_axiom,
                          bool g_use_metric, int & g_min_action_cost, int & g_max_action_cost);
+    SASOperator (bool _is_an_axiom,
+                 std::vector<SASCondition> && _preconditions,
+                 std::vector<SASEffect> && _effects,
+                 std::string _name,
+                 int _cost) : is_an_axiom(_is_an_axiom),
+                              preconditions(std::move(_preconditions)),
+                              effects (std::move(_effects)),
+                              name(_name), cost(_cost) {
+
+
+    }
     void dump() const;
     const std::string &get_name() const {return name; }
 

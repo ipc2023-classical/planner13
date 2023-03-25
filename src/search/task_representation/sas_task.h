@@ -64,6 +64,14 @@ class SASTask {
 
     const SASOperator & get_operator_or_axiom(int index, bool is_axiom) const;
 
+    void multiply_out_conditions(const SASOperator & original_op,
+                                 const std::vector<int>& conditional_variables,
+                                 int var_index,
+                                 std::vector<SASCondition>& multiplied_conditions);
+
+    void add_conditional_operator(const SASOperator & original_op, const std::vector<SASCondition>& multiplied_conditions);
+
+
 public:
     SASTask();
     void read_from_file(std::istream &in);
@@ -138,7 +146,7 @@ public:
     void verify_no_axioms() const;
 
     void save_plan(const std::vector<int> & plan, const std::string & filename) const;
-    
+
 };
 }
 

@@ -33,10 +33,10 @@ class FTSFactory {
 
         unique_ptr<LabelEquivalenceRelation> label_equivalence_relation;
         std::unordered_map<std::pair<int, int>, int> pre_eff_pair_to_label_group;
-        
+
         vector<vector<Transition>> transitions_by_label_group;
         vector<vector<int>> label_groups;
-        
+
         vector<bool> relevant_labels;
         int num_states;
         vector<bool> goal_states;
@@ -63,7 +63,7 @@ class FTSFactory {
                 utils::make_unique_ptr<LabelEquivalenceRelation>(labels,
                                                                  label_groups);
         }
-        
+
         void add_transition(int label_no, int src_value, int dest_value) {
 
             relevant_labels[label_no] = (dest_value != -1) ;
@@ -92,8 +92,8 @@ class FTSFactory {
                 }else {
                     transitions.push_back(Transition(src_value, dest_value));
                 }
-                transitions_by_label_group.push_back(transitions);        
-                
+                transitions_by_label_group.push_back(transitions);
+
             } else {
                 label_groups[pos->second].push_back(label_no);
             }
@@ -213,6 +213,7 @@ void FTSFactory::build_transitions() {
             //Alvaro: commented out support of conditional effects
             if (!effect.conditions.empty()) {
                 cerr << "Error: conditional effects are not supported." << endl;
+                cerr << "Conditional effect on " << op.get_name() << endl;
                 utils::exit_with(utils::ExitCode::UNSUPPORTED);
             }
             int pre_value = -1;
@@ -360,7 +361,7 @@ pair<unique_ptr<Labels>, vector<unique_ptr<TransitionSystem>>> FTSFactory::creat
     unique_ptr<Labels> labels = create_labels();
     initialize_transition_system_data();
     build_transitions();
-    
+
     for (size_t var_no = 0; var_no < transition_system_data_by_var.size(); ++var_no) {
         transition_system_data_by_var[var_no].set_label_equivalence_relation(*labels);
     }

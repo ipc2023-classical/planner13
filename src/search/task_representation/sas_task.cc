@@ -126,12 +126,108 @@ void SASTask::read_goal(istream &in) {
     check_magic(in, "end_goal");
 }
 
+
+
+
+    void SASTask::add_conditional_operator(const SASOperator & original_op, const std::vector<SASCondition>& multiplied_conditions) {
+    // multiplied_conditions keeps an assignment to all variables in conditions of effects
+    int num_vars = g_variable_domain.size();
+    vector<int> assignment(num_vars, -1);
+    for (const auto & fact : multiplied_conditions) {
+        assignment[fact.var] = fact.val;
+    }
+    // Going over the effects and collecting those that fire.
+    vector<SASEffect> effects;
+    for (const auto & original_effect : original_op.get_effects()) {
+        bool fires = true;
+        for (const auto & original_condition : original_effect.conditions) {
+            assert(assignment[original_condition.var] != -1);
+            if (assignment[original_condition.var] != original_condition.val) {
+                fires = false;
+                break;
+            }
+        }
+        if (fires) {
+            // Check if the operator effect is not redundant because it is
+            // already a (multiplied out) precondidtion.
+            if (assignment[original_effect.var] != original_effect.val) {
+                effects.emplace_back(original_effect.var, original_effect.val, std::vector<SASCondition>{});
+            }
+        }
+    }
+    if (effects.empty())
+        return;
+
+    // Effects have to be sorted by var in various places of the planner.
+    sort(effects.begin(), effects.end());
+
+    /*
+      Collect preconditions of the operators from the parent's preconditions
+      and the multiplied out effect preconditions. We use a set here to filter
+      out duplicates. Furthermore, we directly sort the set in the desired
+      way, i.e. according to the order of (var, val) of the operator's effects.
+    */
+    set<SASCondition> conditions;
+    for (const auto & pre : original_op.get_preconditions()) {
+        conditions.insert(pre);
+    }
+    for (const auto & fact : multiplied_conditions) {
+        conditions.insert(fact);
+    }
+
+
+    std::vector<SASCondition> cond_vector;
+    for (const auto & cond : conditions) {
+        cond_vector.push_back(cond);
+    }
+
+    g_operators.emplace_back(original_op.is_axiom(),
+                             std::move(cond_vector),
+                             std::move(effects),
+                             original_op.get_name(),
+                             original_op.get_cost());
+}
+
+void SASTask::multiply_out_conditions(const SASOperator & original_op,
+                                      const std::vector<int>& conditional_variables,
+                             int var_index, std::vector<SASCondition>& multiplied_conditions) {
+    if (var_index == static_cast<int>(conditional_variables.size())) {
+        add_conditional_operator(original_op, multiplied_conditions);
+        return;
+    }
+    int var = conditional_variables[var_index];
+    int domain_size = get_variable_domain_size(var);
+    for (int value = 0; value < domain_size; ++value) {
+        multiplied_conditions.emplace_back(var,value);
+        multiply_out_conditions(original_op, conditional_variables, var_index+1, multiplied_conditions);
+        multiplied_conditions.pop_back();
+    }
+}
+
+
+
 void SASTask::read_operators(istream &in) {
     int count;
     in >> count;
-    for (int i = 0; i < count; ++i)
-        g_operators.push_back(SASOperator(in, false,
-                                             g_use_metric, g_min_action_cost, g_max_action_cost));
+    for (int i = 0; i < count; ++i) {
+        SASOperator op (in, false, g_use_metric, g_min_action_cost, g_max_action_cost);
+
+        set<int> condition_variables;
+        for (const auto & eff : op.get_effects()) {
+            for (const auto & cond : eff.conditions ) {
+                condition_variables.insert(cond.var);
+            }
+        }
+        if (condition_variables.empty()) {
+            g_operators.push_back(op);
+        } else {
+            vector<int> cvars(condition_variables.begin(), condition_variables.end());
+            vector<SASCondition> multiplied_conditions;
+            multiply_out_conditions(op, cvars, 0, multiplied_conditions);
+        }
+
+
+    }
 }
 
 void SASTask::read_axioms(istream &in) {
@@ -391,7 +487,7 @@ void SASTask::check_fact(int var, int val) const {
     }
 }
 
-    
+
 void SASTask::save_plan(const vector<int> & plan, const std::string & filename) const {
     std::ofstream outfile(filename);
     int plan_cost = 0;
