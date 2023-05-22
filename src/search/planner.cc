@@ -32,6 +32,11 @@ int main(int argc, const char **argv) {
 
     if (static_cast<string>(argv[1]) != "--help") {
         g_sas_task()->read_from_file(cin);
+        if (g_sas_task()->get_num_axioms()) {
+            cerr << "This configuration does not support axioms!"
+                 << endl << "Terminating." << endl;
+            utils::exit_with(ExitCode::UNSUPPORTED);
+        }
         auto labels_and_transition_systems = create_labels_and_transition_systems(*g_sas_task());
         g_main_task = make_shared<FTSTask>(
             move(labels_and_transition_systems.second),
