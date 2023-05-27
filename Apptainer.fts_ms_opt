@@ -69,4 +69,4 @@ SupportsNegativePreconditions                   yes
 SupportsEqualityPreconditions                   yes
 SupportsInequalityPreconditions                 yes
 SupportsConditionalEffects                      yes
-SupportsImplyPreconditions                      yes
+SupportsImplyPreconditions                      no
